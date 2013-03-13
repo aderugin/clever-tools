@@ -1,0 +1,54 @@
+#!/bin/bash
+
+export VENV=$VIRTUAL_ENV
+mkdir -p $VENV/packages
+cd $VENV/packages
+
+
+if [ ! -f redis-stable.tar.gz ]
+then
+    wget http://download.redis.io/redis-stable.tar.gz
+    tar xzvf redis-stable.tar.gz
+fi
+
+cd $VENV/packages/redis-stable
+./configure --prefix=$VENV && make -j4 && make install
+
+export LD_LIBRARY_PATH=$VENV/lib:$LD_LIBRARY_PATH
+
+cd $VENV/packages/xapian-bindings-1.2.8
+./configure --prefix=$VENV --with-python && make -j4 && make install
+
+python -c "
+CHECK = '\033[32m✔\033[39m'
+ERROR = '\033[31m✘\033[39m'
+
+try:
+    import redis
+except ImportError:
+    print 'Install completed with error ' + ERROR
+else:
+    print 'Install completed succefull ' + CHECK
+"
+
+
+# # Install Redis
+# echo 'Install Redis'
+# cd /tmp
+# mkdir redis && cd redis
+# wget http://download.redis.io/redis-stable.tar.gz
+# tar xvzf redis-stable.tar.gz
+# cd redis-stable
+# make && make install
+# wget https://github.com/ijonas/dotfiles/raw/master/etc/init.d/redis-server
+# wget https://github.com/ijonas/dotfiles/raw/master/etc/redis.conf
+# mv redis-server /etc/init.d/redis-server
+# chmod +x /etc/init.d/redis-server
+# mv redis.conf /etc/redis.conf
+# useradd redis
+# mkdir -p /var/lib/redis
+# mkdir -p /var/log/redis
+# chown redis.redis /var/lib/redis
+# chown redis.redis /var/log/redis
+# update-rc.d redis-server defaults
+# echo 'Redis install completed. Run "sudo /etc/init.d/redis-server start"'

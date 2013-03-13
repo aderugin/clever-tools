@@ -1,0 +1,36 @@
+#!/bin/bash
+
+export VENV=$VIRTUAL_ENV
+mkdir -p $VENV/packages
+cd $VENV/packages
+
+if [ ! -f Python-2.7.3.tgz ]
+then
+    wget http://www.python.org/ftp/python/2.7.3/Python-2.7.3.tgz
+    tar xzvf Python-2.7.3.tgz
+fi
+
+
+export LD_LIBRARY_PATH=$VENV/lib:$LD_LIBRARY_PATH
+cd Python-2.7.3
+env CPPFLAGS="-I/$VENV/include" LDFLAGS="-L/$VENV/lib" ./configure --prefix=$VENV --enable-shared --prefix=$VENV LDFLAGS=-Wl,-rpath=$VENV/lib && make -j4 && make install
+
+cd $VENV/..
+name=`basename $VENV`
+virtualenv --no-site-packages --python=$VENV/bin/python2.7 $name
+
+
+source $VENV/bin/activate
+easy_install --upgrade pip
+easy_install --upgrade distribute
+
+    python -c "
+CHECK = '\033[32m✔\033[39m'
+ERROR = '\033[31m✘\033[39m'
+
+import sys
+if sys.version_info == (2, 7):
+    print 'Install completed with error ' + ERROR
+else:
+    print 'Install completed succefull ' + CHECK
+"

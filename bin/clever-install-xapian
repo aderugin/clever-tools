@@ -1,0 +1,39 @@
+#!/bin/bash
+
+#sudo apt-get install zlib1g-dev
+
+export VENV=$VIRTUAL_ENV
+mkdir -p $VENV/packages
+cd $VENV/packages
+
+if [ ! -f xapian-core-1.2.8.tar.gz ]
+then
+    wget http://oligarchy.co.uk/xapian/1.2.8/xapian-core-1.2.8.tar.gz
+    tar xzvf xapian-core-1.2.8.tar.gz
+fi
+
+if [ ! -f xapian-bindings-1.2.8.tar.gz ]
+then
+    wget http://oligarchy.co.uk/xapian/1.2.8/xapian-bindings-1.2.8.tar.gz
+    tar xzvf xapian-bindings-1.2.8.tar.gz
+fi
+
+cd $VENV/packages/xapian-core-1.2.8
+./configure --prefix=$VENV && make -j4 && make install
+
+export LD_LIBRARY_PATH=$VENV/lib:$LD_LIBRARY_PATH
+
+cd $VENV/packages/xapian-bindings-1.2.8
+./configure --prefix=$VENV --with-python && make -j4 && make install
+
+python -c "
+CHECK = '\033[32m✔\033[39m'
+ERROR = '\033[31m✘\033[39m'
+
+try:
+    import xapian
+except ImportError:
+    print 'Install completed with error ' + ERROR
+else:
+    print 'Install completed succefull ' + CHECK
+"

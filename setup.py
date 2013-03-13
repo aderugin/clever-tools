@@ -46,5 +46,10 @@ setup(
 
         #'git+git://github.com/alurin/django-whatever.git',
         #'git+git://github.com/django-mptt/django-mptt.git',
+    ],
+    scripts=[
+        'bin/clever-install-python',
+        'bin/clever-install-redis',
+        'bin/clever-install-xapian',
     ]
 )
