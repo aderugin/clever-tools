@@ -30,7 +30,6 @@ class Template:
         return ""
 
 
-
 class Loader(BaseLoader):
     is_usable = True
 

@@ -12,12 +12,7 @@ then
 fi
 
 cd $VENV/packages/redis-stable
-./configure --prefix=$VENV && make -j4 && make install
-
-export LD_LIBRARY_PATH=$VENV/lib:$LD_LIBRARY_PATH
-
-cd $VENV/packages/xapian-bindings-1.2.8
-./configure --prefix=$VENV --with-python && make -j4 && make install
+make -j4 && make install PREFIX=$VENV
 
 python -c "
 CHECK = '\033[32m✔\033[39m'
