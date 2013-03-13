@@ -28,7 +28,7 @@ setup(
 
         # Latest version
         'FeinCMS >= 1.7.1',
-        'PIL >= 1.1.7',
+        'Pillow >= 1.7.8',
         'South >= 0.7.6',
         'Unidecode >= 0.04.12',
         'django-autoslug >= 1.6.1',
