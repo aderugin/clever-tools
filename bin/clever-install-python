@@ -21,6 +21,8 @@ virtualenv --no-site-packages --python=$VENV/bin/python2.7 $name
 
 
 source $VENV/bin/activate
+cd $VENV/packages
+curl http://python-distribute.org/distribute_setup.py | python
 easy_install --upgrade pip
 easy_install --upgrade distribute
 
@@ -32,5 +34,10 @@ import sys
 if sys.version_info == (2, 7):
     print 'Install completed with error ' + ERROR
 else:
-    print 'Install completed succefull ' + CHECK
+    try
+        import pkg_resources
+    except ImportError:
+        print 'Install completed with error ' + ERROR
+    else:
+        print 'Install completed succefull ' + CHECK
 "

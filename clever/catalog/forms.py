@@ -5,6 +5,7 @@ from clever.catalog.metadata import CatalogMetadata
 from clever.catalog.models import AttributeParams
 import operator
 
+
 class FilterForm(forms.Form):
     def get_product_model(self):
         if not getattr(self, 'product_model', None):
