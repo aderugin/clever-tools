@@ -176,18 +176,18 @@ class Order(models.Model):
         return str(self.pk)
 
 
-class OrderItem(models.Model):
+#class OrderItem(models.Model):
 
-    class Meta:
-        verbose_name = u'товар'
-        verbose_name_plural = u'товары'
+    #class Meta:
+        #verbose_name = u'товар'
+        #verbose_name_plural = u'товары'
 
-    catalog_item = models.ForeignKey(Item, verbose_name=u'Товар')
-    quantity = models.IntegerField(u'Количество', default=1)
-    price = models.DecimalField(u'Цена', max_digits=9, decimal_places=2)
-    order = models.ForeignKey(Order, related_name='order_items')
-    sale = models.PositiveIntegerField(verbose_name=u'Размер скидки', blank=True, default=0, help_text=u'В процентах')
-    on_request = models.BooleanField(verbose_name=u'Под заказ', default=False)
+    #catalog_item = models.ForeignKey(Item, verbose_name=u'Товар')
+    #quantity = models.IntegerField(u'Количество', default=1)
+    #price = models.DecimalField(u'Цена', max_digits=9, decimal_places=2)
+    #order = models.ForeignKey(Order, related_name='order_items')
+    #sale = models.PositiveIntegerField(verbose_name=u'Размер скидки', blank=True, default=0, help_text=u'В процентах')
+    #on_request = models.BooleanField(verbose_name=u'Под заказ', default=False)
 
 
 class OrderStatusHistory(models.Model):

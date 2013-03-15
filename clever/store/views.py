@@ -17,8 +17,8 @@ from rikitavi.apps.catalog.models import Item
 from .models import *
 # from templated_emails.utils import send_templated_email
 # from rikitavi.apps.catalog.templatetags.pruma_catalog_tags import wrap_price
-from rikitavi.apps.actions.helpers import set_action_to_cart
-from rikitavi.apps.store.utils import update_offers_quantity
+#from rikitavi.apps.actions.helpers import set_action_to_cart
+#from rikitavi.apps.store.utils import update_offers_quantity
 from .signals import order_submited
 from ..catalog.models import price_formated
 
@@ -231,7 +231,7 @@ class CartModalCheckout(CartModalCheck):
         if (len(order.payment.gateaway) > 0):
             order.total_cost = order.total_cost * 1.05
             order.total_cost_with_sale = order.total_cost_with_sale * 1.05
-            
+
         order.save()
 
         # Подарок

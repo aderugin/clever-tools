@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from .signals import order_submited
 from django.dispatch import receiver
-from rikitavi.apps.notifier.models import Notification
+#from rikitavi.apps.notifier.models import Notification
 from django.template import loader, Context
 
 
