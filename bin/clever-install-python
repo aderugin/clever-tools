@@ -34,7 +34,7 @@ import sys
 if sys.version_info == (2, 7):
     print 'Install completed with error ' + ERROR
 else:
-    try
+    try:
         import pkg_resources
     except ImportError:
         print 'Install completed with error ' + ERROR
