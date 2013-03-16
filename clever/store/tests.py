@@ -4,7 +4,7 @@ import unittest
 from django_any import any_model
 from django.db.models import get_model
 from django.db import models
-from cart import Cart, Item
+from cart import CartBase, ItemBase
 import clever.catalog.models as base
 
 class Section(base.SectionBase):
@@ -52,4 +52,6 @@ class OrderTestCase(unittest.TestCase):
         #self.assertEqual(mail.outbox[0].subject, u'order_number %d' % order.id)
 
     def test_add_item_to_cart(self):
-        pass
+        Item = ItemBase()
+
+

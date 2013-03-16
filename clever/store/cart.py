@@ -2,7 +2,7 @@
 import decimal
 
 
-class Item(object):
+class ItemBase(object):
     '''
     A shopping cart system for Ecommerce in Django.
     '''
@@ -30,7 +30,7 @@ class Item(object):
         return self.product.price * self.quantity
 
 
-class Cart(object):
+class CartBase(object):
     def __init__(self):
         self.items = list()
         self.unique_item_id = 0
