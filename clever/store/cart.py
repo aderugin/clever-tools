@@ -26,7 +26,7 @@ class Item(object):
 
     @property
     def total_price_wosale(self):
-        """ Цена умноженная на количество в корзине"""
+        """ Цена умноженная на количество в корзине """
         return self.product.price * self.quantity
 
 
@@ -45,7 +45,6 @@ class Cart(object):
     next_item_id = property(_get_next_item_id)
 
     def add_item(self, product, quantity=1):
-
         # Пытаемся найти товар в корзине
         ext_item = filter(lambda x: x.product.id == int(product.id), self.items)
 
@@ -55,6 +54,7 @@ class Cart(object):
         else:
             item = Item(self.next_item_id, product, quantity)
             self.items.append(item)
+
 
     def update_item_quantity(self, itemid, quantity):
         """ Изменяет количество товара в корзине
@@ -74,8 +74,10 @@ class Cart(object):
     def is_empty(self):
         return self.items == []
 
-    def empty(self):
+
+    def clear(self):
         self.items = list()
+
 
     def remove_item(self, itemid):
         self.items = filter(lambda x: x.itemid != int(itemid), self.items)

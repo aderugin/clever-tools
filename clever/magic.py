@@ -10,7 +10,6 @@
 
 from django.db import models
 
-
 def get_model_fields(model):
     """Получение полей из модели Django ORM"""
     return model._meta.fields
