@@ -34,11 +34,6 @@ TEMPLATE_LOADERS = (
 
 TEST_RUNNER = 'clever.test.runner.PatchedNoseTestSuiteRunner'
 
-NOSE_ARGS = [
-    '--cover-package=clever',
-    '--with-coverage',
-]
-
 ROOT_URLCONF = 'tests.test_runner'
 MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
 

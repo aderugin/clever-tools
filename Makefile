@@ -18,25 +18,22 @@ ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) doc
 I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) docs
 
 
-main: coverage dirhtml
+main: coverage docs
 
 coverage:
-	coverage run --source=clever test/manage.py test -v 0
+	python tests/manage.py test -v 0 --cover-package=clever --with-coverage
 	coverage html
 	@echo "clever and coverage:                                  ${CHECK} Done"
-
 test:
-	python tests/manage.py
+	python tests/manage.py test
 	@echo "Test                                                  ${CHECK} Done"
 
 install:
-	pip install -r requirements.txt.txt
-	npm install
+	pip install -r requirements.pip
 	@echo "Installation                                          ${CHECK} Done"
 
-
 clean:
-	-rm -rf $(BUILDDIR)/*
+	-rm -rf $(BUILDDIR)/
 
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html

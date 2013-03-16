@@ -1,6 +1,7 @@
 -r tests/requirements.pip
 
 docutils
+sphinx
 coverage
 django-nose
 django-extensions

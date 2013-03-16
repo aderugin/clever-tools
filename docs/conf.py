@@ -49,7 +49,7 @@ extensions = [
     'sphinx.ext.mathjax',
     'sphinx.ext.ifconfig',
     'sphinx.ext.viewcode',
-    'clever.contrib.sphinx.docstring'
+    'clever.sphinx.docstring'
 ]
 
 # Add any paths that contain templates here, relative to this directory.

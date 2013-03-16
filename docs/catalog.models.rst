@@ -6,11 +6,20 @@
 .. toctree::
    :maxdepth: 2
 
-.. automodule:: clever.contrib.core.models
+.. automodule:: clever.core.models
     :members:
 
-.. automodule:: clever.contrib.bem.render
+.. automodule:: clever.bem.render
     :members:
 
-.. automodule:: clever.contrib.catalog.models
+.. automodule:: clever.catalog.models
+    :members:
+
+.. automodule:: clever.catalog.views
+    :members:
+
+.. automodule:: clever.catalog.admin
+    :members:
+
+.. automodule:: clever.store.carts
     :members:
