@@ -1,5 +1,11 @@
+# Build files
 *.pyc
 build/
 dist/
 *egg-info/
 
+# Coverage files
+.coverage
+htmlcov
+profiles
+*.orig

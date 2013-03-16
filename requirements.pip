@@ -1,0 +1,6 @@
+-r tests/requirements.pip
+
+docutils
+coverage
+django-nose
+django-extensions
