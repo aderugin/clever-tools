@@ -28,21 +28,6 @@ class StoreSettings(models.Model):
     confirm_yes_description = models.TextField(u'Подтверждение требуется: описание', blank=True)
 
 
-class OrderDiscount(models.Model):
-    class Meta:
-        verbose_name = u'скидка от стоимости заказа'
-        verbose_name_plural = u'скидки от стоимости заказа'
-
-    price = models.DecimalField(u'Сумма заказа', max_digits=10, decimal_places=2)
-    value = models.PositiveIntegerField(u'Величина скидки в %', unique=True)
-
-    def __unicode__(self):
-        return u'суииа от ' + str(self.price) + u' / скидка: ' + str(self.value) + '%'
-
-    active = None
-    estimated = 0
-
-
 class DeliveryLocation(models.Model):
     class Meta:
         verbose_name = u'местоположение для доставки'
@@ -140,7 +125,7 @@ class Order(models.Model):
     user_name = models.CharField(max_length=300, blank=True, verbose_name=u'ФИО пользователя')
     user_email = models.EmailField(u'Email пользователя', blank=True)
     user_phone = models.CharField(max_length=20, blank=True, verbose_name=u'телефон пользователя')
-    #user = models.ForeignKey('users.CleverUser', blank=True, null=True, verbose_name=u'Пользователь')
+    user = models.ForeignKey('users.CleverUser', blank=True, null=True, verbose_name=u'Пользователь')
 
     delivery = models.ForeignKey(Delivery, verbose_name=u'Способоб доставки')
     payment = models.ForeignKey(Payment, verbose_name=u'Способо оплаты')
