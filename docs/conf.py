@@ -23,7 +23,7 @@ sys.path.append(PROJECT_DIR) # The directory that contains settings.py
 
 # Set up the Django settings/environment
 from django.core.management import setup_environ
-from clever_shop import settings
+from tests import settings
 
 setup_environ(settings)
 
