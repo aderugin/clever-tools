@@ -5,7 +5,7 @@ PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 SITE_ID=1
 PROJECT_APPS = (
   'clever.catalog',
-  'clever.store'
+  'clever.store',
 )
 INSTALLED_APPS = ( 'django.contrib.auth',
                    'django.contrib.contenttypes',
