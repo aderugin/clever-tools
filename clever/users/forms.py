@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 #author: Vasiliy Sheredeko (piphon@gmail.com)
 
-from .models import RikitaviUser
-from .models import UserChildren
+from .models import CleverUser
 from registration.forms import RegistrationFormUniqueEmail
 from django import forms
 from django.forms import ModelForm
@@ -13,7 +12,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 class UserEditForm(ModelForm):
     class Meta:
         model = RikitaviUser
-        fields = ("fullname", "email", "bdate", "phone")
+        fields = ("fullname", "email", "bdate")
 
     fullname = forms.CharField(widget=forms.TextInput(), label=u"Фамилия Имя Отчество")
 
@@ -64,14 +63,7 @@ class RegistrationForm(RegistrationFormUniqueEmail):
             f.widget.attrs['placeholder'] = f.label
 
     name = forms.CharField(widget=forms.TextInput(), label=u"Фамилия Имя Отчество")
-    phone = forms.CharField(widget=forms.TextInput(), label=u"Телефон")
 
-    def clean_phone(self):
-        """ Phone number validation """
-        phone = self.cleaned_data.get('phone')
-        if len(phone) != 13:
-            raise forms.ValidationError(u"Неверный формат телефона")
-        return phone
 
     def clean_email(self):
         """
@@ -116,8 +108,3 @@ class AuthenticationFormByEmail(AuthenticationForm):
 class UserChangePasswordForm(PasswordChangeForm):
     pass
 
-
-class ChildrenForm(ModelForm):
-    class Meta:
-        model = UserChildren
-        fields = ('name', 'sex', 'bdate',)

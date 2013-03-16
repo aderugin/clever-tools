@@ -5,8 +5,6 @@ from .views import LoginView
 from .views import LogoutView
 from .views import RegisterView
 from .views import PasswordChangeView
-from .views import ChildrenAddView
-from .views import ChildrenEditView
 from .views import AccountCheckExists
 
 urlpatterns = patterns('',
@@ -17,6 +15,4 @@ urlpatterns = patterns('',
     url(r'^logout/$', LogoutView.as_view(), name='account_logout'),
     url(r'^register/$', RegisterView.as_view(), name='account_registration'),
     url(r'^change_password/$', PasswordChangeView.as_view(), name='account_change_password'),
-    url(r'^children/add$', ChildrenAddView.as_view(), name='account_child_add'),
-    url(r'^children/(?P<id>\d+)/edit$', ChildrenEditView.as_view(), name='account_child_edit'),
 )

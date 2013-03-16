@@ -5,30 +5,24 @@ from django.contrib.auth.forms import UserChangeForm
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.contrib import admin
-from .models import RikitaviUser, UserChildren
+from .models import CleverUser, UserChildren
 from django.utils.translation import ugettext_lazy as _
 
 
-class RikitaviUserChangeForm(UserChangeForm):
+class CleverUserChangeForm(UserChangeForm):
 
     class Meta:
-        model = RikitaviUser
+        model = CleverUser
 
 
-class UserChildrenAdminInline(admin.StackedInline):
-
-    model = UserChildren
-    extra = 1
-
-
-class RikitaviUserAdmin(UserAdmin):
-    form = RikitaviUserChangeForm
+class CleverUserAdmin(UserAdmin):
+    form = CleverUserChangeForm
     list_display = ('username', 'last_name', 'first_name', 'initial_name',
-                    'is_staff', 'is_active', 'phone')
+                    'is_staff', 'is_active')
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         (_('Personal info'), {'fields': (
-                              'first_name', 'last_name', 'initial_name', 'email', 'phone', 'bdate'
+                              'first_name', 'last_name', 'initial_name', 'email', 'bdate'
                               )}),
         (_('Permissions'), {'fields': ('is_active', 'is_staff',
          'is_superuser', 'user_permissions')}),
@@ -39,4 +33,4 @@ class RikitaviUserAdmin(UserAdmin):
     inlines = [UserChildrenAdminInline]
 
 admin.site.unregister(User)
-admin.site.register(RikitaviUser, RikitaviUserAdmin)
+admin.site.register(CleverUser, CleverUserAdmin)

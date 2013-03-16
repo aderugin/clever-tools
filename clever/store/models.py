@@ -140,7 +140,7 @@ class Order(models.Model):
     user_name = models.CharField(max_length=300, blank=True, verbose_name=u'ФИО пользователя')
     user_email = models.EmailField(u'Email пользователя', blank=True)
     user_phone = models.CharField(max_length=20, blank=True, verbose_name=u'телефон пользователя')
-    user = models.ForeignKey('users.RikitaviUser', blank=True, null=True, verbose_name=u'Пользователь')
+    #user = models.ForeignKey('users.CleverUser', blank=True, null=True, verbose_name=u'Пользователь')
 
     delivery = models.ForeignKey(Delivery, verbose_name=u'Способоб доставки')
     payment = models.ForeignKey(Payment, verbose_name=u'Способо оплаты')

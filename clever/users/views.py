@@ -77,10 +77,6 @@ class UserMixinView(UserMixin, FormMixinView):
         return self.object
 
 
-class ChildrenMixinView(FormMixinView, UserMixin):
-    model = UserChildren
-    form_class = ChildrenForm
-
 
 class ProfileView(UserMixinView, UpdateView):
     """
@@ -217,20 +213,4 @@ class PasswordChangeView(UserMixinView, UpdateView):
         return super(PasswordChangeView, self).dispatch(*args, **kwargs)
 
 
-class ChildrenAddView(ChildrenMixinView, CreateView):
-    def form_valid(self, form):
-        self.object = form.save(commit=False)
-        self.object.user = self.get_user()
-        return super(ChildrenAddView, self).form_valid(form)
 
-    def get_ajax_kwargs(self, error=False):
-        if not error and getattr(self, 'object', None):
-            object = self.object
-            return {
-                'form_action': reverse('account_child_edit', kwargs={'id': object.id})
-            }
-        return {}
-
-
-class ChildrenEditView(ChildrenMixinView, UpdateView):
-    pk_url_kwarg = 'id'
