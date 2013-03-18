@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import decimal
-
+from decimal import Decimal
 
 class ItemBase(object):
     '''
@@ -10,27 +10,21 @@ class ItemBase(object):
         self.itemid = itemid
         self.product = product
         self.quantity = quantity
-        self.sale = 0
 
-    @property
-    def price(self):
+    #@property
+    def price(self, **kwargs):
         """ Цена товара / Если есть скидка она учитывается """
-        if self.sale:
-            return self.product.price - self.product.price * self.sale / 100
         return self.product.price
 
-    @property
-    def total_price(self):
+    #@property
+    def total_price(self, **kwargs):
         """ Цена умноженная на количество в корзине"""
-        return self.price * self.quantity
-
-    @property
-    def total_price_wosale(self):
-        """ Цена умноженная на количество в корзине """
-        return self.product.price * self.quantity
+        return self.price(**kwargs) * self.quantity
 
 
 class CartBase(object):
+    model = ItemBase
+
     def __init__(self):
         self.items = list()
         self.unique_item_id = 0
@@ -44,7 +38,7 @@ class CartBase(object):
         return self.unique_item_id
     next_item_id = property(_get_next_item_id)
 
-    def add_item(self, product, quantity=1):
+    def add_product(self, product, quantity=1):
         # Пытаемся найти товар в корзине
         ext_item = filter(lambda x: x.product.id == int(product.id), self.items)
 
@@ -52,24 +46,32 @@ class CartBase(object):
             # если нашли это будет list поэтому стучим по индексу 0
             ext_item[0].quantity += quantity
         else:
-            item = Item(self.next_item_id, product, quantity)
+            item = self.model(self.next_item_id, product, quantity)
             self.items.append(item)
 
+    def find_product(self, product):
+        '''Поиск товара в корзине'''
+        ext_item = filter(lambda x: x.product.id == int(product.id), self.items)
 
-    def update_item_quantity(self, itemid, quantity):
+        if ext_item:
+            return {
+                'new_quantity' : ext_item[0].quantity,
+                'new_cost' : float(ext_item[0].product.price()) * ext_item[0].quantity
+            }
+        else:
+            None
+
+
+    def update_item_quantity(self, product, quantity):
         """ Изменяет количество товара в корзине
             :itemid: Ид элемента в корзине
             :quantity: Значение
         """
         quantity = int(quantity)
 
-        ext_item = filter(lambda x: x.itemid == int(itemid), self.items)
+        ext_item = filter(lambda x: x.product.id == product.id, self.items)
         ext_item[0].quantity = quantity
 
-        return {
-            'new_quantity' : ext_item[0].quantity,
-            'new_cost' : float(ext_item[0].product.price) * ext_item[0].quantity
-        }
 
     def is_empty(self):
         return self.items == []
@@ -79,8 +81,8 @@ class CartBase(object):
         self.items = list()
 
 
-    def remove_item(self, itemid):
-        self.items = filter(lambda x: x.itemid != int(itemid), self.items)
+    def remove_product(self, product):
+        self.items = filter(lambda x: x.product.id != product.id, self.items)
 
     def __iter__(self):
         return self.forward()
@@ -92,14 +94,14 @@ class CartBase(object):
             current_index += 1
             yield item
 
-    def get_total_cost(self):
+    def get_total_cost(self, **kwargs):
         '''  Возвращает общую сумму корзины '''
 
         cost = 0
         for item in self.items:
-            cost += item.product.price * item.quantity
+            cost += item.total_price(**kwargs)
 
-        return float(cost)
+        return cost
 
     def get_discount(self):
         """Сумма скидки от акций и от суммы заказа"""
