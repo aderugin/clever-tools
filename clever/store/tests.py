@@ -148,6 +148,33 @@ class OrderTestCase(unittest.TestCase):
         cart = Cart()
 
         cart.add_product(self.product, 1)
-        self.assertEqual(False, cart.is_empty())
+        self.assertFalse(cart.is_empty())
 
+    def test_find_existed_product(self):
+        cart = Cart()
+
+        for i in xrange(5):
+            section = any_model(Section, image=None)
+            brand = any_model(Brand, image=None)
+            product = any_model(Product, section=section, brand=brand, image=None)
+
+            cart.add_product(product)
+        cart.add_product(self.product, 10)
+
+        item = cart.find_product(self.product)
+        self.assertIsInstance(item, Item)
+        self.assertEqual(10, item.quantity)
+
+    def test_find_non_existed_product(self):
+        cart = Cart()
+
+        for i in xrange(5):
+            section = any_model(Section, image=None)
+            brand = any_model(Brand, image=None)
+            product = any_model(Product, section=section, brand=brand, image=None)
+
+            cart.add_product(product)
+
+        item = cart.find_product(self.product)
+        self.assertIsNone(item)
 

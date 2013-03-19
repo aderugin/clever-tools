@@ -22,9 +22,10 @@ I18NSPHINXOPTS  = $(PAPEROPT_$(PAPER)) $(SPHINXOPTS) docs
 main: coverage dirhtml
 
 coverage:
-	-python tests/manage.py test -v 2 --with-coverage --cover-package=clever
+	-coverage run --source=clever tests/manage.py test -v 2
 	coverage html
 	@echo "clever and coverage:                                  ${CHECK} Done"
+
 test:
 	python tests/manage.py test -v 2
 	@echo "Test                                                  ${CHECK} Done"

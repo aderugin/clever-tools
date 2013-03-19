@@ -54,10 +54,7 @@ class CartBase(object):
         ext_item = filter(lambda x: x.product.id == int(product.id), self.items)
 
         if ext_item:
-            return {
-                'new_quantity' : ext_item[0].quantity,
-                'new_cost' : float(ext_item[0].product.price()) * ext_item[0].quantity
-            }
+            return ext_item[0]
         else:
             None
 
@@ -102,25 +99,6 @@ class CartBase(object):
             cost += item.total_price(**kwargs)
 
         return cost
-
-    def get_discount(self):
-        """Сумма скидки от акций и от суммы заказа"""
-        sale_ammount = float(self.sale_ammount)
-        total = self.get_total_cost() - sale_ammount
-
-        return_discount = None
-        for discount in self.discounts:
-            if (discount.active):
-                return_discount = discount.value
-
-        if (return_discount):
-            return float(((total / 100) * return_discount) + sale_ammount)
-        else:
-            return sale_ammount
-
-    def total_cost_with_sale(self):
-        """Общая сумма с учетом скидки"""
-        return self.get_total_cost() - self.get_discount()
 
     def get_count_items(self):
         if len(self.items):
