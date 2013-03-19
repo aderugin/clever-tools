@@ -1,6 +1,6 @@
+# -*- coding: utf-8 -*-
 import time
 import hotshot
-
 
 def profile(prefix):
     """Декоратор для оценки производительности сайта"""

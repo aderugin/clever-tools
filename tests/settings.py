@@ -5,8 +5,8 @@ PROJECT_ROOT = os.path.abspath(os.path.dirname(__file__))
 SITE_ID=1
 
 PROJECT_APPS = (
-    'clever.catalog',
-    'clever.store',
+    'catalog',
+    'store',
 )
 
 INSTALLED_APPS = (
@@ -17,10 +17,14 @@ INSTALLED_APPS = (
     'django.contrib.admin',
 
     # Tests
-    'clever',
     'django_any',
     'django_nose',
-) + PROJECT_APPS
+
+    # Our application
+    'clever',
+    'clever.catalog',
+    'clever.store',
+)
 
 DATABASES = {
     'default': {
