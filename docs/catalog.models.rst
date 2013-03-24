@@ -21,5 +21,5 @@
 .. automodule:: clever.catalog.admin
     :members:
 
-.. automodule:: clever.store.carts
+.. automodule:: clever.store.cart
     :members:

@@ -2,16 +2,18 @@
 import unittest
 from decimal import Decimal
 from django_any import any_model
-from django.db.models import get_model
 from django.db import models
 from clever.catalog import models as base
 from clever.store.cart import CartBase, ItemBase
 
+
 class Section(base.SectionBase):
     pass
 
+
 class Brand(base.BrandBase):
     pass
+
 
 class Product(base.ProductBase):
     class Meta:
@@ -20,11 +22,13 @@ class Product(base.ProductBase):
 
     price = models.DecimalField("dfdf", decimal_places=2, max_digits=20)
 
+
 class Item(ItemBase):
     pass
 
+
 class Cart(CartBase):
-    model = Item
+    item_model = Item
 
 
 class OrderTestCase(unittest.TestCase):
@@ -33,6 +37,14 @@ class OrderTestCase(unittest.TestCase):
         self.section = any_model(Section, image=None)
         self.brand = any_model(Brand, image=None)
         self.product = any_model(Product, section=self.section, brand=self.brand, image=None)
+
+    def add_products_to_cart(self, cart, count=5):
+        for i in xrange(count):
+            section = any_model(Section, image=None)
+            brand = any_model(Brand, image=None)
+            product = any_model(Product, section=section, brand=brand, image=None)
+
+            cart.add_product(product)
 
     def test_add_product_to_cart(self):
         '''Добавление нового товара'''
@@ -79,7 +91,7 @@ class OrderTestCase(unittest.TestCase):
         cart = Cart()
 
         cart.add_product(self.product, 1)
-        cart.update_item_quantity(self.product,3)
+        cart.update_item_quantity(self.product, 3)
 
         self.assertEqual(3, cart.items[0].quantity)
 
@@ -87,12 +99,7 @@ class OrderTestCase(unittest.TestCase):
         '''Перебор корзины в цикле for'''
         cart = Cart()
 
-        for i in xrange(5):
-            section = any_model(Section, image=None)
-            brand = any_model(Brand, image=None)
-            product = any_model(Product, section=section, brand=brand, image=None)
-
-            cart.add_product(product)
+        self.add_products_to_cart(cart)
 
         copy_products = list()
         for item in cart:
@@ -111,7 +118,7 @@ class OrderTestCase(unittest.TestCase):
             product = any_model(Product, section=section, brand=brand, price=i, image=None)
             cart.add_product(product, 1)
 
-        self.assertIsInstance(cart.get_total_cost(), Decimal)
+        self.assertIsInstance(cart.total_cost, Decimal)
         self.assertEqual(Decimal(10), cart.get_total_cost())
 
     def test_product_price(self):
@@ -120,8 +127,8 @@ class OrderTestCase(unittest.TestCase):
         product = any_model(Product, section=self.section, brand=self.brand, price=100, image=None)
         cart.add_product(product, 2)
 
-        self.assertIsInstance(cart.items[0].price(), Decimal)
-        self.assertEqual(Decimal(100), cart.items[0].price())
+        self.assertIsInstance(cart.items[0].price, Decimal)
+        self.assertEqual(Decimal(100), cart.items[0].price)
 
     def test_product_total_price(self):
         '''Получение стоимости для отдельного товара с учетом количества'''
@@ -129,36 +136,32 @@ class OrderTestCase(unittest.TestCase):
         product = any_model(Product, section=self.section, brand=self.brand, price=100, image=None)
         cart.add_product(product, 3)
 
-        self.assertIsInstance(cart.items[0].price(), Decimal)
-        self.assertEqual(Decimal(300), cart.items[0].total_price())
+        self.assertIsInstance(cart.items[0].price, Decimal)
+        self.assertEqual(Decimal(300), cart.items[0].total_price)
 
     def test_empty_cart(self):
         '''Пустая корзина: is_empty == True'''
         cart = Cart()
 
-        self.assertTrue(cart.is_empty())
+        self.assertTrue(cart.is_empty)
 
         cart.add_product(self.product, 1)
         cart.remove_product(self.product)
 
-        self.assertTrue(cart.is_empty())
+        self.assertTrue(cart.is_empty)
 
     def test_no_empty_cart(self):
         '''Не пустая корзина: is_empty == False'''
         cart = Cart()
 
         cart.add_product(self.product, 1)
-        self.assertFalse(cart.is_empty())
+        self.assertFalse(cart.is_empty)
 
     def test_find_existed_product(self):
+        '''Поиск товара добавленного в корзину'''
         cart = Cart()
 
-        for i in xrange(5):
-            section = any_model(Section, image=None)
-            brand = any_model(Brand, image=None)
-            product = any_model(Product, section=section, brand=brand, image=None)
-
-            cart.add_product(product)
+        self.add_products_to_cart(cart)
         cart.add_product(self.product, 10)
 
         item = cart.find_product(self.product)
@@ -166,15 +169,18 @@ class OrderTestCase(unittest.TestCase):
         self.assertEqual(10, item.quantity)
 
     def test_find_non_existed_product(self):
+        '''Поиск товара не добавленного в корзину'''
         cart = Cart()
 
-        for i in xrange(5):
-            section = any_model(Section, image=None)
-            brand = any_model(Brand, image=None)
-            product = any_model(Product, section=section, brand=brand, image=None)
-
-            cart.add_product(product)
+        self.add_products_to_cart(cart)
 
         item = cart.find_product(self.product)
         self.assertIsNone(item)
 
+    def test_items_count(self):
+        ''' Вычисление количества продуктов в корзине'''
+        '''Поиск товара не добавленного в корзину'''
+        cart = Cart()
+        self.add_products_to_cart(cart, 6)
+
+        self.assertEqual(6, len(cart))
