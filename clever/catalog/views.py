@@ -11,6 +11,7 @@
 from __future__ import absolute_import
 from django.views.generic import DetailView
 from django.views.generic.list import ListView
+from django.shortcuts import get_object_or_404
 from clever.catalog.metadata import CatalogMetadata
 
 
@@ -45,6 +46,8 @@ class BrandView(DetailView):
 
 class SectionView(DetailView):
     """Страница для просмотра отдельного раздела"""
+    pseudo_section = None
+
     def get_queryset(self):
         return self.model.sections.get_query_set()
 
@@ -55,7 +58,18 @@ class SectionView(DetailView):
             self._filter_form = filter_form(self.get_object(), *args, **kwargs)
         return getattr(self, '_filter_form', None)
 
+    def get_pseudo_section(self):
+        """Создание запроса для получения активной псевдо категорий из раздела"""
+        pseudo_slug = self.kwargs.get('pseudo_slug', None)
+        if pseudo_slug and not self.pseudo_section:
+            if not getattr(self, 'pseudo_section_model', None):
+                raise RuntimeError("Для страницы детальной информации о разделе, не указана форма фильтра или модель продукта в каталоге")
+            pseudo_section_model = self.pseudo_section_model
+            self.pseudo_section = get_object_or_404(klass=pseudo_section_model.pseudo_sections, section=self.get_object(), slug=pseudo_slug)
+        return self.pseudo_section
+
     def get_pseudo_queryset(self):
+        """Создание запроса для получения все активных псевдо категорий из раздела"""
         if not getattr(self, 'pseudo_section_model', None):
             raise RuntimeError("Для страницы детальной информации о разделе, не указана форма фильтра или модель продукта в каталоге")
         pseudo_section_model = self.pseudo_section_model
@@ -78,19 +92,14 @@ class SectionView(DetailView):
         context = super(SectionView, self).get_context_data(**kwargs)
 
         # Получаем форму с фильтром
-        filter_form = self.get_filter_form()
-        context['filter_form'] = filter_form
-
-        # Получаем подразделы для текущего раздела каталога
-        # context['sections'] = self.get_sections_queryset(self.object)
+        context['filter_form'] = self.get_filter_form()
 
         # Получаем псевдо разделы для текущего раздела каталога
-        pseudo_sections = self.get_pseudo_queryset()
-        context['pseudo_sections'] = pseudo_sections
+        context['pseudo_sections'] = self.get_pseudo_queryset()
+        context['active_pseudo_section'] = self.get_pseudo_section()
 
         # Получаем продукты для текущего раздела каталога
-        products = self.get_products_queryset()
-        context['products'] = products
+        context['products'] = self.get_products_queryset()
 
         # Возвращаем все
         return context
