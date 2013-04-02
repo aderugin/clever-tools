@@ -48,7 +48,6 @@ class SectionView(DetailView):
     def get_queryset(self):
         return self.model.sections.get_query_set()
 
-
     def get_filter_form(self, *args, **kwargs):
         """Получение формы для фильтра"""
         filter_form = getattr(self, 'filter_form', None)
@@ -56,6 +55,12 @@ class SectionView(DetailView):
             self._filter_form = filter_form(self.get_object(), *args, **kwargs)
         return getattr(self, '_filter_form', None)
 
+    def get_pseudo_queryset(self):
+        if not getattr(self, 'pseudo_section_model', None):
+            raise RuntimeError("Для страницы детальной информации о разделе, не указана форма фильтра или модель продукта в каталоге")
+        pseudo_section_model = self.pseudo_section_model
+        queryset = pseudo_section_model.pseudo_sections.filter(section=self.get_object())
+        return queryset
 
     def get_products_queryset(self):
         """Создание запроса для получения продуктов из раздела"""
@@ -69,7 +74,6 @@ class SectionView(DetailView):
             queryset = product_model.products.filter(section=self.get_object())
         return queryset
 
-
     def get_context_data(self, **kwargs):
         context = super(SectionView, self).get_context_data(**kwargs)
 
@@ -80,13 +84,16 @@ class SectionView(DetailView):
         # Получаем подразделы для текущего раздела каталога
         # context['sections'] = self.get_sections_queryset(self.object)
 
+        # Получаем псевдо разделы для текущего раздела каталога
+        pseudo_sections = self.get_pseudo_queryset()
+        context['pseudo_sections'] = pseudo_sections
+
         # Получаем продукты для текущего раздела каталога
         products = self.get_products_queryset()
         context['products'] = products
 
         # Возвращаем все
         return context
-
 
     def post(self, request, *args, **kwargs):
         """Обрабатываем запрос к базе данный"""

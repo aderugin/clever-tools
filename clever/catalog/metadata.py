@@ -22,6 +22,9 @@ class CatalogMetadata:
     product_attribute_model = None
     section_attribute_model = None
     section_brand_model = None
+    pseudo_section_model = None
+    pseudo_section_value_model = None
+    pseudo_section_brand_model = None
 
     def __init__(self, product_model):
         self.product_model = product_model
@@ -43,12 +46,23 @@ class CatalogMetadata:
             if field.name == 'attribute':
                 self.attribute_model = field.related.parent_model
 
-        # Получение информации об модели
+        # Получение информации об модели свойств в определенной категории
         for field in magic.get_related_objects(self.section_model):
-            if field.get_accessor_name() == 'attributes_params':
+            accessor_name = field.get_accessor_name()
+            if accessor_name == 'attributes_params':
                 self.section_attribute_model = field.model
-            elif field.get_accessor_name() == 'brand_params':
+            elif accessor_name == 'brand_params':
                 self.section_brand_model = field.model
+            elif accessor_name == 'pseudo_sections':
+                self.pseudo_section_model = field.model
+
+        # Получение информации о псевдо категориях
+        for field in magic.get_related_objects(self.pseudo_section_model):
+            accessor_name = field.get_accessor_name()
+            if accessor_name == 'pseudo_section_values':
+                self.pseudo_section_value_model = field.model
+            elif accessor_name == 'pseudo_section_brands':
+                self.pseudo_section_brand_model = field.model
 
     @classmethod
     def from_section_model(cls, section_model):
