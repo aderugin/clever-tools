@@ -7,6 +7,7 @@ from ckeditor.widgets import CKEditorWidget
 from clever.core.admin import thumbnail_column
 from clever.core.admin import AdminMixin
 from clever.catalog.metadata import CatalogMetadata
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class SectionParamsIterator(forms.models.ModelChoiceIterator):
@@ -117,10 +118,9 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
     ..todo: Протестировать все!
     """
     class Meta(object):
-        widgets ={
+        widgets = {
             'text': CKEditorWidget(config_name='default')
         }
-
 
     def __init__(self, model, admin_site, *args, **kwargs):
         metadata = CatalogMetadata(model)
@@ -142,3 +142,52 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
     def admin_thumbnail(self, inst):
         """ Выводит картинку а админке """
         return [inst.image]
+
+
+class PseudoSectionValueInline(admin.TabularInline):
+    extra = 1
+
+    # def get_formset(self, request, obj=None, **kwargs):
+    #     value = super(PseudoSectionValueInline, self).get_formset(request, obj, **kwargs)
+    #     if obj:
+    #         try:
+    #             value.form.base_fields['attribute'].choices = PrumaCatalogAttributeIterator(
+    #                 value.form.base_fields['attribute'],
+    #                 obj.category
+    #             )
+    #         except ObjectDoesNotExist:
+    #             pass
+    #     return value
+
+
+class PseudoSectionBrandInline(admin.TabularInline):
+    extra = 1
+
+
+class PseudoSectionAdmin(AdminMixin, admin.ModelAdmin):
+    class Meta:
+        widgets = {
+            'text': CKEditorWidget(config_name='default')
+        }
+
+    def __init__(self, model, admin_site, *args, **kwargs):
+        metadata = CatalogMetadata.from_pseudo_section_model(model)
+
+        super(PseudoSectionAdmin, self).__init__(model, admin_site, *args, **kwargs)
+
+        # Добавляем базовые элементы в админку
+        self.insert_list_display(['active', 'section', 'slug'])
+        self.insert_list_display_links(['admin_thumbnail', '__unicode__', '__str__'])
+
+        # Создание inline редактора для свойств товара
+        pseudo_section_value_inline = type(model.__name__ + "_PseudoSectionValueInline", (PseudoSectionValueInline,), {
+            'model': metadata.pseudo_section_value_model,
+        })
+        product_attribute_inline = type(model.__name__ + "_PseudoSectionBrandInline", (PseudoSectionBrandInline,), {
+            'model': metadata.pseudo_section_brand_model,
+        })
+
+        self.insert_inlines([
+            pseudo_section_value_inline,
+            product_attribute_inline
+        ])

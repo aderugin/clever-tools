@@ -66,8 +66,23 @@ class CatalogMetadata:
 
     @classmethod
     def from_section_model(cls, section_model):
-        # Получение информации об модели
+        ''' Получение информации об каталоге из модели раздела '''
         for field in magic.get_related_objects(section_model):
             if field.get_accessor_name() == 'products':
                 return cls(field.model)
         raise RuntimeError("В модели раздела %s не найдена обратная ссылка на модель продуктов" % section_model.__name__)
+
+    @classmethod
+    def from_pseudo_section_model(cls, pseudo_section_model):
+        ''' Получение информации об каталоге из модели псевдо раздела '''
+        for field in magic.get_model_fields(pseudo_section_model):
+            if field.name == 'section':
+                return cls.from_section_model(field.related.parent_model)
+        raise RuntimeError("В модели раздела %s не найдена обратная ссылка на модель раздела" % pseudo_section_model.__name__)
+
+    @classmethod
+    def from_brand_model(cls, brand_model):
+        ''' Получение информации об каталоге из модели бренда '''
+        for field in magic.get_related_objects(brand_model):
+            if field.get_accessor_name() == 'sections':
+                return cls.from_pseudo_section_model(field.model)

@@ -12,7 +12,6 @@ class FilterForm(forms.Form):
             raise RuntimeError("Для формы с фильтром продукции в разделе, не указана модель продукта в каталоге")
         return self.product_model
 
-
     def __init__(self, section, *args, **kwargs):
         super(FilterForm, self).__init__(*args, **kwargs)
 
@@ -31,7 +30,6 @@ class FilterForm(forms.Form):
             control_object = attr.control_object
 
             self.fields[attr_name] = control_object.create_form_field(attr, values)
-
 
     def get_queryset(self):
         product_model = self.get_product_model()
@@ -57,10 +55,8 @@ class FilterForm(forms.Form):
 
         return product_model.products.filter(section=self.section).filter(*filter_args, **filter_kwargs)
 
-
     def get_brands(self):
         return self.metadata.brand_model.objects.filter(products__section=self.section).distinct()
-
 
     def get_attributes(self, section):
         """Создание запроса для получение всех аттрибутов из данного раздела"""
@@ -91,7 +87,6 @@ class FilterForm(forms.Form):
                     values.append((value, value))
             final_result.append((attrib, values,))
         return final_result
-
 
     def create_brand_field(self, brands):
         """Создание поля формы для брэнда"""
