@@ -1,0 +1,5 @@
+{
+    "dump": "%(dump)s",
+    "source": "%(source)s",
+    "markup": "%(markup)s"
+}
