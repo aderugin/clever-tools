@@ -15,3 +15,6 @@ class SelectControl:
 
     def create_query_part(self, attribute, values):
         return models.Q(attributes__string_value=values)
+
+    def create_form_value(self, values):
+        return value
