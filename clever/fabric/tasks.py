@@ -10,6 +10,10 @@ from fabric.api import hide
 from fabric.contrib import files
 from fabric import operations
 from clever.fabric import local_env
+from clever.fabric.utils import backup_mysql
+from clever.fabric.utils import get_head_hash
+from clever.fabric.utils import git_revert
+from clever.fabric.utils import revert_mysql
 import os
 import json
 
@@ -35,8 +39,8 @@ def active_env(name):
     """
     Подготовка окружения
     """
-    env_params = local_env.get(name, None)
-    if not local_env:
+    env_params = getattr(local_env, name, None)
+    if not env_params:
         raise RuntimeError("Не найдено окружение")
 
     # Имя пользователя от которого запущен проект
@@ -91,7 +95,7 @@ def update(branch=None, force=False):
     # Отправляем локальные изменения в верстке на сервер
     if local_env.MARKUP_DIRECTORY:
         with lcd(local_env.MARKUP_DIRECTORY):
-            local("git push origin master")
+            local("git push origin %s" % branch)
 
     with cd(env.root):
         # Обновляем бранчи если надо
@@ -99,6 +103,7 @@ def update(branch=None, force=False):
             run('git fetch --all')
 
         if force:
+            run('git fetch --all')
             run('git reset --hard HEAD')
 
         # Перемещаем изменения из репозитория в локальную папку
@@ -106,15 +111,13 @@ def update(branch=None, force=False):
         run('git checkout ' + branch)
 
         # Обновляем исходный код для статических файлов
-        #run('git submodule update --init')
-
         if local_env.MARKUP_DIRECTORY:
             with cd(local_env.MARKUP_DIRECTORY):
                 if force:
                     run('git fetch --all')
                     run('git reset --hard origin/master')
                 else:
-                    run('git pull origin master')
+                    run('git pull origin %s' % branch)
 
 
 @task
