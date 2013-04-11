@@ -14,6 +14,9 @@ from clever.catalog.metaclass import ProductMetaclass
 from clever.catalog.metaclass import ProductAttributeMetaclass
 from clever.catalog.metaclass import SectionAttributeMetaclass
 from clever.catalog.metaclass import SectionBrandMetaclass
+from clever.catalog.metaclass import PseudoSectionMetaclass
+from clever.catalog.metaclass import PseudoSectionValueMetaclass
+from clever.catalog.metaclass import PseudoSectionBrandMetaclass
 from clever.core.models import generate_upload_name
 from clever.core.models import TimestableMixin
 from clever.core.models import ActivableMixin
@@ -26,6 +29,8 @@ from mptt import models as mptt
 from caching.base import CachingManager
 
 
+# ------------------------------------------------------------------------------
+# Разделы каталога
 class SectionQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQuerySet):
     """Базовый запрос для получения продуктов из каталога"""
 
@@ -55,6 +60,8 @@ class SectionBase(cache_machine.CachingMixin, mptt.MPTTModel, TimestableMixin, A
     sections = SectionFrontendManager(SectionQuerySet)
 
 
+# ------------------------------------------------------------------------------
+# Производители(бренды) каталога
 class BrandQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQuerySet):
     """Базовый запрос для получения продуктов из каталога"""
 
@@ -76,6 +83,19 @@ class BrandBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, Tit
     brands = BrandFrontendManager(BrandQuerySet)
 
 
+class SectionBrandBase(cache_machine.CachingMixin, models.Model):
+    """Базовая модель для настройки бренда в отдельном разделе"""
+    __metaclass__ = SectionBrandMetaclass
+
+    class Meta:
+        abstract = True
+
+    order = models.IntegerField(verbose_name=u'Позиция', help_text=u'Расположение в фильтре')
+    objects = CachingManager()
+
+
+# ------------------------------------------------------------------------------
+# Товары каталога
 class ProductQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQuerySet):
     """Базовый запрос для получения продуктов из каталога"""
 
@@ -99,6 +119,8 @@ class ProductBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, T
     products = ProductFrontendManager(ProductQuerySet)
 
 
+# ------------------------------------------------------------------------------
+# Аттрибуты(свойства) товаров каталога
 class AttributeType:
     """Стратегия для работы с отдельными свойствами"""
     def filter(self, queryset):
@@ -149,7 +171,7 @@ class AttributeBase(cache_machine.CachingMixin, models.Model):
     code = models.CharField(verbose_name=u'Внутренний код', help_text=u'Код для связи с внешними сервисами, например 1C', max_length=50, blank=True)
     main_title = models.CharField(verbose_name=u'Заголовок', max_length=255)
     additional_title = models.CharField(verbose_name=u"Дополнительный заголовок", max_length=50, blank=True, null=True,
-        help_text=u'Заполняется если нужно переопределить основной заголовок из 1С')
+                                        help_text=u'Заполняется если нужно переопределить основной заголовок из 1С')
 
     objects = CachingManager()
 
@@ -225,17 +247,6 @@ class SectionAttributeBase(cache_machine.CachingMixin, models.Model):
         return False
 
 
-class SectionBrandBase(cache_machine.CachingMixin, models.Model):
-    """Базовая модель для настройки бренда в отдельном разделе"""
-    __metaclass__ = SectionBrandMetaclass
-
-    class Meta:
-        abstract = True
-
-    order = models.IntegerField(verbose_name=u'Позиция', help_text=u'Расположение в фильтре')
-    objects = CachingManager()
-
-
 def register_attribute_type(cls):
     """Декоратор класса для регистрации нового типа аттрибута в каталоге"""
     pass
@@ -244,3 +255,47 @@ def register_attribute_type(cls):
 def register_attribute_style(cls):
     """Декоратор класса для регистрации нового стиля аттрибута в каталоге"""
     pass
+
+
+# ------------------------------------------------------------------------------
+# Псевдо разделы каталога
+class PseudoSectionQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQuerySet):
+    """Базовый запрос для получения псевдо категорий из каталога"""
+
+
+class PseudoSectionFrontendManager(CachingPassThroughManager):
+    """Менеджер для получения только активных псевдо категорий из каталога"""
+    def get_query_set(self):
+        return super(PseudoSectionFrontendManager, self).get_query_set().active()
+
+
+class PseudoSectionBase(cache_machine.CachingMixin, TitleMixin, TimestableMixin, ActivableMixin, PageMixin):
+    """ Псевдо раздел каталога """
+    __metaclass__ = PseudoSectionMetaclass
+
+    class Meta:
+        abstract = True
+
+    objects = CachingPassThroughManager(PseudoSectionQuerySet)
+    pseudo_sections = PseudoSectionFrontendManager(PseudoSectionQuerySet)
+
+    def __unicode__(self):
+        return ' '.join([self.section.title, ' > ', self.title])
+
+
+class PseudoSectionValueBase(models.Model):
+    """ Значение для фильтра псевдо-категории """
+    __metaclass__ = PseudoSectionValueMetaclass
+
+    class Meta:
+        abstract = True
+
+    string_value = models.CharField(verbose_name=u"Значение", max_length=255)
+
+
+class PseudoSectionBrandBase(models.Model):
+    """ Брэнды для фильтра псевдо-категории """
+    __metaclass__ = PseudoSectionBrandMetaclass
+
+    class Meta:
+        abstract = True

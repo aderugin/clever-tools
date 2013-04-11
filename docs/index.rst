@@ -6,6 +6,7 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
+.. _catalog.readme.rst:
 .. _catalog.models.rst:
 
 Indices and tables
