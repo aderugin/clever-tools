@@ -1,0 +1,61 @@
+{% load compress %}
+<!DOCTYPE html>
+<!--[if lt IE 7]> <html class="i-ua_js_no i-ua_css_standard no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]> <html class="i-ua_js_no i-ua_css_standard no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]> <html class="i-ua_js_no i-ua_css_standard no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="i-ua_js_no i-ua_css_standard no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <script>
+            ;(function(d, e, c, r) {
+                e = d.documentElement;
+                c = "className";
+                r = "replace";
+                e[c] = e[c][r]("i-ua_js_no", "i-ua_js_yes");
+                if (d.compatMode != "CSS1Compat") e[c] = e[c][r]("i-ua_css_standart", "i-ua_css_quirks")
+            })(document);
+        </script>
+
+        {% block page_head %}{% endblock page_head %}
+
+        <meta name="viewport" content="width=device-width">
+
+        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+        {% compress css %}
+            <link rel="stylesheet" href="{{ STATIC_URL }}markup/pages/merged/_merged.css">
+            {% block page_styles %} {% endblock page_styles %}
+        {% endcompress %}
+
+        <script src="{{ STATIC_URL }}js/modernizr-2.6.2.min.js"></script>
+    </head>
+    <body class="">
+        {% comment %}
+        <!--[if lt IE 7]>
+            <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
+        <![endif]-->
+        {% endcomment %}
+
+        <!-- Add your site or application content here -->
+        {% spaceless %}
+            {% block page_content %}{% endblock%}
+        {% endspaceless %}
+
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+        <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/jquery-1.9.0.min.js"><\/script>')</script>
+        {% compress js %}
+            <script src="{{ STATIC_URL }}js/plugins/_merged.js"></script>
+            <script src="{{ STATIC_URL }}markup/pages/merged/_merged.js"></script>
+            {% block page_styles %} {% endblock page_styles %}
+        {% endcompress %}
+
+        <!-- Google Analytics: change UA-XXXXX-X to be your site's ID. -->
+        <script>
+            var _gaq=[['_setAccount','UA-XXXXX-X'],['_trackPageview']];
+            (function(d,t){var g=d.createElement(t),s=d.getElementsByTagName(t)[0];
+            g.src=('https:'==location.protocol?'//ssl':'//www')+'.google-analytics.com/ga.js';
+            s.parentNode.insertBefore(g,s)}(document,'script'));
+        </script>
+    </body>
+</html>
