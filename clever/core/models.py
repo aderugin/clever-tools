@@ -4,6 +4,7 @@
 ===================================
 
 .. moduleauthor:: Семен Пупков (semen.pupkov@gmail.com)
+.. moduleauthor:: Василий Шередеко (piphon@gmail.com)
 """
 from django.db import models
 from django.db.models import query
@@ -80,14 +81,12 @@ class TitleMixin(models.Model):
     # TODO: , editable=True - в админке при создании нового элемента, не срабатывает autopopulate
     slug = autoslug.AutoSlugField(verbose_name=u"ЧПУ сегмент", populate_from='title', sep='-', unique=True)
 
-
     # @models.permalink
     # def get_absolute_url(self):
     #     """
     #     Получение каноничного пути до раздела каталога
     #     """
     #     return (magic.get_meta_param(self, 'url_name'), (), {'slug': self.slug})
-
 
     def __unicode__(self):
         return self.title
@@ -113,4 +112,16 @@ class PageMixin(models.Model):
 
 
 class CachingPassThroughManager(managers.PassThroughManager, cache_machine.CachingManager):
+    pass
+
+# Registry points to application
+METADATA_REGISTRY = {}
+
+
+def register_application(app, metadata):
+    global METADATA_REGISTRY
+    METADATA_REGISTRY[app] = metadata
+
+
+def get_application(app):
     pass
