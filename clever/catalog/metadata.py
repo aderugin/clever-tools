@@ -84,5 +84,6 @@ class CatalogMetadata:
     def from_brand_model(cls, brand_model):
         ''' Получение информации об каталоге из модели бренда '''
         for field in magic.get_related_objects(brand_model):
-            if field.get_accessor_name() == 'sections':
-                return cls.from_pseudo_section_model(field.model)
+            print field.get_accessor_name()
+            if field.get_accessor_name() == 'products':
+                return cls(field.model)
