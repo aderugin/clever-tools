@@ -16,7 +16,9 @@ TECHS = [
 
 class Console(PyV8.JSClass):
     def log(self, text):
-        print text
+        import pprint
+        pp = pprint.PrettyPrinter(indent=4, depth=6)
+        pp.pprint(text)
 
 
 class TemplateGlobal(PyV8.JSClass):
