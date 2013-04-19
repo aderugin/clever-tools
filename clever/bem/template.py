@@ -3,8 +3,10 @@
 from clever.bem import unicode_utils
 from django.template.loader import BaseLoader
 from django.template.base import TemplateDoesNotExist
+from django.template.base import NodeList
 from django.conf import settings
 from glob import glob
+from django import template
 import os
 import PyV8
 
@@ -14,13 +16,32 @@ TECHS = [
 ]
 
 
+#class Console(PyV8.JSClass):
+#    def log(self, text):
+#        print text
+
 class Console(PyV8.JSClass):
+    def __init__(self):
+        import pprint
+        self.pp = pprint.PrettyPrinter(indent=4, depth=6)
+
     def log(self, text):
-        print text
+        self.pp.pprint(text)
+
+    def dir(self, text):
+        self.pp.pprint(dir(text))
 
 
 class TemplateGlobal(PyV8.JSClass):
     console = Console()
+
+
+class TemplateNode(template.Node):
+    def __init__(self, template):
+        self.template = template
+
+    def render(self, context):
+        return self.template.render(context)
 
 
 class Template:
@@ -78,6 +99,12 @@ class Template:
             # TODO: Send signal about rendering for render, for compleant with django_toolbar
             return ctx.eval(js_code)
         return ""
+
+    @property
+    def nodelist(self):
+        nodelist = NodeList()
+        nodelist.append(TemplateNode(self))
+        return nodelist
 
 
 class Loader(BaseLoader):
