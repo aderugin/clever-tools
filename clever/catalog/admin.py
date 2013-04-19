@@ -76,7 +76,6 @@ class SectionAdmin(AdminMixin, editor.TreeEditor):
             'text': CKEditorWidget(config_name='default')
         }
 
-
     def __init__(self, model, *args, **kwargs):
         metadata = CatalogMetadata.from_section_model(model)
 
@@ -102,11 +101,13 @@ class SectionAdmin(AdminMixin, editor.TreeEditor):
         })
         self.insert_inlines([brand_inline, attribute_inline], before=True)
 
-
     @thumbnail_column(size='106x80')
     def admin_thumbnail(self, inst):
         """ Выводит картинку а админке """
         return [inst.image]
+
+    def get_readonly_fields(self, request, obj=None):
+        return super(SectionAdmin, self).get_readonly_fields(request, obj) + ('slug',)
 
 
 class ProductAttributeInline(admin.TabularInline):
@@ -142,6 +143,9 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
     def admin_thumbnail(self, inst):
         """ Выводит картинку а админке """
         return [inst.image]
+
+    def get_readonly_fields(self, request, obj=None):
+        return super(ProductAdmin, self).get_readonly_fields(request, obj) + ('slug',)
 
 
 class PseudoSectionValueInline(admin.TabularInline):
@@ -191,3 +195,6 @@ class PseudoSectionAdmin(AdminMixin, admin.ModelAdmin):
             pseudo_section_value_inline,
             product_attribute_inline
         ])
+
+    def get_readonly_fields(self, request, obj=None):
+        return super(PseudoSectionAdmin, self).get_readonly_fields(request, obj) + ('slug',)

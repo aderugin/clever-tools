@@ -13,7 +13,6 @@ from time import time
 from model_utils import managers
 from model_utils import fields
 from caching import base as cache_machine
-from clever import magic
 import autoslug
 import os
 
@@ -24,7 +23,7 @@ def generate_upload_name(instance, filename, prefix=None, unique=False):
 
     .. sectionauthor:: Семен Пупков (semen.pupkov@gmail.com)
     """
-    if instance == None:
+    if instance is None:
         return filename
 
     ext = os.path.splitext(filename)[1]
@@ -79,7 +78,7 @@ class TitleMixin(models.Model):
         abstract = True
     title = models.CharField(verbose_name=u"Название", max_length=255)
     # TODO: , editable=True - в админке при создании нового элемента, не срабатывает autopopulate
-    slug = autoslug.AutoSlugField(verbose_name=u"ЧПУ сегмент", populate_from='title', sep='-', unique=True)
+    slug = autoslug.AutoSlugField(verbose_name=u"ЧПУ сегмент", populate_from='title', sep='-', unique=True, editable=True)
 
     # @models.permalink
     # def get_absolute_url(self):
@@ -112,16 +111,4 @@ class PageMixin(models.Model):
 
 
 class CachingPassThroughManager(managers.PassThroughManager, cache_machine.CachingManager):
-    pass
-
-# Registry points to application
-METADATA_REGISTRY = {}
-
-
-def register_application(app, metadata):
-    global METADATA_REGISTRY
-    METADATA_REGISTRY[app] = metadata
-
-
-def get_application(app):
     pass

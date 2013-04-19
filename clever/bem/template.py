@@ -31,7 +31,6 @@ class Console(PyV8.JSClass):
     def dir(self, text):
         self.pp.pprint(dir(text))
 
-
 class TemplateGlobal(PyV8.JSClass):
     console = Console()
 
@@ -47,8 +46,9 @@ class TemplateNode(template.Node):
 class Template:
     ''' Шаблон BEM-tools '''
 
-    def __init__(self, source):
+    def __init__(self, source, filename):
         self.source = source
+        self.filename = filename
 
     def thumbnail(self, image, sizes, params):
         from sorl.thumbnail import get_thumbnail
@@ -65,9 +65,6 @@ class Template:
                 }
             except Exception, e:
                 # TODO: Write error to log
-                import pprint
-                pp = pprint.PrettyPrinter(indent=4, depth=6)
-                pp.pprint(("Exception from JavaScript: ", e))
                 return None
         return None
 
@@ -97,7 +94,10 @@ class Template:
 
             # TODO: Catch exception and convert to TemplateError, for compleant with django_toolbar
             # TODO: Send signal about rendering for render, for compleant with django_toolbar
-            return ctx.eval(js_code)
+            try:
+                return ctx.eval(js_code)
+            except Exception, e:
+                raise TemplateError(self.filename, e.args[0])
         return ""
 
     @property
@@ -114,38 +114,32 @@ class Loader(BaseLoader):
     def load_template_source(self, template_name, template_dirs=None):
         for dir in settings.TEMPLATE_DIRS:
             jsdata = []
+            included_file = None
 
             # merged.bemhtml.js
             path = os.path.join(dir, 'pages/merged/_merged.bemhtml.js')
-            print "Include:", path
             try:
                 merged_benhtml = open(path).read()
-                print "Include is success:", path
             except IOError:
                 continue
 
             # Поиск техник для BEMHTML
             for tech in TECHS:
-                import pprint
-                pp = pprint.PrettyPrinter(indent=4, depth=6)
-                pp.pprint(os.path.join(dir, template_name, tech))
                 for fname in glob(os.path.join(dir, template_name, tech)):
                     path = os.path.join(dir, fname)
-                    import pprint
-                    pp = pprint.PrettyPrinter(indent=4, depth=6)
-                    pp.pprint(path)
                     try:
                         jsdata.append(open(path).read())
+                        included_file = path
                     except IOError:
                         pass
 
             # Если файлы найдены возвращаем их
             if len(jsdata) > 0:
-                jsdata.insert(0, merged_benhtml)
-                return "\n".join(jsdata), template_name
+                jsdata.append(merged_benhtml)
+                return "\n".join(jsdata), included_file
         raise TemplateDoesNotExist
 
     def load_template(self, template_name, template_dirs=None):
         source, origin = self.load_template_source(template_name, template_dirs)
-        template = Template(source)
+        template = Template(source, origin)
         return template, origin
