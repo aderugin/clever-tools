@@ -78,7 +78,7 @@ class TitleMixin(models.Model):
         abstract = True
     title = models.CharField(verbose_name=u"Название", max_length=255)
     # TODO: , editable=True - в админке при создании нового элемента, не срабатывает autopopulate
-    slug = autoslug.AutoSlugField(verbose_name=u"ЧПУ сегмент", populate_from='title', sep='-', unique=True, editable=True)
+    slug = autoslug.AutoSlugField(verbose_name=u"ЧПУ сегмент", populate_from='title', sep='-', unique=True)
 
     # @models.permalink
     # def get_absolute_url(self):

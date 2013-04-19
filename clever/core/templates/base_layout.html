@@ -45,9 +45,8 @@
         {% endspaceless %}
 
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
-        <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/jquery-1.9.0.min.js"><\/script>')</script>
+        <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}markup/js/jquery-1.9.0.min.js"><\/script>')</script>
         {% compress js %}
-            <script src="{{ STATIC_URL }}js/plugins/_merged.js"></script>
             <script src="{{ STATIC_URL }}markup/pages/merged/_merged.js"></script>
             {% block page_scripts %} {% endblock %}
         {% endcompress %}

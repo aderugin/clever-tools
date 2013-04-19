@@ -15,10 +15,15 @@ TECHS = [
 
 
 class Console(PyV8.JSClass):
-    def log(self, text):
+    def __init__(self):
         import pprint
-        pp = pprint.PrettyPrinter(indent=4, depth=6)
-        pp.pprint(text)
+        self.pp = pprint.PrettyPrinter(indent=4, depth=6)
+
+    def log(self, text):
+        self.pp.pprint(text)
+
+    def dir(self, text):
+        self.pp.pprint(dir(text))
 
 
 class TemplateGlobal(PyV8.JSClass):

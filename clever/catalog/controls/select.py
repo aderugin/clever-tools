@@ -3,7 +3,10 @@
 from django import forms
 from django.db import models
 
+
 class SelectControl:
+    tag = 'select'
+    name = u"Выпадающий список"
     empty_label = u"----"
 
     def create_form_field(self, attribute, values):
@@ -17,4 +20,4 @@ class SelectControl:
         return models.Q(attributes__string_value=values)
 
     def create_form_value(self, values):
-        return value
+        return values

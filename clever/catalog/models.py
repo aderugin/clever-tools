@@ -17,7 +17,9 @@ from clever.catalog.metaclass import SectionBrandMetaclass
 from clever.catalog.metaclass import PseudoSectionMetaclass
 from clever.catalog.metaclass import PseudoSectionValueMetaclass
 from clever.catalog.metaclass import PseudoSectionBrandMetaclass
-from clever.core.models import generate_upload_name
+from clever.catalog.controls import SelectControl
+from clever.catalog.controls import CheckboxControl
+from clever.catalog.controls import RadioControl
 from clever.core.models import TimestableMixin
 from clever.core.models import ActivableMixin
 from clever.core.models import ActivableQuerySet
@@ -121,25 +123,6 @@ class ProductBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, T
 
 # ------------------------------------------------------------------------------
 # Аттрибуты(свойства) товаров каталога
-class AttributeType:
-    """Стратегия для работы с отдельными свойствами"""
-    def filter(self, queryset):
-        """
-        Фильтровать, используя данное свойство
-        """
-        pass
-
-    def order_by(self, queryset, order="asc"):
-        """
-        Сортировать, используя данное свойство
-        """
-        pass
-
-
-class AttributeStyle:
-    """Стратегия для работы вывода отдельных свойств"""
-    pass
-
 
 class AttributeParams:
     """Пока что херь которая должна скрыть сложность получение данных для свойств с учетом категории"""
@@ -173,6 +156,13 @@ class AttributeBase(cache_machine.CachingMixin, models.Model):
     additional_title = models.CharField(verbose_name=u"Дополнительный заголовок", max_length=50, blank=True, null=True,
                                         help_text=u'Заполняется если нужно переопределить основной заголовок из 1С')
 
+    # Элементы управления
+    CONTROL_CHOICES = []
+    CONTROL_CLASSES = {}
+
+    control = models.CharField(verbose_name=u'Элемент управления', help_text=u'для отображения в форме фильтра',
+                               choices=CONTROL_CHOICES, max_length=30, null=False, blank=False)
+
     objects = CachingManager()
 
     @property
@@ -188,11 +178,21 @@ class AttributeBase(cache_machine.CachingMixin, models.Model):
         from clever.catalog.types import StringType
         return StringType()
 
+    @classmethod
+    def register_control(cls, control_cls):
+        """ Регистрация нового элемента управления для аттрибута в форме фильтра """
+        cls.CONTROL_CLASSES[control_cls.tag] = control_cls
+        cls.CONTROL_CHOICES.append((control_cls.tag, control_cls.name))
+
     @property
     def control_object(self):
         """Получение стратегии для работы с элементом для отображения свойства в фильтре"""
-        from clever.catalog.controls import SelectControl
-        return SelectControl()
+        if getattr(self, '_control_object', None) is None:
+            if self.control in self.__class__.CONTROL_CLASSES:
+                self._control_object = self.__class__.CONTROL_CLASSES[self.control]()
+            else:
+                self._control_object = self.__class__.CONTROL_CLASSES['checkbox']()
+        return self._control_object
 
     @property
     def is_filterable(self):
@@ -247,14 +247,10 @@ class SectionAttributeBase(cache_machine.CachingMixin, models.Model):
         return False
 
 
-def register_attribute_type(cls):
-    """Декоратор класса для регистрации нового типа аттрибута в каталоге"""
-    pass
-
-
-def register_attribute_style(cls):
-    """Декоратор класса для регистрации нового стиля аттрибута в каталоге"""
-    pass
+# Регистрация базовых элементов управления для аттрибутов в форме фильтра
+AttributeBase.register_control(SelectControl)
+AttributeBase.register_control(CheckboxControl)
+AttributeBase.register_control(RadioControl)
 
 
 # ------------------------------------------------------------------------------

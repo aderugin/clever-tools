@@ -1,5 +1,12 @@
 #!/bin/bash
 
+echo -e "Install this packages before continue: "
+echo -e "                       \E[033;34m         libssl-dev               \E[033;39m"
+echo -e "                       \E[033;34m         zlib1g-dev               \E[033;39m"
+echo -e "                       \E[033;34m         libmysqlclient-dev       \E[033;39m"
+echo -e "                       \E[033;34m         python-dev               \E[033;39m"
+read -p "Press [Enter] key to start installation or [Ctrl+C]..."
+
 export VENV=$VIRTUAL_ENV
 mkdir -p $VENV/packages
 cd $VENV/packages
@@ -9,7 +16,6 @@ then
     wget http://www.python.org/ftp/python/2.7.3/Python-2.7.3.tgz
     tar xzvf Python-2.7.3.tgz
 fi
-
 
 export LD_LIBRARY_PATH=$VENV/lib:$LD_LIBRARY_PATH
 cd Python-2.7.3
@@ -30,14 +36,28 @@ easy_install --upgrade distribute
 CHECK = '\033[32m✔\033[39m'
 ERROR = '\033[31m✘\033[39m'
 
+# Check python
 import sys
-if sys.version_info == (2, 7):
-    print 'Install completed with error ' + ERROR
+python_version = CHECK if (sys.version_info == (2, 7)) else ERROR
+
+# Check zlib
+try:
+    import pkg_resources
+except ImportError:
+    zlib_installed = False
 else:
-    try:
-        import pkg_resources
-    except ImportError:
-        print 'Install completed with error ' + ERROR
-    else:
-        print 'Install completed succefull ' + CHECK
+    zlib_installed = True
+
+# Check ssl
+import socket
+ssl_installed = socket.ssl
+
+print 'Python version 2.7:     %s' % (CHECK if python_version else ERROR)
+print 'ZLib installed:         %s' % (CHECK if zlib_installed else ERROR)
+print 'OpenSSL installed:      %s' % (CHECK if ssl_installed else ERROR)
+
+if python_version or zlib_installed or ssl_installed:
+    print 'Install completed succefull ' + CHECK
+else:
+    print 'Install completed with error ' + ERROR
 "
