@@ -2,6 +2,8 @@
 
 from clever.bem import unicode_utils
 from django.template.loader import BaseLoader
+from django.template.base import Node
+from django.template.base import NodeList
 from django.template.base import TemplateDoesNotExist
 from django.conf import settings
 from glob import glob
@@ -38,6 +40,14 @@ class TemplateError(StandardError):
         return u"Ошибка JavaScript в файле '%s':\n '%s'" % (self.args[0], unicode(self.args[1]))
 
 
+class TemplateNode(Node):
+    def __init__(self, template):
+        self.template = template
+
+    def render(self, context):
+        return self.template.render(context)
+
+
 class Template:
     ''' Шаблон BEM-tools '''
 
@@ -58,7 +68,7 @@ class Template:
                     'ratio': thumb.ratio,
                     'url': thumb.url,
                 }
-            except Exception, e:
+            except Exception:
                 # TODO: Write error to log
                 return None
         return None
@@ -94,6 +104,12 @@ class Template:
             except Exception, e:
                 raise TemplateError(self.filename, e.args[0])
         return ""
+
+    @property
+    def nodelist(self):
+        nodelist = NodeList()
+        nodelist.append(TemplateNode(self))
+        return nodelist
 
 
 class Loader(BaseLoader):
