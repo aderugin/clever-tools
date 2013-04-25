@@ -9,6 +9,9 @@ from django.conf import settings
 from glob import glob
 import os
 import PyV8
+import locale
+
+locale.setlocale(locale.LC_ALL, 'ru_RU.UTF-8')
 
 TECHS = [
     '*.bemhtml.js',
@@ -83,6 +86,14 @@ class Template:
             return reverse(object, args=python_args, kwargs=python_kwargs)
         else:
             return object.get_absolute_url
+
+    def format_price(self, value):
+        if value == "":
+            value = Decimal(0.0)
+        elif isinstance(value, str):
+            value = Decimal(value.replace('.', ','))
+        value = locale.currency(value, grouping=True, symbol=False)
+        return value[:-3]
 
     def render(self, context):
         ''' Рендеринг шаблона BEMHTML '''
