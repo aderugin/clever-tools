@@ -13,6 +13,11 @@ from django.views.generic import DetailView
 from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404
 from clever.catalog.metadata import CatalogMetadata
+from django.core.paginator import Paginator
+from django.core.paginator import InvalidPage
+from django.core.exceptions import ImproperlyConfigured
+from django.http import Http404
+from django.utils.translation import ugettext as _
 
 
 class IndexView(ListView):
@@ -50,6 +55,11 @@ class BrandView(DetailView):
 class SectionView(DetailView):
     """Страница для просмотра отдельного раздела"""
     pseudo_section = None
+    allow_empty = True
+    paginate_by = None
+    paginator_class = Paginator
+    page_kwarg = 'page'
+    count_kwarg = 'count'
 
     def __init__(self, *args, **kwargs):
         super(SectionView, self).__init__(*args, **kwargs)
@@ -57,6 +67,56 @@ class SectionView(DetailView):
 
     def get_queryset(self):
         return self.model.sections.get_query_set()
+
+    def paginate_queryset(self, queryset, page_size):
+        """
+        Paginate the queryset, if needed.
+        """
+        paginator = self.get_paginator(queryset, page_size, allow_empty_first_page=self.get_allow_empty())
+        page_kwarg = self.page_kwarg
+        page = self.kwargs.get(page_kwarg) or self.request.GET.get(page_kwarg) or 1
+        try:
+            page_number = int(page)
+        except ValueError:
+            if page == 'last':
+                page_number = paginator.num_pages
+            else:
+                raise Http404(_("Page is not 'last', nor can it be converted to an int."))
+        try:
+            page = paginator.page(page_number)
+            return (paginator, page, page.object_list, page.has_other_pages())
+        except InvalidPage as e:
+            raise Http404(_('Invalid page (%(page_number)s): %(message)s') % {
+                'page_number': page_number,
+                'message': str(e)
+            })
+
+    def get_paginate_by(self, queryset):
+        """
+        Get the number of items to paginate by, or ``None`` for no pagination.
+        """
+        count_kwarg = self.count_kwarg
+        paginate_by = self.paginate_by
+        if self.paginate_by:
+            paginate_by = self.kwargs.get(count_kwarg) or self.request.GET.get(count_kwarg) or self.paginate_by
+            try:
+                paginate_by = int(paginate_by)
+            except ValueError:
+                pass
+        return paginate_by
+
+    def get_paginator(self, queryset, per_page, orphans=0, allow_empty_first_page=True):
+        """
+        Return an instance of the paginator for this view.
+        """
+        return self.paginator_class(queryset, per_page, orphans=orphans, allow_empty_first_page=allow_empty_first_page)
+
+    def get_allow_empty(self):
+        """
+        Returns ``True`` if the view should display empty lists, and ``False``
+        if a 404 should be raised instead.
+        """
+        return self.allow_empty
 
     def get_filter_form(self, *args, **kwargs):
         """Получение формы для фильтра"""
@@ -125,7 +185,23 @@ class SectionView(DetailView):
         context['active_pseudo_section'] = self.get_pseudo_section()
 
         # Получаем продукты для текущего раздела каталога
-        context['products'] = self.get_products_queryset()
+        products_queryset = self.get_products_queryset()
+        page_size = self.get_paginate_by(products_queryset)
+        if page_size:
+            paginator, page, products_queryset, is_paginated = self.paginate_queryset(products_queryset, page_size)
+            context.update({
+                'paginator': paginator,
+                'page_obj': page,
+                'is_paginated': is_paginated,
+                'products': products_queryset
+            })
+        else:
+            context.update({
+                'paginator': None,
+                'page_obj': None,
+                'is_paginated': False,
+                'products': products_queryset
+            })
 
         # Получем метаинформацию: заголовок и текст страницы раздела
         if context['active_pseudo_section']:
