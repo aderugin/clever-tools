@@ -111,9 +111,6 @@ class SectionView(DetailView):
         # Фильтр по брэндам
         brands = self.metadata.brand_model.brands.filter(pseudo_section_brands__pseudo_section=pseudo_category).values_list('id')
         for brand in brands:  # Хак, для flatten list of list
-            import pprint
-            pp = pprint.PrettyPrinter(indent=4, depth=6)
-            pp.pprint(brand)
             filter_data.appendlist('brand', int(brand[0]))
         return filter_data
 
