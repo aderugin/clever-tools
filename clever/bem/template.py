@@ -6,6 +6,7 @@ from django.template.base import Node
 from django.template.base import NodeList
 from django.template.base import TemplateDoesNotExist
 from django.conf import settings
+from decimal import Decimal
 from glob import glob
 import os
 import PyV8
