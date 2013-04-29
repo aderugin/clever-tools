@@ -96,6 +96,7 @@ class BrandBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, Tit
     """Базовая модель для производителя в каталоге"""
     class Meta:
         abstract = True
+
     __metaclass__ = DeferredMetaclass.for_point(Brand)
 
     section = DeferredForeignKey(Section, verbose_name='Раздел', null=False, blank=False)

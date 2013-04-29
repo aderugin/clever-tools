@@ -138,7 +138,7 @@ class DeferredPoint(object):
         return setattr(self.__dict__['__instance'], name, value)
 
 
-class DeferredConsumer:
+class DeferredConsumer(object):
     def __init__(self, point):
         self.point = point
         self.point.connect_deferred_consumer(self)
@@ -157,20 +157,24 @@ class DeferredForeignKey(DeferredConsumer):
         self.fk_kwargs = kwargs
 
     def resolve_deferred_point(self, target_model):
-        if not self.consumer_name:
-            raise RuntimeError('DeferredForeignKey не является значением')
-        foreign_key = models.ForeignKey(target_model, *self.fk_args, **self.fk_kwargs)
-        self.consumer_model.add_to_class(self.consumer_name, foreign_key)
+        # if not self.consumer_name:
+        #     raise RuntimeError('DeferredForeignKey не является значением')
+        # import pprint
+        # pp = pprint.PrettyPrinter(indent=4, depth=6)
+        # pp.pprint(target_model)
+        # foreign_key = models.ForeignKey(target_model, *self.fk_args, **self.fk_kwargs)
+        # self.consumer_model.add_to_class(self.consumer_name, foreign_key)
+        pass
 
 
 class DeferredMetaclass(models.base.ModelBase):
     ''' Строчка для подготовки магии отложенных ключей '''
-    def __init__(meta, name, bases, attribs):
-        cls = super(DeferredMetaclass, meta).__init__(name, bases, attribs)
+    def __init__(meta, cls, bases, attribs):
+        super(DeferredMetaclass, meta).__init__(cls, bases, attribs)
 
-        if magic.is_concrete_model(bases, attribs):
+        if not meta._meta.abstract:
             # Подготовка аттрибутов
-            for name, value in attribs:
+            for name, value in attribs.items():
                 if isinstance(value, DeferredConsumer):
                     value.consumer_model = cls
                     value.consumer_name = name
@@ -178,15 +182,7 @@ class DeferredMetaclass(models.base.ModelBase):
             # Расширение отложенной точки до оригинального класса
             point = getattr(meta, 'point', None)
             if point:
-                point.resolve_deferred_point(cls)
-
-        return cls
-
-        # import pprint
-        # pp = pprint.PrettyPrinter(indent=4, depth=6)
-        # pp.pprint(args)
-        # pp.pprint(cls.point)
-
+                point.resolve_deferred_point(meta)
 
     @classmethod
     def for_consumer(self, *bases):
