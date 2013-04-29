@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-:mod:`clever.catalog.models` -- Модели базового каталога
+:mod:`clever.catalog.base` -- Модели базового каталога
 ===================================
 
 В данном модуле хранится базовый набор моделей для работы с каталогом.
@@ -28,9 +28,7 @@ from clever.core.models import TitleMixin
 from clever.core.models import TitleQuerySet
 from clever.core.models import PageMixin
 from clever.core.models import CachingPassThroughManager
-from clever.core.models import DeferredPoint
-from clever.core.models import DeferredForeignKey
-from clever.core.models import DeferredMetaclass
+from clever.core.models import CachingPassThroughManager
 from mptt import models as mptt
 from caching.base import CachingManager
 
@@ -50,10 +48,6 @@ class SectionFrontendManager(CachingPassThroughManager):
         return super(SectionFrontendManager, self).get_query_set().active().with_products()
 
 
-''' Отложенный класс для модели раздела '''
-Section = DeferredPoint()
-
-
 class SectionBase(cache_machine.CachingMixin, mptt.MPTTModel, TimestableMixin, ActivableMixin, TitleMixin, PageMixin):
     """Базовая модель для раздела в каталоге"""
     class Meta:
@@ -61,8 +55,6 @@ class SectionBase(cache_machine.CachingMixin, mptt.MPTTModel, TimestableMixin, A
 
     class MPTTMeta:
         parent_attr = "section"
-
-    __metaclass__ = DeferredMetaclass.for_point(Section, mptt.MPTTModelBase)
 
     section = mptt.TreeForeignKey('self', blank=True, null=True, related_name='children', verbose_name=u'Родительский раздел')
 
@@ -89,16 +81,10 @@ class BrandFrontendManager(CachingPassThroughManager):
         return super(BrandFrontendManager, self).get_query_set().active()
 
 
-Brand = DeferredPoint()
-
-
 class BrandBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, TitleMixin, PageMixin):
     """Базовая модель для производителя в каталоге"""
     class Meta:
         abstract = True
-    __metaclass__ = DeferredMetaclass.for_point(Brand)
-
-    section = DeferredForeignKey(Section, verbose_name='Раздел', null=False, blank=False)
 
     code = models.CharField(verbose_name=u'Внутренний код', help_text=u'Код для связи с внешними сервисами, например 1C', max_length=50, blank=True)
 

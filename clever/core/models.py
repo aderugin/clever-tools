@@ -15,6 +15,7 @@ from model_utils import fields
 from caching import base as cache_machine
 import autoslug
 import os
+from clever import magic
 
 
 def generate_upload_name(instance, filename, prefix=None, unique=False):
@@ -112,3 +113,102 @@ class PageMixin(models.Model):
 
 class CachingPassThroughManager(managers.PassThroughManager, cache_machine.CachingManager):
     pass
+
+
+class DeferredPoint(object):
+    '''
+    Базовый класс для предоставления создания 'отложенных точек' - абстрактных моделей
+    для последующего использования в проектах
+    '''
+    def __init__(self):
+        self.__dict__['__consumers'] = []
+
+    def resolve_deferred_point(self, target_model):
+        self.__dict__['__instance'] = target_model
+        for consumer in self.__dict__['__consumers']:
+            consumer.resolve_deferred_point(target_model)
+
+    def connect_deferred_consumer(self, consumer):
+        self.__dict__['__consumers'].append(consumer)
+
+    def __getattr__(self, name):
+        return getattr(self.__dict__['__instance'], name)
+
+    def __setattr__(self, name, value):
+        return setattr(self.__dict__['__instance'], name, value)
+
+
+class DeferredConsumer:
+    def __init__(self, point):
+        self.point = point
+        self.point.connect_deferred_consumer(self)
+        self.consumer_name = ''
+        self.consumer_model = None
+
+    def resolve_deferred_point(self, target_model):
+        raise NotImplementedError()
+
+
+class DeferredForeignKey(DeferredConsumer):
+    def __init__(self, point, *args, **kwargs):
+        super(DeferredForeignKey, self).__init__(point)
+
+        self.fk_args = args
+        self.fk_kwargs = kwargs
+
+    def resolve_deferred_point(self, target_model):
+        if not self.consumer_name:
+            raise RuntimeError('DeferredForeignKey не является значением')
+        foreign_key = models.ForeignKey(target_model, *self.fk_args, **self.fk_kwargs)
+        self.consumer_model.add_to_class(self.consumer_name, foreign_key)
+
+
+class DeferredMetaclass(models.base.ModelBase):
+    ''' Строчка для подготовки магии отложенных ключей '''
+    def __init__(meta, name, bases, attribs):
+        cls = super(DeferredMetaclass, meta).__init__(name, bases, attribs)
+
+        if magic.is_concrete_model(bases, attribs):
+            # Подготовка аттрибутов
+            for name, value in attribs:
+                if isinstance(value, DeferredConsumer):
+                    value.consumer_model = cls
+                    value.consumer_name = name
+
+            # Расширение отложенной точки до оригинального класса
+            point = getattr(meta, 'point', None)
+            if point:
+                point.resolve_deferred_point(cls)
+
+        return cls
+
+        # import pprint
+        # pp = pprint.PrettyPrinter(indent=4, depth=6)
+        # pp.pprint(args)
+        # pp.pprint(cls.point)
+
+
+    @classmethod
+    def for_consumer(self, *bases):
+        class ConsumerDeferredMetaclass(DeferredMetaclass):
+            pass
+        ConsumerDeferredMetaclass.__bases__ += tuple(bases)
+        return ConsumerDeferredMetaclass
+
+    @classmethod
+    def for_point(self, point, *bases):
+        class PointDeferredMetaclass(DeferredMetaclass):
+            pass
+        PointDeferredMetaclass.point = point
+        PointDeferredMetaclass.__bases__ += tuple(bases)
+        return PointDeferredMetaclass
+
+
+# def deferred_point(point):
+#     def create_deferred(target_model):
+#         #point.resolve_deferred_point(target_model)
+#         import pprint
+#         pp = pprint.PrettyPrinter(indent=4, depth=6)
+#         pp.pprint(target_model.__name__)
+#         return target_model
+#     return create_deferred

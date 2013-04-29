@@ -4,6 +4,14 @@ from django import forms
 from django.db import models
 
 
+# class RadioFilter(forms.CheckboxSelectMultiple):
+#     pass
+
+
+# class RadioFilterField(forms.ChoiceField):
+#     widget = RadioFilter
+
+
 class SelectControl:
     tag = 'select'
     name = u"Выпадающий список"
@@ -11,13 +19,14 @@ class SelectControl:
 
     def create_form_field(self, attribute, values):
         return forms.ChoiceField(
-            choices=[(u'', self.empty_label)] + values,
+            choices=[(u'', self.empty_label)] + list(values),
             label=attribute.title,
             required=False,
         )
 
     def create_query_part(self, attribute, values):
-        return models.Q(attributes__string_value=values)
+        query = {attribute.query_name: values}
+        return models.Q(**query)
 
     def create_form_value(self, values):
         return values

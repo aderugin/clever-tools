@@ -2,61 +2,70 @@
 from django import forms
 from django.db import models
 from clever.catalog.metadata import CatalogMetadata
-from clever.catalog.models import AttributeParams
+from clever.catalog.models import AttributeManager
 import operator
 
 
 class FilterForm(forms.Form):
-    def get_product_model(self):
-        if not getattr(self, 'product_model', None):
-            raise RuntimeError("Для формы с фильтром продукции в разделе, не указана модель продукта в каталоге")
-        return self.product_model
-
+    ''' Базовая форма для фильтра '''
     def __init__(self, section, *args, **kwargs):
         super(FilterForm, self).__init__(*args, **kwargs)
 
         self.section = section
         self.metadata = CatalogMetadata(self.get_product_model())
 
-        # Получаем брэнды для фильтрации
-        self.brands = self.get_brands()
-        self.fields['brand'] = self.create_brand_field(self.brands)
-
         # Получаем аттрибуты для фильтрации
-        self.attributes_params = self.get_attributes(section)
+        self.attributes_params = self.get_pseudo_attributes(section) + self.get_attributes(section)
         for attr, values in self.attributes_params:
             # Создаем настоящий вид элемента
-            attr_name = 'attribute-' + str(attr.id)
             control_object = attr.control_object
 
-            self.fields[attr_name] = control_object.create_form_field(attr, values)
+            self.fields[attr.uid] = control_object.create_form_field(attr, values)
+
+    def get_product_model(self):
+        if not getattr(self, 'product_model', None):
+            raise RuntimeError("Для формы с фильтром продукции в разделе, не указана модель продукта в каталоге")
+        return self.product_model
 
     def get_queryset(self):
-        product_model = self.get_product_model()
-
         filter_args = ()
-        filter_kwargs = {}
-        if self.is_valid():
-            # Фильтрация по брэндам
-            brands = self.cleaned_data['brand']
-            if brands:
-                filter_kwargs['brand__in'] = brands
 
+        if self.is_valid():
             # Фильтрация по значениям аттрибутов
             for attr, values in self.attributes_params:
-                attr_name = 'attribute-' + str(attr.id)
-                values = self.cleaned_data[attr_name]
+                values = self.cleaned_data[attr.uid]
 
-                type_object = attr.type_object
+                # type_object = attr.type_object
                 control_object = attr.control_object
-
                 if values:
-                    filter_args += (models.Q(attributes__attribute=attr) & control_object.create_query_part(attr, values), )
+                    # Получение параметров для query
+                    attr_query = attr.make_query()
+                    values_query = control_object.create_query_part(attr, values)
+                    if attr_query:
+                        attr_query &= values_query
+                    else:
+                        attr_query = values_query
+                    filter_args += (values_query,)
+        else:
+            for name, message in self.errors.items():
+                print name, message
 
-        return product_model.products.filter(section=self.section).filter(*filter_args, **filter_kwargs)
+        product_model = self.get_product_model()
+        products_queryset = product_model.products.filter(section=self.section)
+        if len(filter_args):
+            products_queryset = products_queryset.filter(models.Q(reduce(operator.and_, filter_args)))
+        return products_queryset
 
-    def get_brands(self):
-        return self.metadata.brand_model.objects.filter(products__section=self.section).distinct()
+    def get_pseudo_attributes(self, section):
+        """Получение всех псевдо аттрибутов из данного раздела"""
+        # Подготовка значений к выводу
+        final_result = []
+
+        # Поиск значений для псевдо свойств
+        for attrib in AttributeManager.get_attributes():
+            values = attrib.get_values(section)
+            final_result.append((attrib, values,))
+        return final_result
 
     def get_attributes(self, section):
         """Создание запроса для получение всех аттрибутов из данного раздела"""
@@ -87,12 +96,3 @@ class FilterForm(forms.Form):
                     values.append((value, value))
             final_result.append((attrib, values,))
         return final_result
-
-    def create_brand_field(self, brands):
-        """Создание поля формы для брэнда"""
-        return forms.MultipleChoiceField(
-            widget=forms.CheckboxSelectMultiple,
-            label='Бренды',
-            choices=[(unicode(str(brand.id)), brand.title) for brand in brands],
-            required=False
-        )

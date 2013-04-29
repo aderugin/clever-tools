@@ -20,18 +20,21 @@ from django.http import Http404
 from django.utils.translation import ugettext as _
 
 
+# ------------------------------------------------------------------------------
 class IndexView(ListView):
     """Главная страница каталога"""
     def get_queryset(self):
         return self.model.sections.get_query_set()
 
 
+# ------------------------------------------------------------------------------
 class BrandIndexView(ListView):
     """Главная страница каталога"""
     def get_queryset(self):
         return self.model.brands.get_query_set()
 
 
+# ------------------------------------------------------------------------------
 class BrandView(DetailView):
     """Страница для просмотра отдельного бренда"""
 
@@ -52,6 +55,7 @@ class BrandView(DetailView):
         return context
 
 
+# ------------------------------------------------------------------------------
 class SectionView(DetailView):
     """Страница для просмотра отдельного раздела"""
     pseudo_section = None
@@ -96,13 +100,17 @@ class SectionView(DetailView):
         Get the number of items to paginate by, or ``None`` for no pagination.
         """
         count_kwarg = self.count_kwarg
-        paginate_by = self.paginate_by
+        paginate_by = None
         if self.paginate_by:
             paginate_by = self.kwargs.get(count_kwarg) or self.request.GET.get(count_kwarg) or self.paginate_by
             try:
                 paginate_by = int(paginate_by)
             except ValueError:
                 pass
+
+        # Если количество указано all - отключить paginator
+        if paginate_by == 'all':
+            return None
         return paginate_by
 
     def get_paginator(self, queryset, per_page, orphans=0, allow_empty_first_page=True):
@@ -131,6 +139,10 @@ class SectionView(DetailView):
                 kwargs['data'] = data
 
             # Создание фильтра
+            import pprint
+            pp = pprint.PrettyPrinter(indent=4, depth=6)
+            pp.pprint(args)
+            pp.pprint(kwargs)
             self._filter_form = filter_form(self.get_object(), *args, **kwargs)
 
         return getattr(self, '_filter_form', None)
@@ -210,6 +222,7 @@ class SectionView(DetailView):
             meta_object = self.get_object()
         context['section_title'] = meta_object.title
         context['section_text'] = meta_object.text
+        context['section_url'] = meta_object.get_absolute_url()
 
         # Возвращаем все
         return context
@@ -220,6 +233,7 @@ class SectionView(DetailView):
         return self.get(self, request, *args, **kwargs)
 
 
+# ------------------------------------------------------------------------------
 class ProductView(DetailView):
     """Страница для просмотра отдельного продукта"""
 

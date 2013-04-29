@@ -7,7 +7,6 @@ from ckeditor.widgets import CKEditorWidget
 from clever.core.admin import thumbnail_column
 from clever.core.admin import AdminMixin
 from clever.catalog.metadata import CatalogMetadata
-from django.core.exceptions import ObjectDoesNotExist
 
 
 class SectionParamsIterator(forms.models.ModelChoiceIterator):
@@ -29,10 +28,10 @@ class SectionParamsIterator(forms.models.ModelChoiceIterator):
         related_manager = self.inline.related_model.objects
 
         # Получение родительских элементов
-        parents = [self.section] # self.get_parents()
+        parents = [self.section]  # self.get_parents()
 
         # Поиск элементов присуствующих в данном разделе
-        field_name = self.inline.filter_field + '__in';
+        field_name = self.inline.filter_field + '__in'
         filter = {
             field_name: parents
         }
@@ -81,7 +80,7 @@ class SectionAdmin(AdminMixin, editor.TreeEditor):
 
         super(SectionAdmin, self).__init__(model, *args, **kwargs)
 
-        self.insert_list_display(['admin_thumbnail', 'active',], before=True)
+        self.insert_list_display(['admin_thumbnail', 'active'], before=True)
         self.insert_list_display(['slug'])
 
         self.insert_list_display_links(['admin_thumbnail', '__unicode__', '__str__'])
@@ -107,7 +106,7 @@ class SectionAdmin(AdminMixin, editor.TreeEditor):
         return [inst.image]
 
     def get_readonly_fields(self, request, obj=None):
-        return super(SectionAdmin, self).get_readonly_fields(request, obj) + ('slug',)
+        return list(super(SectionAdmin, self).get_readonly_fields(request, obj)) + ['slug']
 
 
 class ProductAttributeInline(admin.TabularInline):
@@ -145,7 +144,7 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
         return [inst.image]
 
     def get_readonly_fields(self, request, obj=None):
-        return super(ProductAdmin, self).get_readonly_fields(request, obj) + ('slug',)
+        return list(super(ProductAdmin, self).get_readonly_fields(request, obj)) + ['slug']
 
 
 class PseudoSectionValueInline(admin.TabularInline):
@@ -197,4 +196,4 @@ class PseudoSectionAdmin(AdminMixin, admin.ModelAdmin):
         ])
 
     def get_readonly_fields(self, request, obj=None):
-        return super(PseudoSectionAdmin, self).get_readonly_fields(request, obj) + ('slug',)
+        return list(super(PseudoSectionAdmin, self).get_readonly_fields(request, obj)) + ['slug']
