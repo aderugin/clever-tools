@@ -12,12 +12,12 @@ from __future__ import absolute_import
 from django.views.generic import DetailView
 from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404
-from clever.catalog.metadata import CatalogMetadata
 from django.core.paginator import Paginator
 from django.core.paginator import InvalidPage
 from django.core.exceptions import ImproperlyConfigured
 from django.http import Http404
 from django.utils.translation import ugettext as _
+from clever.catalog import models
 
 
 # ------------------------------------------------------------------------------
@@ -38,16 +38,11 @@ class BrandIndexView(ListView):
 class BrandView(DetailView):
     """Страница для просмотра отдельного бренда"""
 
-    def __init__(self, *args, **kwargs):
-        super(BrandView, self).__init__(*args, **kwargs)
-        self.metadata = CatalogMetadata.from_brand_model(self.model)
-
     def get_queryset(self):
         return self.model.brands.get_query_set()
 
     def get_sections_queryset(self, brand):
-        section_model = self.metadata.section_model
-        return section_model.sections.filter(products__brand=brand).distinct()
+        return models.Section.sections.filter(products__brand=brand).distinct()
 
     def get_context_data(self, **kwargs):
         context = super(BrandView, self).get_context_data(**kwargs)
@@ -64,10 +59,6 @@ class SectionView(DetailView):
     paginator_class = Paginator
     page_kwarg = 'page'
     count_kwarg = 'count'
-
-    def __init__(self, *args, **kwargs):
-        super(SectionView, self).__init__(*args, **kwargs)
-        self.metadata = CatalogMetadata.from_section_model(self.model)
 
     def get_queryset(self):
         return self.model.sections.get_query_set()
@@ -149,8 +140,7 @@ class SectionView(DetailView):
 
     def get_pseudo_section_queryset(self):
         """Создание запроса для получения активной псевдо категорий из раздела"""
-        pseudo_section_model = self.metadata.pseudo_section_model
-        return pseudo_section_model.pseudo_sections.active()
+        return models.PseudoSection.pseudo_sections.active()
 
     def get_pseudo_section(self):
         """Получение активной псевдо категорий из раздела"""
@@ -162,8 +152,7 @@ class SectionView(DetailView):
 
     def get_pseudo_sections_queryset(self):
         """Создание запроса для получения все активных псевдо категорий из раздела"""
-        pseudo_section_model = self.metadata.pseudo_section_model
-        queryset = pseudo_section_model.pseudo_sections.filter(section=self.get_object())
+        queryset = models.PseudoSection.pseudo_sections.filter(section=self.get_object())
         return queryset
 
     def get_products_queryset(self):
@@ -181,7 +170,7 @@ class SectionView(DetailView):
     def prepare_pseudo_section(self, pseudo_category, filter_data):
         ''' Подготовка данных для формы фильтра '''
         # Фильтр по брэндам
-        brands = self.metadata.brand_model.brands.filter(pseudo_section_brands__pseudo_section=pseudo_category).values_list('id')
+        brands = models.Brand.brands.filter(pseudo_section_brands__pseudo_section=pseudo_category).values_list('id')
         for brand in brands:  # Хак, для flatten list of list
             filter_data.appendlist('brand', int(brand[0]))
         return filter_data
@@ -237,26 +226,16 @@ class SectionView(DetailView):
 class ProductView(DetailView):
     """Страница для просмотра отдельного продукта"""
 
-    def __init__(self, *args, **kwargs):
-        super(ProductView, self).__init__(*args, **kwargs)
-        self.metadata = CatalogMetadata(self.model)
-
     def get_queryset(self):
         return self.model.products.get_query_set()
 
-    def get_main_attributes(self):
-        return []
-
-    def get_nonmain_attributes(self):
-        return self.metadata.product_attribute_model.objects.filter(product=self.get_object())
-
     def get_attributes(self):
-        return self.get_nonmain_attributes(), self.get_main_attributes()
+        return models.ProductAttribute.objects.filter(product=self.get_object())
 
     def get_context_data(self, **kwargs):
         context = super(ProductView, self).get_context_data(**kwargs)
 
-        context['attributes'], context['main_attributes'] = self.get_attributes()
+        context['attributes'] = self.get_attributes()
 
         # Возвращаем все
         return context

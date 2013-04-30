@@ -6,7 +6,7 @@ from django import forms
 from ckeditor.widgets import CKEditorWidget
 from clever.core.admin import thumbnail_column
 from clever.core.admin import AdminMixin
-from clever.catalog.metadata import CatalogMetadata
+from clever.catalog import models
 
 
 class SectionParamsIterator(forms.models.ModelChoiceIterator):
@@ -76,8 +76,6 @@ class SectionAdmin(AdminMixin, editor.TreeEditor):
         }
 
     def __init__(self, model, *args, **kwargs):
-        metadata = CatalogMetadata.from_section_model(model)
-
         super(SectionAdmin, self).__init__(model, *args, **kwargs)
 
         self.insert_list_display(['admin_thumbnail', 'active'], before=True)
@@ -87,15 +85,15 @@ class SectionAdmin(AdminMixin, editor.TreeEditor):
 
         # Создание inline редактора для свойств товара
         brand_inline = type(model.__name__ + "_SectionBrandInline", (SectionParamsInline,), {
-            'model': metadata.section_brand_model,
+            'model': models.SectionBrand,
             'field_name': 'brand',
-            'related_model': metadata.brand_model,
+            'related_model': models.Brand,
             'filter_field': 'products__section',
         })
         attribute_inline = type(model.__name__ + "_SectionAttributeInline", (SectionParamsInline,), {
-            'model': metadata.section_attribute_model,
+            'model': models.SectionAttribute,
             'field_name': 'attribute',
-            'related_model': metadata.attribute_model,
+            'related_model': models.Attribute,
             'filter_field': 'attributes__product__section',
         })
         self.insert_inlines([brand_inline, attribute_inline], before=True)
@@ -123,8 +121,6 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
         }
 
     def __init__(self, model, admin_site, *args, **kwargs):
-        metadata = CatalogMetadata(model)
-
         super(ProductAdmin, self).__init__(model, admin_site, *args, **kwargs)
 
         # Добавляем базовые элементы в админку
@@ -134,7 +130,7 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
 
         # Создание inline редактора для свойств товара
         product_attribute_inline = type(model.__name__ + "_ProductAttributeInline", (ProductAttributeInline,), {
-            'model': metadata.product_attribute_model,
+            'model': models.ProductAttribute,
         })
         self.insert_inlines([product_attribute_inline])
 
@@ -174,8 +170,6 @@ class PseudoSectionAdmin(AdminMixin, admin.ModelAdmin):
         }
 
     def __init__(self, model, admin_site, *args, **kwargs):
-        metadata = CatalogMetadata.from_pseudo_section_model(model)
-
         super(PseudoSectionAdmin, self).__init__(model, admin_site, *args, **kwargs)
 
         # Добавляем базовые элементы в админку
@@ -184,10 +178,10 @@ class PseudoSectionAdmin(AdminMixin, admin.ModelAdmin):
 
         # Создание inline редактора для свойств товара
         pseudo_section_value_inline = type(model.__name__ + "_PseudoSectionValueInline", (PseudoSectionValueInline,), {
-            'model': metadata.pseudo_section_value_model,
+            'model': models.PseudoSectionValue,
         })
         product_attribute_inline = type(model.__name__ + "_PseudoSectionBrandInline", (PseudoSectionBrandInline,), {
-            'model': metadata.pseudo_section_brand_model,
+            'model': models.PseudoSectionBrand,
         })
 
         self.insert_inlines([
