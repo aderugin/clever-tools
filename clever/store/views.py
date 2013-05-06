@@ -22,7 +22,7 @@ class CartClearView(DetailView):
     pass
 
 # Контроллер для добавление продукта в корзину
-class CartAddProductView(DetailView):
+class CartAddProductView(FormView):
     pass
 
 # Удаление продукта из корзины

@@ -20,6 +20,11 @@ class ItemBase(object):
         ''' Получение цены для одной единицы товара '''
         return self.get_price()
 
+    @property
+    def title(self):
+        ''' Получение имени для одной единицы товара '''
+        return self.product.title
+
     def get_total_price(self, **kwargs):
         ''' Вычисление полной цена для всех единиц товара в корзине '''
         return self.get_price(**kwargs) * self.quantity
@@ -53,6 +58,7 @@ class CartBase(object):
         return self.unique_item_id
 
     def add_product(self, product, quantity=1):
+        #TODO Сделать проверку данных quantity
         '''
         Добавление товара в корзину
 
