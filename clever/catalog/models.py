@@ -308,8 +308,8 @@ class ProductAttributeBase(cache_machine.CachingMixin, models.Model):
     class Meta:
         abstract = True
 
-    product = DeferredForeignKey(Product, null=False)
-    attribute = DeferredForeignKey(Attribute, null=False)
+    product = DeferredForeignKey(Product, null=False, related_name='attributes')
+    attribute = DeferredForeignKey(Attribute, null=False, related_name='values')
 
     string_value = models.CharField(verbose_name=u"Значение", max_length=255)
     objects = CachingManager()
