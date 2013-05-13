@@ -117,7 +117,7 @@ class CartBase(object):
 
         TODO: Как сформулировать
         '''
-        return self.items == []
+        return len(self.items) == 0
 
     def clear(self):
         ''' Очистка корзины '''
