@@ -42,7 +42,7 @@ class BrandView(DetailView):
         return self.model.brands.get_query_set()
 
     def get_sections_queryset(self, brand):
-        return models.Section.sections.filter(products__brand=brand).distinct()
+        return brand.descendant_sections
 
     def get_context_data(self, **kwargs):
         context = super(BrandView, self).get_context_data(**kwargs)

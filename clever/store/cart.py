@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+CART_SESSION_NAME = 'cart'
 
 
+# ------------------------------------------------------------------------------
 class ItemBase(object):
     '''
     Базовый класс для отдельной записи в корзине
@@ -11,6 +13,11 @@ class ItemBase(object):
         self.product = product
         self.quantity = quantity
 
+    @property
+    def title(self):
+        ''' Получение имени для одной единицы товара '''
+        return self.product.title
+
     def get_price(self, **kwargs):
         ''' Вычисление цены отдельной единицы товара в корзине '''
         return self.product.price
@@ -19,11 +26,6 @@ class ItemBase(object):
     def price(self):
         ''' Получение цены для одной единицы товара '''
         return self.get_price()
-
-    @property
-    def title(self):
-        ''' Получение имени для одной единицы товара '''
-        return self.product.title
 
     def get_total_price(self, **kwargs):
         ''' Вычисление полной цена для всех единиц товара в корзине '''
@@ -35,6 +37,7 @@ class ItemBase(object):
         return self.get_total_price()
 
 
+# ------------------------------------------------------------------------------
 class CartBase(object):
     '''
     Базовый класс для корзины
@@ -144,7 +147,7 @@ class CartBase(object):
             current_index += 1
             yield item
 
-    def get_total_cost(self, **kwargs):
+    def get_total_price(self, **kwargs):
         '''  Возвращает общую стоимость корзины '''
 
         cost = 0
@@ -154,9 +157,9 @@ class CartBase(object):
         return cost
 
     @property
-    def total_cost(self):
+    def total_price(self):
         ''' Общая стоимость товаров корзине '''
-        return self.get_total_cost()
+        return self.get_total_price()
 
     @property
     def count_items(self):
@@ -166,7 +169,26 @@ class CartBase(object):
         else:
             return 0
 
+    @classmethod
+    def open(cls, request):
+        ''' Загрузка списка сравнения из сессии '''
+        return CartContext(request, cls)
 
-# TODO: Move this to view :D
-def get_user_cart(request):
-    return request.session.get('cart', None) or CartBase()
+
+# ------------------------------------------------------------------------------
+class CartContext(object):
+    def __init__(self, request, cls):
+        self.request = request
+        self.cls = cls
+
+    def __enter__(self):
+        self.cart = self.request.session.get(CART_SESSION_NAME, None) or self.cls()
+        return self.cart
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if exc_type:
+            return False
+        if self.request:
+            ''' Сохранение корзины в сессии '''
+            self.request.session[CART_SESSION_NAME] = self.cart
+        return True

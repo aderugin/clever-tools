@@ -7,14 +7,17 @@ from clever.catalog import models as base
 from clever.store.cart import CartBase, ItemBase
 
 
+# ------------------------------------------------------------------------------
 class Section(base.SectionBase):
     pass
 
 
+# ------------------------------------------------------------------------------
 class Brand(base.BrandBase):
     pass
 
 
+# ------------------------------------------------------------------------------
 class Product(base.ProductBase):
     class Meta:
         section_model = Section
@@ -23,14 +26,17 @@ class Product(base.ProductBase):
     price = models.DecimalField("dfdf", decimal_places=2, max_digits=20)
 
 
+# ------------------------------------------------------------------------------
 class Item(ItemBase):
     pass
 
 
+# ------------------------------------------------------------------------------
 class Cart(CartBase):
     item_model = Item
 
 
+# ------------------------------------------------------------------------------
 class OrderTestCase(unittest.TestCase):
 
     def setUp(self):
@@ -118,8 +124,8 @@ class OrderTestCase(unittest.TestCase):
             product = any_model(Product, section=section, brand=brand, price=i, image=None)
             cart.add_product(product, 1)
 
-        self.assertIsInstance(cart.total_cost, Decimal)
-        self.assertEqual(Decimal(10), cart.get_total_cost())
+        self.assertIsInstance(cart.total_price, Decimal)
+        self.assertEqual(Decimal(10), cart.get_total_price())
 
     def test_product_price(self):
         '''Получение стоимости для отдельного товара'''

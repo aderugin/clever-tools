@@ -10,12 +10,12 @@ from django.db import models
 from django.db.models import query
 from hashlib import md5
 from time import time
+from mptt import managers as mptt_managers
 from model_utils import managers
 from model_utils import fields
 from caching import base as cache_machine
 import autoslug
 import os
-from clever import magic
 
 
 def generate_upload_name(instance, filename, prefix=None, unique=False):
@@ -230,11 +230,5 @@ class DeferredMetaclass(models.base.ModelBase):
         return PointDeferredMetaclass
 
 
-# def deferred_point(point):
-#     def create_deferred(target_model):
-#         #point.resolve_deferred_point(target_model)
-#         import pprint
-#         pp = pprint.PrettyPrinter(indent=4, depth=6)
-#         pp.pprint(target_model.__name__)
-#         return target_model
-#     return create_deferred
+class TreeCachingPassThroughManager(mptt_managers.TreeManager, CachingPassThroughManager):
+    pass

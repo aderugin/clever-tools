@@ -20,6 +20,7 @@ from clever.core.models import TitleMixin
 from clever.core.models import TitleQuerySet
 from clever.core.models import PageMixin
 from clever.core.models import CachingPassThroughManager
+from clever.core.models import TreeCachingPassThroughManager
 from clever.core.models import DeferredPoint
 from clever.core.models import DeferredForeignKey
 from clever.core.models import DeferredMetaclass
@@ -68,13 +69,6 @@ class SectionQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQue
 
 
 # ------------------------------------------------------------------------------
-class SectionFrontendManager(CachingPassThroughManager):
-    """Менеджер для получения только активных продуктов из каталога"""
-    def get_query_set(self):
-        return super(SectionFrontendManager, self).get_query_set().active().with_products()
-
-
-# ------------------------------------------------------------------------------
 class SectionBase(cache_machine.CachingMixin, mptt.MPTTModel, TimestableMixin, ActivableMixin, TitleMixin, PageMixin):
     """Базовая модель для раздела в каталоге"""
     class Meta:
@@ -89,11 +83,16 @@ class SectionBase(cache_machine.CachingMixin, mptt.MPTTModel, TimestableMixin, A
 
     code = models.CharField(verbose_name=u'Внутренний код', help_text=u'Код для связи с внешними сервисами, например 1C', max_length=50, blank=True)
 
-    objects = CachingPassThroughManager(SectionQuerySet)
-    sections = SectionFrontendManager(SectionQuerySet)
+    objects = TreeCachingPassThroughManager(SectionQuerySet)
+    sections = TreeCachingPassThroughManager(SectionQuerySet)
 
     def __unicode__(self):
         return self.title
+
+    @property
+    def descendant_sections(self):
+        ''' Получить queryset для подкатегорий '''
+        return self.__class__.sections.filter(section=self)
 
 
 # ------------------------------------------------------------------------------
@@ -102,13 +101,6 @@ class BrandQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQuery
     """Базовый запрос для получения продуктов из каталога"""
     def with_products(self):
         return self.annotate(products_count=models.Count('products')).filter(products_count__gt=0)
-
-
-# ------------------------------------------------------------------------------
-class BrandFrontendManager(CachingPassThroughManager):
-    """Менеджер для получения только активных продуктов из каталога"""
-    def get_query_set(self):
-        return super(BrandFrontendManager, self).get_query_set().active()
 
 
 # ------------------------------------------------------------------------------
@@ -122,10 +114,17 @@ class BrandBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, Tit
     code = models.CharField(verbose_name=u'Внутренний код', help_text=u'Код для связи с внешними сервисами, например 1C', max_length=50, blank=True)
 
     objects = CachingPassThroughManager(BrandQuerySet)
-    brands = BrandFrontendManager(BrandQuerySet)
+    brands = CachingPassThroughManager(BrandQuerySet)
 
     def __unicode__(self):
         return self.title
+
+    @property
+    def descendant_sections(self):
+        ''' Получить queryset для категорий в которых есть продукт данного производителя '''
+        return Section.sections.filter(products__brand=self).distinct()
+        # context['section_list'] = self.get_sec(self.get_object())
+        # return self.__class__.sections.filter(section=self)
 
 
 # ------------------------------------------------------------------------------
