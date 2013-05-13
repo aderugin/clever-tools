@@ -5,7 +5,6 @@ import codecs
 import locale
 import os
 from django.core.files import File
-
 sys.stdout = codecs.getwriter(locale.getpreferredencoding())(sys.stdout)
 
 
@@ -49,6 +48,6 @@ class ImportFactory:
         for cls in self.parsers:
             parser = cls(source)
             model_verbose_name = parser.model._meta.verbose_name_plural.title()
-            print u"Импорт элементов: ", model_verbose_name
+            print u"Импорт элементов: ", unicode(model_verbose_name)
             parser.parse()
         print u"Импорт завершен"
