@@ -170,8 +170,17 @@ class CartBase(object):
             return 0
 
     @classmethod
+    def load(cls, request):
+        ''' Загрузка корзины из сессии '''
+        return request.session.get(CART_SESSION_NAME, None) or cls()
+
+    def save(self, request):
+        ''' Сохранение корзины в сессии '''
+        request.session[CART_SESSION_NAME] = self
+
+    @classmethod
     def open(cls, request):
-        ''' Загрузка списка сравнения из сессии '''
+        ''' Загрузка корзины из сессии для использования с with '''
         return CartContext(request, cls)
 
 
@@ -180,15 +189,17 @@ class CartContext(object):
     def __init__(self, request, cls):
         self.request = request
         self.cls = cls
+        self.cart = None
 
     def __enter__(self):
-        self.cart = self.request.session.get(CART_SESSION_NAME, None) or self.cls()
+        if not self.cart:
+            self.cart = self.cls.load(self.request)
         return self.cart
 
     def __exit__(self, exc_type, exc_value, traceback):
         if exc_type:
             return False
-        if self.request:
+        if self.cart and self.request:
             ''' Сохранение корзины в сессии '''
-            self.request.session[CART_SESSION_NAME] = self.cart
+            self.cart.save(self.request)
         return True

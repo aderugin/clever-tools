@@ -108,3 +108,11 @@ class DeferredMetaclass(type):
 # ------------------------------------------------------------------------------
 class DefferedObject(object):
     __metaclass__ = DeferredMetaclass
+
+
+# ------------------------------------------------------------------------------
+def deferred_object(point):
+    def deferred_wrapper(cls):
+        point.resolve_deferred_point(cls)
+        return cls
+    return deferred_wrapper

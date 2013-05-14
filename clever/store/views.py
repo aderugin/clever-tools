@@ -12,12 +12,33 @@ from django.views.generic.base import View
 from django.views.generic.base import RedirectView
 from django.views.generic import TemplateView
 from clever.catalog.models import Product
-from clever.store.cart import CartBase
+from clever.store import Cart
 # from django.views.generic import FormView
 
 
 # ------------------------------------------------------------------------------
-class BackRedirectMixin(RedirectView):
+class CartMixin(View):
+    cart_class = Cart
+    cart = None
+
+    def get_cart(self):
+        if not self.cart:
+            self.cart = self.cart_class.load(self.request)
+        return self.cart
+
+    def get(self, request, *args, **kwargs):
+        result = super(CartMixin, self).get(request, *args, **kwargs)
+        self.get_cart().save(self.request)
+        return result
+
+    def get_context_data(self, **kwargs):
+        context = super(CartMixin, self).get_context_data(**kwargs)
+        context['cart'] = self.get_cart()
+        return context
+
+
+# ------------------------------------------------------------------------------
+class BackRedirectMixin(CartMixin, RedirectView):
     ''' Вспомогательный вид для последущего редиректа '''
     permanent = False
 
@@ -35,38 +56,23 @@ class BackRedirectMixin(RedirectView):
 
 
 # ------------------------------------------------------------------------------
-class CartMixin(View):
-    cart_class = CartBase
-
-    def get(self, request, *args, **kwargs):
-        with self.cart_class.open(request) as cart:
-            self.cart = cart
-            return super(CartMixin, self).get(request, *args, **kwargs)
-
-    def get_context_data(self, **kwargs):
-        context = super(CartMixin, self).get_context_data(**kwargs)
-        context['cart'] = self.cart
-        return context
-
-
-# ------------------------------------------------------------------------------
-class AddProductView(CartMixin, BackRedirectMixin):
+class AddProductView(BackRedirectMixin):
     ''' Контроллер для добавление продукта в корзину '''
     def execute(self):
         try:
             product = Product.objects.get(id=self.kwargs.get('id', None))
-            self.cart.add_product(product, int(self.request.REQUEST.get('quantity', 1)))
+            self.get_cart().add_product(product, int(self.request.REQUEST.get('quantity', 1)))
         except Product.DoesNotExist:
             pass
 
 
 # ------------------------------------------------------------------------------
-class RemoveProductView(CartMixin, BackRedirectMixin):
+class RemoveProductView(BackRedirectMixin):
     ''' Контроллер для удаления продукта из корзины '''
     def execute(self):
         try:
             product = Product.objects.get(id=self.kwargs.get('id', None))
-            self.cart.remove_product(product)
+            self.get_cart().remove_product(product)
         except Product.DoesNotExist:
             pass
 

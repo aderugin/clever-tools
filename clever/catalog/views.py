@@ -167,6 +167,9 @@ class SectionView(DetailView):
             queryset = product_model.products.filter(section=self.get_object())
         return queryset
 
+    def get_sections_queryset(self):
+        return self.get_object().children.all()
+
     def prepare_pseudo_section(self, pseudo_category, filter_data):
         ''' Подготовка данных для формы фильтра '''
         # Фильтр по брэндам
@@ -178,12 +181,14 @@ class SectionView(DetailView):
     def get_context_data(self, **kwargs):
         context = super(SectionView, self).get_context_data(**kwargs)
 
-        # Получаем форму с фильтром
-        context['filter_form'] = self.get_filter_form()
+        # Получаем форму с фильтром и псевдо разделы для текущего раздела каталога
 
-        # Получаем псевдо разделы для текущего раздела каталога
-        context['pseudo_sections'] = self.get_pseudo_sections_queryset()
-        context['active_pseudo_section'] = self.get_pseudo_section()
+        context.update({
+            'section_list': self.get_sections_queryset(),
+            'filter_form': self.get_filter_form(),
+            'pseudo_sections': self.get_pseudo_sections_queryset(),
+            'active_pseudo_section': self.get_pseudo_section(),
+        })
 
         # Получаем продукты для текущего раздела каталога
         products_queryset = self.get_products_queryset()
@@ -203,15 +208,16 @@ class SectionView(DetailView):
                 'is_paginated': False,
                 'products': products_queryset
             })
-
         # Получем метаинформацию: заголовок и текст страницы раздела
         if context['active_pseudo_section']:
             meta_object = context['active_pseudo_section']
         else:
             meta_object = self.get_object()
-        context['section_title'] = meta_object.title
-        context['section_text'] = meta_object.text
-        context['section_url'] = meta_object.get_absolute_url()
+        context.update({
+            'section_title': meta_object.title,
+            'section_text': meta_object.text,
+            'section_url': meta_object.get_absolute_url(),
+        })
 
         # Возвращаем все
         return context
