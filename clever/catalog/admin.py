@@ -9,6 +9,7 @@ from clever.core.admin import AdminMixin
 from clever.catalog import models
 
 
+# ------------------------------------------------------------------------------
 class SectionParamsIterator(forms.models.ModelChoiceIterator):
     ### TODO: TEST THIS!!!!
     def __init__(self, inline, field, section):
@@ -52,6 +53,7 @@ class SectionParamsIterator(forms.models.ModelChoiceIterator):
             yield (item.id, unicode(item),)
 
 
+# ------------------------------------------------------------------------------
 class SectionParamsInline(admin.TabularInline):
     extra = 0
 
@@ -66,6 +68,7 @@ class SectionParamsInline(admin.TabularInline):
         return value
 
 
+# ------------------------------------------------------------------------------
 class SectionAdmin(AdminMixin, editor.TreeEditor):
     """
     ..todo: Протестировать все!
@@ -107,10 +110,20 @@ class SectionAdmin(AdminMixin, editor.TreeEditor):
         return list(super(SectionAdmin, self).get_readonly_fields(request, obj)) + ['slug']
 
 
+# ------------------------------------------------------------------------------
+class AttributeAdmin(AdminMixin, admin.ModelAdmin):
+    def __init__(self, model, admin_site, *args, **kwargs):
+        super(AttributeAdmin, self).__init__(model, admin_site, *args, **kwargs)
+
+        self.insert_list_display(['code'])
+
+
+# ------------------------------------------------------------------------------
 class ProductAttributeInline(admin.TabularInline):
     extra = 0
 
 
+# ------------------------------------------------------------------------------
 class ProductAdmin(AdminMixin, admin.ModelAdmin):
     """
     ..todo: Протестировать все!
@@ -143,6 +156,7 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
         return list(super(ProductAdmin, self).get_readonly_fields(request, obj)) + ['slug']
 
 
+# ------------------------------------------------------------------------------
 class PseudoSectionValueInline(admin.TabularInline):
     extra = 1
 
@@ -159,10 +173,12 @@ class PseudoSectionValueInline(admin.TabularInline):
     #     return value
 
 
+# ------------------------------------------------------------------------------
 class PseudoSectionBrandInline(admin.TabularInline):
     extra = 1
 
 
+# ------------------------------------------------------------------------------
 class PseudoSectionAdmin(AdminMixin, admin.ModelAdmin):
     class Meta:
         widgets = {
