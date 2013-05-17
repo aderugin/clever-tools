@@ -14,7 +14,10 @@ from django.views.generic import TemplateView
 from clever.catalog.models import Product
 from clever.store import Cart
 # from django.views.generic import FormView
-
+from django.core.serializers.json import DjangoJSONEncoder
+from django.http import HttpResponse
+import json
+from clever.core.views import AjaxMixin
 
 # ------------------------------------------------------------------------------
 class CartMixin(View):
@@ -54,9 +57,22 @@ class BackRedirectMixin(CartMixin, RedirectView):
     def execute(self):
         raise NotImplementedError
 
+#
+#class AjaxMixin(View):
+#    '''
+#    Миксин, формирующий JSON ответ. Достаточно переопределить
+#    get_ajax_data и вернуть в нем словарь
+#    '''
+#    def get_ajax_data(self, **kwargs):
+#        return { }
+#
+#    def get(self, request, *args, **kwargs):
+#        super(AjaxMixin, self).get(request, request, *args, **kwargs)
+#        data = self.get_ajax_data(**kwargs)
+#        return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), mimetype='application/json')
 
 # ------------------------------------------------------------------------------
-class AddProductView(BackRedirectMixin):
+class AddProductView(AjaxMixin, BackRedirectMixin):
     ''' Контроллер для добавление продукта в корзину '''
     def execute(self):
         try:
@@ -64,6 +80,9 @@ class AddProductView(BackRedirectMixin):
             self.get_cart().add_product(product, int(self.request.REQUEST.get('quantity', 1)))
         except Product.DoesNotExist:
             pass
+
+    def get_ajax_data(self, **kwargs):
+        return {'ok': True}
 
 
 # ------------------------------------------------------------------------------
