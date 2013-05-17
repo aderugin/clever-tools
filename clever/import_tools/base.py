@@ -164,7 +164,7 @@ class ImportFactory(object):
         parsers = []
         for cls in self.parsers:
             parser = cls(filename)
-            parsers.push(parser)
+            parsers.append(parser)
             model_verbose_name = parser.model._meta.verbose_name_plural.title()
 
             # Импортируем экземпляры модели
