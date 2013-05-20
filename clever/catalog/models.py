@@ -335,19 +335,6 @@ class SectionAttributeBase(cache_machine.CachingMixin, models.Model):
     order = models.IntegerField(verbose_name=u'Позиция', help_text=u'Расположение в фильтре', default=500)
     objects = CachingManager()
 
-    # in_filter = models.BooleanField('Показывать в фильтре', default=False)
-    # in_main_props = models.BooleanField('Показывать в главных свойствах', default=False)
-    # in_all_props = models.BooleanField('Показывать в свойствах товара', default=True)
-
-    def is_filterable(self):
-        """Главное свойство"""
-        return True
-
-    @property
-    def is_primary(self):
-        """Главное свойство"""
-        return False
-
 
 # ------------------------------------------------------------------------------
 # Псевдо разделы каталога

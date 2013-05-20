@@ -8,6 +8,7 @@ from clever.catalog.models import SectionBrand
 from clever.catalog.models import Product
 from clever.catalog.models import ProductAttribute
 import operator
+import sys
 
 
 class FilterForm(forms.Form):
@@ -16,18 +17,17 @@ class FilterForm(forms.Form):
         super(FilterForm, self).__init__(*args, **kwargs)
 
         self.section = section
-
         # Получаем аттрибуты для фильтрации
         self.attributes_params = self.get_pseudo_attributes(section) + self.get_attributes(section)
         self.attributes_params = self.sort_attributes_params(self.attributes_params)
 
-        for attr, values in self.attributes_params:
-           # Создаем настоящий вид элемента
-           control_object = attr.control_object
-           self.fields[attr.uid] = control_object.create_form_field(attr, values)
+        for filter_attribute in self.attributes_params:
+            # Создаем настоящий вид элемента
+            control_object = filter_attribute.attribute.control_object
+            self.fields[filter_attribute.uid] = control_object.create_form_field(filter_attribute.attribute, filter_attribute.attributes_values)
 
     def sort_attributes_params(self, attributes_params):
-        return attributes_params
+        return sorted(attributes_params, key=lambda x: x.params.order if x.params is not None else sys.maxint)
 
     def get_queryset(self):
         filter_args = ()
@@ -65,7 +65,7 @@ class FilterForm(forms.Form):
         # Поиск значений для псевдо свойств
         for attrib in AttributeManager.get_attributes():
             values = attrib.get_values(section)
-            final_result.append((attrib, values,))
+            final_result.append(FilterAttribute(section, attrib, values,))
         return final_result
 
     def get_attributes(self, section):
@@ -84,13 +84,39 @@ class FilterForm(forms.Form):
         attributes_values = ProductAttribute.objects.filter(attribute__in=attributes).distinct()
         attributes_values = list(attributes_values)
 
+        attributes_params = SectionAttribute.objects.filter(attribute__in=attributes).distinct()
+        attributes_params = list(attributes_params)
+
         # Подготовка значений к выводу
         final_result = []
         for attrib in attributes:
             values = []
+            params = None
+
+            # Поиск значений для свойства
             for product_attrib in attributes_values:
                 if attrib.id == product_attrib.attribute_id:
                     value = product_attrib.value
                     values.append((value, value))
-            final_result.append((attrib, values,))
+
+            for section_attrib in attributes_params:
+                if attrib.id == section_attrib.attribute_id:
+                    params = section_attrib
+
+            final_result.append(FilterAttribute(section, attrib, values, params))
         return final_result
+
+
+class FilterAttribute(object):
+    def __init__(self, section, attrib, values, params=None):
+        self.section = section
+        self.attribute = attrib
+        self.attributes_values = values
+        self.params = params
+
+        control_object = self.attribute.control_object
+        self.field = control_object.create_form_field(self.attribute, self.attributes_values)
+
+    @property
+    def uid(self):
+        return self.attribute.uid
