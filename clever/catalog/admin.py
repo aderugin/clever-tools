@@ -97,7 +97,7 @@ class SectionAdmin(AdminMixin, editor.TreeEditor):
             'model': models.SectionAttribute,
             'field_name': 'attribute',
             'related_model': models.Attribute,
-            'filter_field': 'attributes__product__section',
+            'filter_field': 'values__product__section',
         })
         self.insert_inlines([brand_inline, attribute_inline], before=True)
 

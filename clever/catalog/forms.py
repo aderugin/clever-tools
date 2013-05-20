@@ -19,11 +19,15 @@ class FilterForm(forms.Form):
 
         # Получаем аттрибуты для фильтрации
         self.attributes_params = self.get_pseudo_attributes(section) + self.get_attributes(section)
-        for attr, values in self.attributes_params:
-            # Создаем настоящий вид элемента
-            control_object = attr.control_object
+        self.attributes_params = self.sort_attributes_params(self.attributes_params)
 
-            self.fields[attr.uid] = control_object.create_form_field(attr, values)
+        for attr, values in self.attributes_params:
+           # Создаем настоящий вид элемента
+           control_object = attr.control_object
+           self.fields[attr.uid] = control_object.create_form_field(attr, values)
+
+    def sort_attributes_params(self, attributes_params):
+        return attributes_params
 
     def get_queryset(self):
         filter_args = ()

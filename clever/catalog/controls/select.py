@@ -4,12 +4,12 @@ from django import forms
 from django.db import models
 
 
-# class RadioFilter(forms.CheckboxSelectMultiple):
-#     pass
+class Select(forms.Select):
+    pass
 
 
-# class RadioFilterField(forms.ChoiceField):
-#     widget = RadioFilter
+class SelectField(forms.ChoiceField):
+    widget = Select
 
 
 class SelectControl:
@@ -18,7 +18,7 @@ class SelectControl:
     empty_label = u"----"
 
     def create_form_field(self, attribute, values):
-        return forms.ChoiceField(
+        return SelectField(
             choices=[(u'', self.empty_label)] + list(values),
             label=attribute.title,
             required=False,
