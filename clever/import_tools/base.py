@@ -112,6 +112,7 @@ class XMLImporter(BaseXMLImporter):
                 self.save_item(item, data, instance)
 
                 # Update info about models
+                self.processed_count += 1
                 if is_updated:
                     self.updated_count += 1
                 else:
@@ -188,5 +189,5 @@ class ImportFactory(object):
         print text_color(u"Импорт завершен")
         for parser in parsers:
             model_verbose_name = parser.model._meta.verbose_name_plural.title()
-            print text_color(u'Импортировано', unicode(model_verbose_name), ' ', unicode(parser.processed_count), u' из ', unicode(parser.element_count), color='green')
+            print text_color(u'Импортировано ', unicode(model_verbose_name), ' ', unicode(parser.processed_count), u' из ', unicode(parser.element_count), color='green')
         return True
