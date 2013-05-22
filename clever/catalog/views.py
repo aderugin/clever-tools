@@ -59,6 +59,10 @@ class SectionView(DetailView):
     paginator_class = Paginator
     page_kwarg = 'page'
     count_kwarg = 'count'
+    order_by = {
+        # TODO: Добавить сортировку по идентификатору
+    }
+    default_order = None
 
     def get_queryset(self):
         return self.model.sections.get_query_set()
@@ -167,6 +171,24 @@ class SectionView(DetailView):
             queryset = product_model.products.filter(section=self.get_object())
         return queryset
 
+    def get_order_by(self, queryset):
+        order = self.request.GET.get('order_by', self.default_order)
+        sort_by = self.request.GET.get('sort_by', 'asc')
+        if not order in self.order_by:
+            order = self.default_order
+        if order in self.order_by and order is not None:
+            order_by = self.order_by[order]
+            result_order = order_by['fields']
+            for field in range(len(result_order)):      # TODO
+                if sort_by == 'desc':
+                    if result_order[field][0] != '-':
+                        result_order[field] = '-' + result_order[field]
+                if sort_by == 'asc' and result_order[field][0] == '-':
+                    result_order[field] = result_order[field][1:]
+            queryset = queryset.order_by(*result_order)
+
+        return order_by, sort_by, queryset
+
     def get_sections_queryset(self):
         return self.get_object().children.all()
 
@@ -182,7 +204,6 @@ class SectionView(DetailView):
         context = super(SectionView, self).get_context_data(**kwargs)
 
         # Получаем форму с фильтром и псевдо разделы для текущего раздела каталога
-
         context.update({
             'section_list': self.get_sections_queryset(),
             'filter_form': self.get_filter_form(),
@@ -192,7 +213,11 @@ class SectionView(DetailView):
 
         # Получаем продукты для текущего раздела каталога
         products_queryset = self.get_products_queryset()
+
+        #сортируем queryset перед выдачей
+        order_by, sort_by, products_queryset = self.get_order_by(products_queryset)
         page_size = self.get_paginate_by(products_queryset)
+
         if page_size:
             paginator, page, products_queryset, is_paginated = self.paginate_queryset(products_queryset, page_size)
             context.update({
@@ -208,6 +233,24 @@ class SectionView(DetailView):
                 'is_paginated': False,
                 'products': products_queryset
             })
+
+        # Получем информацию для сортировки
+        order_by = self.request.GET.get('order_by', None)
+        sort_by = self.request.GET.get('sort_by', 'asc')
+        sort_list = []
+        for key, params in self.order_by.items():
+            sort_name = params['title']
+            sort = 'asc'
+            if order_by == key:
+                sort = 'asc' if sort_by == 'desc' else 'desc'
+            sort_list.append([sort_name, key, sort])
+
+        context.update({
+            'order_by': order_by,
+            'sort_by': sort_by,
+            'sort_list': sort_list,
+        })
+
         # Получем метаинформацию: заголовок и текст страницы раздела
         if context['active_pseudo_section']:
             meta_object = context['active_pseudo_section']

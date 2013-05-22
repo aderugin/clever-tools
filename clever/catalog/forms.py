@@ -4,7 +4,6 @@ from django.db import models
 from clever.catalog.models import AttributeManager
 from clever.catalog.models import Attribute
 from clever.catalog.models import SectionAttribute
-from clever.catalog.models import SectionBrand
 from clever.catalog.models import Product
 from clever.catalog.models import ProductAttribute
 import operator
