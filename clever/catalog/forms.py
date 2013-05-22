@@ -21,20 +21,23 @@ class FilterForm(forms.Form):
         self.attributes_params = self.get_pseudo_attributes(section) + self.get_attributes(section)
         self.attributes_params = self.sort_attributes_params(self.attributes_params)
 
+        import pprint
+        pp = pprint.PrettyPrinter(indent=4, depth=6)
+        pp.pprint(self.attributes_params)
+
         for filter_attribute in self.attributes_params:
-            # Создаем настоящий вид элемента
-            control_object = filter_attribute.attribute.control_object
-            self.fields[filter_attribute.uid] = control_object.create_form_field(filter_attribute.attribute, filter_attribute.attributes_values)
+            self.fields[filter_attribute.uid] = filter_attribute.field
 
     def sort_attributes_params(self, attributes_params):
         return sorted(attributes_params, key=lambda x: x.params.order if x.params is not None else sys.maxint)
 
-    def get_queryset(self):
+    def get_queryset(self, products_queryset):
         filter_args = ()
 
         if self.is_valid():
             # Фильтрация по значениям аттрибутов
-            for attr, values in self.attributes_params:
+            for filter_attribute in self.attributes_params:
+                attr = filter_attribute.attribute
                 values = self.cleaned_data[attr.uid]
 
                 # type_object = attr.type_object
@@ -47,14 +50,18 @@ class FilterForm(forms.Form):
                         attr_query &= values_query
                     else:
                         attr_query = values_query
-                    filter_args += (values_query,)
+                    filter_args += (attr_query,)
         else:
             for name, message in self.errors.items():
                 print name, message
 
-        products_queryset = Product.products.filter(section=self.section)
         if len(filter_args):
             products_queryset = products_queryset.filter(models.Q(reduce(operator.and_, filter_args)))
+
+        import pprint
+        pp = pprint.PrettyPrinter(indent=4, depth=6)
+        pp.pprint(unicode(products_queryset.query))
+
         return products_queryset
 
     def get_pseudo_attributes(self, section):
@@ -70,20 +77,16 @@ class FilterForm(forms.Form):
 
     def get_attributes(self, section):
         """Создание запроса для получение всех аттрибутов из данного раздела"""
-
         # TODO: Refactoring!!! Здесь хуева туча по времени для запросов.
-
         # Поиск всех аттрибутов
         attributes = Attribute.objects.filter(values__product__section=self.section).order_by('additional_title', 'main_title').distinct()
         attributes = list(attributes)
 
-        # TODO: Поиск параметров аттрибутов для раздела
-
         # Поиск значений аттрибутов для раздела
-        # values_list - не поддерживается :(
-        attributes_values = ProductAttribute.objects.filter(attribute__in=attributes).distinct()
+        attributes_values = ProductAttribute.objects.filter(attribute__in=attributes, product__section=self.section).distinct()
         attributes_values = list(attributes_values)
 
+        # Поиск параметров аттрибутов для раздела
         attributes_params = SectionAttribute.objects.filter(attribute__in=attributes).distinct()
         attributes_params = list(attributes_params)
 
@@ -91,18 +94,23 @@ class FilterForm(forms.Form):
         final_result = []
         for attrib in attributes:
             values = []
+            values_set = set()
             params = None
 
             # Поиск значений для свойства
             for product_attrib in attributes_values:
                 if attrib.id == product_attrib.attribute_id:
                     value = product_attrib.value
-                    values.append((value, value))
+                    if not value in values_set:
+                        values_set.add(value)
+                        values.append((value, value))
 
+            # Поиск параметра для свойства
             for section_attrib in attributes_params:
                 if attrib.id == section_attrib.attribute_id:
                     params = section_attrib
 
+            # Добавляем поле в финальный результат
             final_result.append(FilterAttribute(section, attrib, values, params))
         return final_result
 
@@ -120,3 +128,6 @@ class FilterAttribute(object):
     @property
     def uid(self):
         return self.attribute.uid
+
+    def __unicode__(self):
+        return unicode(self.attribute)

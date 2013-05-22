@@ -13,6 +13,7 @@ from caching import base as cache_machine
 from clever.catalog.controls import SelectControl
 from clever.catalog.controls import CheckboxControl
 from clever.catalog.controls import RadioControl
+from clever.catalog.controls import RangeControl
 from clever.core.models import TimestableMixin
 from clever.core.models import ActivableMixin
 from clever.core.models import ActivableQuerySet
@@ -237,6 +238,7 @@ class AttributeManager:
 AttributeManager.register_control(SelectControl)
 AttributeManager.register_control(CheckboxControl)
 AttributeManager.register_control(RadioControl)
+AttributeManager.register_control(RangeControl)
 
 
 # Регистрация псевдо свойств в фильтре

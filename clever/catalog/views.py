@@ -18,6 +18,7 @@ from django.core.exceptions import ImproperlyConfigured
 from django.http import Http404
 from django.utils.translation import ugettext as _
 from clever.catalog import models
+from clever.catalog.models import Product
 
 
 # ------------------------------------------------------------------------------
@@ -122,18 +123,14 @@ class SectionView(DetailView):
         filter_form = getattr(self, 'filter_form', None)
         if filter_form and not getattr(self, '_filter_form', None):
             # Подготовка фильтра для псевдо раздела
+            data = kwargs.get('data', self.request.GET).copy()
             pseudo_section = self.get_pseudo_section()
             if pseudo_section:
-                data = kwargs.get('data', self.request.POST).copy()
                 data = self.prepare_pseudo_section(self.pseudo_section, data)
                 kwargs = kwargs.copy()
-                kwargs['data'] = data
+            kwargs['data'] = data
 
             # Создание фильтра
-            import pprint
-            pp = pprint.PrettyPrinter(indent=4, depth=6)
-            pp.pprint(args)
-            pp.pprint(kwargs)
             self._filter_form = filter_form(self.get_object(), *args, **kwargs)
 
         return getattr(self, '_filter_form', None)
@@ -157,14 +154,12 @@ class SectionView(DetailView):
 
     def get_products_queryset(self):
         """Создание запроса для получения продуктов из раздела"""
+        return Product.products.filter(section=self.get_object())
+
+    def get_filter_queryset(self, queryset):
         filter_form = self.get_filter_form()
         if filter_form:
-            queryset = filter_form.get_queryset()
-        else:
-            if not getattr(self, 'product_model', None):
-                raise RuntimeError("Для страницы детальной информации о разделе, не указана форма фильтра или модель продукта в каталоге")
-            product_model = self.product_model
-            queryset = product_model.products.filter(section=self.get_object())
+            queryset = filter_form.get_queryset(queryset)
         return queryset
 
     def get_sections_queryset(self):
@@ -192,6 +187,8 @@ class SectionView(DetailView):
 
         # Получаем продукты для текущего раздела каталога
         products_queryset = self.get_products_queryset()
+        products_queryset = self.get_filter_queryset(products_queryset)
+
         page_size = self.get_paginate_by(products_queryset)
         if page_size:
             paginator, page, products_queryset, is_paginated = self.paginate_queryset(products_queryset, page_size)
@@ -221,11 +218,6 @@ class SectionView(DetailView):
 
         # Возвращаем все
         return context
-
-    def post(self, request, *args, **kwargs):
-        """Обрабатываем запрос к базе данный"""
-        self.get_filter_form(request.POST, request.FILES)
-        return self.get(self, request, *args, **kwargs)
 
 
 # ------------------------------------------------------------------------------
