@@ -32,6 +32,7 @@ __all__ = [
     'deploy',
     'help',
     'active_env',
+    'import_xml'
 ]
 
 
@@ -243,6 +244,17 @@ def deploy(branch=None, flush=False):
     if flush:
         flush_cache()
 
+
+@task
+def import_xml(*args):
+    """
+    Обновление каталога на сайте
+    """
+    # Собираем статические файлы
+    with cd(env.root):
+        with prefix(env.activate):
+            with prefix('export PYTHONIOENCODING=utf-8'):
+                run('python manage.py import_xml ' + ' '.join(args))
 
 @task(default=True)
 def help():

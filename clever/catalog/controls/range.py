@@ -68,7 +68,7 @@ class RangeControl:
         )
 
     def create_query_part(self, attribute, values):
-        query = {attribute.query_name: values}
+        query = {attribute.query_name + '__range': values}
         return models.Q(**query)
 
     def create_form_value(self, values):

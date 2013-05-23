@@ -60,6 +60,9 @@ def insert_in_list(self, name, values, before=False):
 class AdminMixin:
     """Данный класс упрощает работу с AdminModel"""
 
+    def insert_fields(self, fields, before=False):
+        insert_in_list(self, 'fields', fields, before=before)
+
     def insert_list_display(self, list_display, before=False):
         insert_in_list(self, 'list_display', list_display, before=before)
 

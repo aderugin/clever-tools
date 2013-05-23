@@ -7,6 +7,7 @@ from ckeditor.widgets import CKEditorWidget
 from clever.core.admin import thumbnail_column
 from clever.core.admin import AdminMixin
 from clever.catalog import models
+from clever.catalog.forms import FilterForm
 
 
 # ------------------------------------------------------------------------------
@@ -179,11 +180,30 @@ class PseudoSectionBrandInline(admin.TabularInline):
 
 
 # ------------------------------------------------------------------------------
+class PseudoSectionForm(forms.ModelForm):
+    ''' Форма для работы с фильтром для псевдораздела '''
+    def __init__(self, *args, **kwargs):
+        super(PseudoSectionForm, self).__init__(*args, **kwargs)
+        instance = kwargs.get('instance', None)
+
+        if instance and instance.section:
+            filter_form = FilterForm(instance.section, prefix='filter_form')
+
+            for name, field in filter_form.fields.items():
+                self.fields['filter_' + name] = field
+
+    def save(self, *args, **kwargs):
+        return super(PseudoSectionForm, self).save(*args, **kwargs)
+
+
+# ------------------------------------------------------------------------------
 class PseudoSectionAdmin(AdminMixin, admin.ModelAdmin):
     class Meta:
         widgets = {
             'text': CKEditorWidget(config_name='default')
         }
+
+    form = PseudoSectionForm
 
     def __init__(self, model, admin_site, *args, **kwargs):
         super(PseudoSectionAdmin, self).__init__(model, admin_site, *args, **kwargs)
@@ -191,6 +211,7 @@ class PseudoSectionAdmin(AdminMixin, admin.ModelAdmin):
         # Добавляем базовые элементы в админку
         self.insert_list_display(['active', 'section', 'slug'])
         self.insert_list_display_links(['admin_thumbnail', '__unicode__', '__str__'])
+        # self.insert_fields(['brand'])
 
         # Создание inline редактора для свойств товара
         pseudo_section_value_inline = type(model.__name__ + "_PseudoSectionValueInline", (PseudoSectionValueInline,), {

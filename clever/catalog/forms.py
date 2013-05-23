@@ -20,10 +20,7 @@ class FilterForm(forms.Form):
         self.attributes_params = self.get_pseudo_attributes(section) + self.get_attributes(section)
         self.attributes_params = self.sort_attributes_params(self.attributes_params)
 
-        import pprint
-        pp = pprint.PrettyPrinter(indent=4, depth=6)
-        pp.pprint(self.attributes_params)
-
+        # Формируем поля для фильтра
         for filter_attribute in self.attributes_params:
             self.fields[filter_attribute.uid] = filter_attribute.field
 
@@ -45,22 +42,18 @@ class FilterForm(forms.Form):
                     # Получение параметров для query
                     attr_query = attr.make_query()
                     values_query = control_object.create_query_part(attr, values)
-                    if attr_query:
-                        attr_query &= values_query
-                    else:
-                        attr_query = values_query
-                    filter_args += (attr_query,)
+                    if values_query:
+                        if attr_query:
+                            attr_query &= values_query
+                        else:
+                            attr_query = values_query
+                        filter_args += (attr_query,)
         else:
             for name, message in self.errors.items():
                 print name, message
 
         if len(filter_args):
             products_queryset = products_queryset.filter(models.Q(reduce(operator.and_, filter_args)))
-
-        import pprint
-        pp = pprint.PrettyPrinter(indent=4, depth=6)
-        pp.pprint(unicode(products_queryset.query))
-
         return products_queryset
 
     def get_pseudo_attributes(self, section):
@@ -78,7 +71,7 @@ class FilterForm(forms.Form):
         """Создание запроса для получение всех аттрибутов из данного раздела"""
         # TODO: Refactoring!!! Здесь хуева туча по времени для запросов.
         # Поиск всех аттрибутов
-        attributes = Attribute.objects.filter(values__product__section=self.section).order_by('additional_title', 'main_title').distinct()
+        attributes = Attribute.objects.filter(values__product__section=self.section, is_filtered=True).order_by('additional_title', 'main_title').distinct()
         attributes = list(attributes)
 
         # Поиск значений аттрибутов для раздела
