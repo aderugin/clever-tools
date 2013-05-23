@@ -167,7 +167,7 @@ class SectionView(DetailView):
         return queryset
 
     def get_order_by(self, queryset):
-        order = self.request.GET.get('order_by', self.default_order)
+        order = self.request.GET.get('order_by', '')
         sort_by = self.request.GET.get('sort_by', 'asc')
         if not order in self.order_by:
             order = self.default_order
@@ -181,7 +181,6 @@ class SectionView(DetailView):
                 if sort_by == 'asc' and result_order[field][0] == '-':
                     result_order[field] = result_order[field][1:]
             queryset = queryset.order_by(*result_order)
-
         return order, sort_by, queryset
 
     def get_sections_queryset(self):
