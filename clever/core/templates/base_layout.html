@@ -55,7 +55,7 @@
         <meta name="viewport" content="width=device-width">
 
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-        {% block page_styles %} {% endblock %}
+            {% block page_styles %} {% endblock %}
 
         <script src="{{ STATIC_URL }}js/modernizr-2.6.2.min.js"></script>
 
@@ -78,7 +78,7 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}markup/js/jquery-1.9.0.min.js"><\/script>')</script>
 
-        {% block page_scripts %} {% endblock %}
+            {% block page_scripts %} {% endblock %}
 
         {% flatblock "seo.google_counter" 3600 using "counters/google-counter.html" %}
         {% flatblock "seo.yandex_counter" 3600 using "counters/yandex-counter.html" %}

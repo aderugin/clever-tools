@@ -267,6 +267,7 @@ class AttributeBase(cache_machine.CachingMixin, models.Model, AbstractAttribute)
     additional_title = models.CharField(verbose_name=u"Дополнительный заголовок", max_length=50, blank=True, null=True,
                                         help_text=u'Заполняется если нужно переопределить основной заголовок из 1С')
 
+    is_filtered = models.BooleanField(verbose_name=u'Отображать в фильтре', default=True, blank=False, null=False)
     control = models.CharField(verbose_name=u'Элемент управления', help_text=u'для отображения в форме фильтра',
                                choices=AttributeManager.CONTROL_CHOICES, max_length=30, null=False, blank=False, default='select')
 
@@ -359,7 +360,7 @@ class PseudoSectionBase(cache_machine.CachingMixin, TitleMixin, TimestableMixin,
     class Meta:
         abstract = True
 
-    section = DeferredForeignKey(Section, verbose_name=u'Псевдо раздел')
+    section = DeferredForeignKey(Section, verbose_name=u'Раздел')
     objects = CachingPassThroughManager(PseudoSectionQuerySet)
     pseudo_sections = PseudoSectionFrontendManager(PseudoSectionQuerySet)
 
