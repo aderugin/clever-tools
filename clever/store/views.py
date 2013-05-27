@@ -11,13 +11,15 @@ from __future__ import absolute_import
 from django.views.generic.base import View
 from django.views.generic.base import RedirectView
 from django.views.generic import TemplateView
+from django.views.generic.edit import CreateView
 from clever.catalog.models import Product
 from clever.store import Cart
-# from django.views.generic import FormView
+from clever.store.forms import CheckoutForm
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 import json
 from clever.core.views import AjaxMixin
+
 
 # ------------------------------------------------------------------------------
 class CartMixin(View):
@@ -57,19 +59,6 @@ class BackRedirectMixin(CartMixin, RedirectView):
     def execute(self):
         raise NotImplementedError
 
-#
-#class AjaxMixin(View):
-#    '''
-#    Миксин, формирующий JSON ответ. Достаточно переопределить
-#    get_ajax_data и вернуть в нем словарь
-#    '''
-#    def get_ajax_data(self, **kwargs):
-#        return { }
-#
-#    def get(self, request, *args, **kwargs):
-#        super(AjaxMixin, self).get(request, request, *args, **kwargs)
-#        data = self.get_ajax_data(**kwargs)
-#        return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), mimetype='application/json')
 
 # ------------------------------------------------------------------------------
 class AddProductView(AjaxMixin, BackRedirectMixin):
@@ -99,4 +88,17 @@ class RemoveProductView(BackRedirectMixin):
 # ------------------------------------------------------------------------------
 class CartView(CartMixin, TemplateView):
     ''' Контроллер для просмотра элементов в корзине '''
-    pass
+    checkout_form = CheckoutForm
+
+    def get_checkout_form(self):
+        return self.checkout_form()
+
+    def get_context_data(self, **kwargs):
+        context = super(CartView, self).get_context_data(**kwargs)
+        context['form'] = self.get_checkout_form()
+        return context
+
+
+# ------------------------------------------------------------------------------
+class CheckoutView(CartMixin, CreateView):
+    form = CheckoutForm

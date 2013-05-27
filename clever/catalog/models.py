@@ -22,9 +22,10 @@ from clever.core.models import TitleQuerySet
 from clever.core.models import PageMixin
 from clever.core.models import CachingPassThroughManager
 from clever.core.models import TreeCachingPassThroughManager
-from clever.core.models import DeferredPoint
-from clever.core.models import DeferredForeignKey
-from clever.core.models import DeferredMetaclass
+from clever.core.models import extend_meta
+from clever.deferred import DeferredPoint
+from clever.deferred.fields import DeferredForeignKey
+from clever.deferred.models import DeferredModelMetaclass
 from mptt import models as mptt
 from caching.base import CachingManager
 
@@ -78,7 +79,14 @@ class SectionBase(cache_machine.CachingMixin, mptt.MPTTModel, TimestableMixin, A
     class MPTTMeta:
         parent_attr = "section"
 
-    __metaclass__ = DeferredMetaclass.for_point(Section, mptt.MPTTModelBase)
+    __metaclass__ = DeferredModelMetaclass.for_point(
+        Section,
+        extend_meta(
+            verbose_name=u'Раздел',
+            verbose_name_plural=u'Разделы'
+        ),
+        mptt.MPTTModelBase
+    )
 
     section = mptt.TreeForeignKey('self', blank=True, null=True, related_name='children', verbose_name=u'Родительский раздел')
 
@@ -110,7 +118,13 @@ class BrandBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, Tit
     class Meta:
         abstract = True
 
-    __metaclass__ = DeferredMetaclass.for_point(Brand)
+    __metaclass__ = DeferredModelMetaclass.for_point(
+        Brand,
+        extend_meta(
+            verbose_name=u'Производитель',
+            verbose_name_plural=u'Производители'
+        )
+    )
 
     code = models.CharField(verbose_name=u'Внутренний код', help_text=u'Код для связи с внешними сервисами, например 1C', max_length=50, blank=True)
 
@@ -134,11 +148,18 @@ class SectionBrandBase(cache_machine.CachingMixin, models.Model):
     class Meta:
         abstract = True
 
-    __metaclass__ = DeferredMetaclass.for_point(SectionBrand)
+    __metaclass__ = DeferredModelMetaclass.for_point(
+        SectionBrand,
+        extend_meta(
+            verbose_name=u'Параметры для производителя в разделе',
+            verbose_name_plural=u'Параметры для производителей в разделе'
+        )
+    )
 
     section = DeferredForeignKey(Section, verbose_name=u'Раздел', null=False, blank=False)
     brand = DeferredForeignKey(Brand, verbose_name=u'Производитель', null=False, blank=False)
     order = models.IntegerField(verbose_name=u'Позиция', help_text=u'Расположение в фильтре', default=500)
+
     objects = CachingManager()
 
 
@@ -161,7 +182,13 @@ class ProductBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, T
     class Meta:
         abstract = True
 
-    __metaclass__ = DeferredMetaclass.for_point(Product)
+    __metaclass__ = DeferredModelMetaclass.for_point(
+        Product,
+        extend_meta(
+            verbose_name=u'Товар',
+            verbose_name_plural=u'Товары'
+        )
+    )
 
     section = DeferredForeignKey(Section, verbose_name='Раздел', null=False, blank=False, related_name='products')
     brand = DeferredForeignKey(Brand, verbose_name='Раздел', null=False, blank=False, related_name='products')
@@ -260,7 +287,13 @@ class AttributeBase(cache_machine.CachingMixin, models.Model, AbstractAttribute)
     class Meta:
         abstract = True
 
-    __metaclass__ = DeferredMetaclass.for_point(Attribute)
+    __metaclass__ = DeferredModelMetaclass.for_point(
+        Attribute,
+        extend_meta(
+            verbose_name=u'Свойство',
+            verbose_name_plural=u'Свойства'
+        )
+    )
 
     code = models.CharField(verbose_name=u'Внутренний код', help_text=u'Код для связи с внешними сервисами, например 1C', max_length=50, blank=True)
     main_title = models.CharField(verbose_name=u'Заголовок', max_length=255)
@@ -305,7 +338,13 @@ class AttributeBase(cache_machine.CachingMixin, models.Model, AbstractAttribute)
 # ------------------------------------------------------------------------------
 class ProductAttributeBase(cache_machine.CachingMixin, models.Model):
     """Базовая модель для хранения значения свойства у продукта"""
-    __metaclass__ = DeferredMetaclass.for_point(ProductAttribute)
+    __metaclass__ = DeferredModelMetaclass.for_point(
+        ProductAttribute,
+        extend_meta(
+            verbose_name=u'Значение свойства',
+            verbose_name_plural=u'Значения свойства'
+        )
+    )
 
     class Meta:
         abstract = True
@@ -328,7 +367,13 @@ class ProductAttributeBase(cache_machine.CachingMixin, models.Model):
 # ------------------------------------------------------------------------------
 class SectionAttributeBase(cache_machine.CachingMixin, models.Model):
     """Базовая модель для настройки свойства в отдельном разделе"""
-    __metaclass__ = DeferredMetaclass.for_point(SectionAttribute)
+    __metaclass__ = DeferredModelMetaclass.for_point(
+        SectionAttribute,
+        extend_meta(
+            verbose_name=u'Параметры для свойства в разделе',
+            verbose_name_plural=u'Параметры для свойств в разделе'
+        )
+    )
 
     class Meta:
         abstract = True
@@ -355,10 +400,16 @@ class PseudoSectionFrontendManager(CachingPassThroughManager):
 # ------------------------------------------------------------------------------
 class PseudoSectionBase(cache_machine.CachingMixin, TitleMixin, TimestableMixin, ActivableMixin, PageMixin):
     """ Псевдо раздел каталога """
-    __metaclass__ = DeferredMetaclass.for_point(PseudoSection)
-
     class Meta:
         abstract = True
+
+    __metaclass__ = DeferredModelMetaclass.for_point(
+        PseudoSection,
+        extend_meta(
+            verbose_name=u'Псевдо раздел',
+            verbose_name_plural=u'Псевдо разделы'
+        )
+    )
 
     section = DeferredForeignKey(Section, verbose_name=u'Раздел')
     objects = CachingPassThroughManager(PseudoSectionQuerySet)
@@ -371,7 +422,13 @@ class PseudoSectionBase(cache_machine.CachingMixin, TitleMixin, TimestableMixin,
 # ------------------------------------------------------------------------------
 class PseudoSectionValueBase(models.Model):
     """ Значение для фильтра псевдо-категории """
-    __metaclass__ = DeferredMetaclass.for_point(PseudoSectionValue)
+    __metaclass__ = DeferredModelMetaclass.for_point(
+        PseudoSectionValue,
+        extend_meta(
+            verbose_name=u'Значение свойства в псевдо разделе',
+            verbose_name_plural=u'Значения свойств в псевдо разделе'
+        )
+    )
 
     class Meta:
         abstract = True
@@ -384,7 +441,13 @@ class PseudoSectionValueBase(models.Model):
 # ------------------------------------------------------------------------------
 class PseudoSectionBrandBase(models.Model):
     """ Брэнды для фильтра псевдо-категории """
-    __metaclass__ = DeferredMetaclass.for_point(PseudoSectionBrand)
+    __metaclass__ = DeferredModelMetaclass.for_point(
+        PseudoSectionBrand,
+        extend_meta(
+            verbose_name=u'Значение производителя в псевдо разделе',
+            verbose_name_plural=u'Значения производителя в псевдо разделе'
+        )
+    )
 
     class Meta:
         abstract = True
