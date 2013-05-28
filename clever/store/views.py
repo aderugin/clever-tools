@@ -15,6 +15,8 @@ from django.views.generic.edit import CreateView
 from clever.catalog.models import Product
 from clever.store import Cart
 from clever.store.forms import CheckoutForm
+from clever.store.models import Delivery
+from clever.store.models import Payment
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 import json
@@ -93,9 +95,18 @@ class CartView(CartMixin, TemplateView):
     def get_checkout_form(self):
         return self.checkout_form()
 
+    def get_deliveries_queryset(self):
+        return Delivery.objects.all()
+
+    def get_payments_queryset(self):
+        return Payment.objects.all()
+
     def get_context_data(self, **kwargs):
         context = super(CartView, self).get_context_data(**kwargs)
+
         context['form'] = self.get_checkout_form()
+        context['deliveries'] = self.get_deliveries_queryset()
+        context['payments'] = self.get_payments_queryset()
         return context
 
 

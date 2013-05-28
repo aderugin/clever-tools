@@ -80,13 +80,13 @@ class OrderBase(TimestableMixin, models.Model):
         )
     )
 
-    # Стандартные статусы
-    NEW = 'new'
+    # # Стандартные статусы
+    # NEW = 'new'
 
-    # Названия статусов
-    STATUSES = (
-        (NEW, u'Новый заказ'),
-    )
+    # # Названия статусов
+    # STATUSES = (
+    #     (NEW, u'Новый заказ'),
+    # )
 
     # Информация о пользователе
     user_name = models.CharField(verbose_name=u'ФИО пользователя', max_length=300, blank=True)
@@ -94,10 +94,10 @@ class OrderBase(TimestableMixin, models.Model):
     user_phone = models.CharField(verbose_name=u'телефон пользователя', max_length=20, blank=True)
 
     # Информация о оплате и доставке
-    status = FSMField(verbose_name=u'Статус заказа', default=NEW)
-    delivery = DeferredForeignKey(Delivery, verbose_name=u'Способоб доставки')
-    payment = DeferredForeignKey(Payment, verbose_name=u'Способо оплаты')
-    adress = models.TextField(blank=True, verbose_name=u'Адрес')
+    # status = FSMField(verbose_name=u'Статус заказа', default=NEW)
+    delivery = DeferredForeignKey(Delivery, verbose_name=u'Способоб доставки', blank=False, null=False)
+    payment = DeferredForeignKey(Payment, verbose_name=u'Способо оплаты', blank=False, null=False)
+    address = models.TextField(blank=True, verbose_name=u'Адрес')
 
     delivery_date = models.DateField(verbose_name=u'Дата доставки', blank=True, null=True, max_length=100)
     delivery_time = models.CharField(verbose_name=u'Время доставки', blank=True, max_length=100)
