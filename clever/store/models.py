@@ -95,8 +95,8 @@ class OrderBase(TimestableMixin, models.Model):
 
     # Информация о оплате и доставке
     # status = FSMField(verbose_name=u'Статус заказа', default=NEW)
-    delivery = DeferredForeignKey(Delivery, verbose_name=u'Способоб доставки', blank=False, null=False)
-    payment = DeferredForeignKey(Payment, verbose_name=u'Способо оплаты', blank=False, null=False)
+    delivery = DeferredForeignKey(Delivery, verbose_name=u'Способ доставки', blank=False, null=False)
+    payment = DeferredForeignKey(Payment, verbose_name=u'Способ оплаты', blank=False, null=False)
     address = models.TextField(blank=True, verbose_name=u'Адрес')
 
     delivery_date = models.DateField(verbose_name=u'Дата доставки', blank=True, null=True, max_length=100)

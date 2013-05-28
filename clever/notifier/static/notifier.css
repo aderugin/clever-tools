@@ -1,0 +1,17 @@
+.j-vars-list
+{
+    margin-left: 180px;
+    margin-top: 20px;
+}
+.j-vars-list .j-var
+{
+    border-bottom: 1px dotted;
+    display: inline-block;
+    cursor: pointer;
+    padding: 2px;
+
+}
+.j-vars-list li
+{
+    margin-bottom: 5px;
+}
