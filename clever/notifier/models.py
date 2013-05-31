@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-from .utils import replace_email_variables, replace_sms_variables
+from .utils import replace_email_variables  # , replace_sms_variables
 
 
 class Notification(models.Model):
@@ -29,7 +29,7 @@ class Notification(models.Model):
         #from .backends.sms import SmsHostBackend
 
         try:
-            notification = cls.objects.get(slug = slug)
+            notification = cls.objects.get(slug=slug)
         except:
             notification = None
             # TODO: Need exeption
@@ -39,8 +39,8 @@ class Notification(models.Model):
             if notification:
                 print notification.templates.all()
                 for template in notification.templates.filter(active=True):
-                    print "in"
                     template = replace_email_variables(template, variables)
+                    print "ENV/SEND"
                     DefaultEmailBackend(template).send_message()
 
                 # # Send sms notification

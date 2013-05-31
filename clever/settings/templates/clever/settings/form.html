@@ -1,0 +1,93 @@
+{% extends "admin/base_site.html" %}
+
+<!-- LOADING -->
+{% load url from future %}
+{% load admin_static i18n admin_modify grp_tags %}
+{% load widget_tweaks %}
+
+<!-- BREADCRUMBS -->
+{% block breadcrumbs %}
+    {% if not is_popup %}
+        <ul>
+            <li><a href="../">{% trans "Home" %}</a></li>
+            <li>{{ "настройки сайта"|capfirst|escape }}</li>
+            {% comment %}
+            <li><{% trans "site settings"|capfirst|escape %}</li>
+            {% endcomment %}
+        </ul>
+    {% endif %}
+{% endblock %}
+
+
+{% block bodyclass %}grp-change-form{% endblock %}
+
+<!-- CONTENT -->
+{% block content %}
+    <form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post" id="{{ opts.module_name }}_form">
+        {% csrf_token %}
+        {% block form_top %}{% endblock %}
+        <div>
+            <h1>Настройки сайта</h1>
+
+            <!-- Popup Hidden Field -->
+            {% if is_popup %}<input type="hidden" name="_popup" value="1" />{% endif %}
+
+            <!-- Errors -->
+            {% if errors %}
+                <p class="errornote">{% blocktrans count errors|length as counter %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktrans %}</p>
+                <ul class="errorlist">
+                    {% for adminform in forms %}
+                        {% for error in adminform.form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+                    {% endfor %}
+                </ul>
+            {% endif %}
+
+            {% for form, title in forms %}
+                <div class="grp-group grp-tabular" id="attribute-group">
+                    <h2 class="grp-collapse-handler">{{ title }}</h2>
+
+                    <!-- container -->
+                    <fieldset class="grp-module">
+                        <!-- element -->
+                        {% for field in form %}
+                            <div class="grp-row grp-cells-1 {{ field.name }}">
+                                {% if field.is_error %}
+                                <div class="l-2c-fluid l-d-4 {{ field.name }}{% if field.errors %} grp-errors{% endif %}">
+                                {% else %}
+                                <div class="l-2c-fluid l-d-4">
+                                {% endif %}
+
+                                {% if field.is_checkbox %}
+                                    <div class="c-1">&nbsp;</div>
+                                    <div class="c-2">
+                                        {{ field|add_class:"vTextField" }}{{ field.label_tag|prettylabel }}
+                                {% else %}
+                                    <div class="c-1">{{ field.label_tag|prettylabel }}</div>
+                                    <div class="c-2">
+                                        {% if field.is_readonly %}
+                                            <p class="grp-readonly">{{ field.contents }}</p>
+                                        {% else %}
+                                            {{ field|add_class:"vTextField" }}
+                                        {% endif %}
+                                {% endif %}
+                                    {% if field.errors %}{{ field.errors }}{% endif %}
+                                    {% if field.help_text %}
+                                        <p class="grp-help">{{ field.help_text|safe }}</p>
+                                    {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </fieldset>
+                </div>
+            {% endfor %}
+        </div>
+        <footer class="grp-module grp-submit-row grp-fixed-footer">
+            <header style="display:none"><h1>Submit Options</h1></header>
+            <ul>
+                <li><input type="submit" value="Сохранить" class="grp-button grp-default" name="_save"></li>
+                <li><input type="submit" value="Сохранить и продолжить редактирование" class="grp-button" name="_continue"></li>
+            </ul>
+        </footer>
+    </form>
+{% endblock %}

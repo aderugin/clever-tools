@@ -92,14 +92,20 @@ class CartView(CartMixin, TemplateView):
     ''' Контроллер для просмотра элементов в корзине '''
     checkout_form = CheckoutForm
 
+    def get_checkout_kwargs(self):
+        return {}
+
     def get_checkout_form(self):
-        return self.checkout_form()
+        form_kwargs = self.get_checkout_kwargs()
+        print "KWARGS"
+        print form_kwargs
+        return self.checkout_form(**form_kwargs)
 
     def get_deliveries_queryset(self):
-        return Delivery.objects.all()
+        return Delivery.objects.order_by('sort').all()
 
     def get_payments_queryset(self):
-        return Payment.objects.all()
+        return Payment.objects.order_by('sort').all()
 
     def get_context_data(self, **kwargs):
         context = super(CartView, self).get_context_data(**kwargs)
