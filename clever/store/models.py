@@ -24,6 +24,7 @@ Delivery = DeferredPoint('Delivery')
 # ------------------------------------------------------------------------------
 Payment = DeferredPoint('Payment')
 
+
 # ------------------------------------------------------------------------------
 class DeliveryBase(models.Model):
     ''' способ доставки '''
@@ -90,13 +91,13 @@ class OrderBase(TimestableMixin, models.Model):
 
     # Информация о пользователе
     user_name = models.CharField(verbose_name=u'ФИО пользователя', max_length=300, blank=True)
-    user_email = models.EmailField(verbose_name=u'Email пользователя', blank=True)
-    user_phone = models.CharField(verbose_name=u'телефон пользователя', max_length=20, blank=True)
+    user_email = models.EmailField(verbose_name=u'Email пользователя')
+    user_phone = models.CharField(verbose_name=u'телефон пользователя', max_length=20)
 
     # Информация о оплате и доставке
     # status = FSMField(verbose_name=u'Статус заказа', default=NEW)
-    delivery = DeferredForeignKey(Delivery, verbose_name=u'Способоб доставки', blank=False, null=False)
-    payment = DeferredForeignKey(Payment, verbose_name=u'Способо оплаты', blank=False, null=False)
+    delivery = DeferredForeignKey(Delivery, verbose_name=u'Способ доставки', blank=False, null=False)
+    payment = DeferredForeignKey(Payment, verbose_name=u'Способ оплаты', blank=False, null=False)
     address = models.TextField(blank=True, verbose_name=u'Адрес')
 
     delivery_date = models.DateField(verbose_name=u'Дата доставки', blank=True, null=True, max_length=100)
@@ -104,8 +105,12 @@ class OrderBase(TimestableMixin, models.Model):
 
     # Информация об стоимости
     price = models.DecimalField(verbose_name=u'Общая стоимость заказа', default=Decimal(0.00), decimal_places=2, max_digits=10)
-    delivery_price = models.DecimalField(verbose_name=u'Стоимость доставки', default=Decimal(0.00), decimal_places=2, max_digits=10)
-    discount_price = models.DecimalField(verbose_name=u'Общая стоимость заказа с учетом скидки', default=Decimal(0.00), decimal_places=2, max_digits=10)
+    delivery_price = models.DecimalField(verbose_name=u'Стоимость доставки', default=Decimal(0.00), decimal_places=2, max_digits=10, null=True)
+    discount_price = models.DecimalField(verbose_name=u'Общая стоимость заказа с учетом скидки', default=Decimal(0.00), decimal_places=2, max_digits=10, null=True)
+
+    discount_amount = models.DecimalField(verbose_name=u'Скидка в процентах', default=Decimal(0.00), decimal_places=2, max_digits=10, null=True, blank=True)
+    discount_code = models.CharField(verbose_name=u'Код на скидку', max_length=50, null=True, blank=True)
+    crated_at = models.DateField(auto_now_add=True)
 
     # Дополнительная информация о
     comment = models.TextField(blank=True, verbose_name=u'Комментарий к заказу')

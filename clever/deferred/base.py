@@ -18,7 +18,7 @@ class DeferredPoint(object):
         # Обновляем потребителей данной точки
         for consumer in self.__dict__['__consumers']:
             consumer.resolve_deferred_point(target_model)
-        self.__dict__['__consumers'] = None
+        self.__dict__['__consumers'] = []
 
     def resolve_deferred_consumer(self, consumer):
         # Обновляем потребителя если модель уже установленна
