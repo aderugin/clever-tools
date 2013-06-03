@@ -55,7 +55,7 @@
         <meta name="viewport" content="width=device-width">
 
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-            {% block page_styles %} {% endblock %}
+        {% block page_styles %} {% endblock %}
 
         <script src="{{ STATIC_URL }}js/modernizr-2.6.2.min.js"></script>
 
@@ -64,7 +64,7 @@
             <link rel="stylesheet" href="{{ STATIC_URL }}flatblocks/flatblocks.css" />
         {% endif %}
     </head>
-    <body class="b-page b-page__body">
+    <body class="b-page b-page__body {% block bodyclass %}{% endblock %}">
         {% comment %}
         <!--[if lt IE 7]>
             <p class="chromeframe">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> or <a href="http://www.google.com/chromeframe/?redirect=true">activate Google Chrome Frame</a> to improve your experience.</p>
@@ -78,7 +78,7 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
         <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}markup/js/jquery-1.9.0.min.js"><\/script>')</script>
 
-            {% block page_scripts %} {% endblock %}
+        {% block page_scripts %} {% endblock %}
 
         {% flatblock "seo.google_counter" 3600 using "counters/google-counter.html" %}
         {% flatblock "seo.yandex_counter" 3600 using "counters/yandex-counter.html" %}
