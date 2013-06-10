@@ -136,7 +136,6 @@ class SectionView(DetailView):
 
             # Создание фильтра
             self._filter_form = filter_form(self.get_object(), *args, **kwargs)
-
         return getattr(self, '_filter_form', None)
 
     def get_pseudo_section_queryset(self):
@@ -192,6 +191,7 @@ class SectionView(DetailView):
         brands = models.Brand.brands.filter(pseudo_section_brands__pseudo_section=pseudo_category).values_list('id')
         for brand in brands:  # Хак, для flatten list of list
             filter_data.appendlist('brand', int(brand[0]))
+
         return filter_data
 
     def get_context_data(self, **kwargs):

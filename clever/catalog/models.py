@@ -453,4 +453,4 @@ class PseudoSectionBrandBase(models.Model):
         abstract = True
 
     pseudo_section = DeferredForeignKey(PseudoSection, verbose_name=u'Псевдо раздел')
-    brand = DeferredForeignKey(Brand, verbose_name=u'Производитель')
+    brand = DeferredForeignKey(Brand, verbose_name=u'Производитель', related_name='pseudo_section_brands')
