@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-from .utils import replace_email_variables  # , replace_sms_variables
+from .utils import replace_email_variables, replace_sms_variables
 
 
 class Notification(models.Model):
@@ -26,7 +26,7 @@ class Notification(models.Model):
         # TODO: Define backends from settings
         # TODO: Need dummy backend
         from .backends.email import DefaultEmailBackend
-        #from .backends.sms import SmsHostBackend
+        from .backends.sms import SmsHostBackend
 
         try:
             notification = cls.objects.get(slug=slug)
@@ -37,16 +37,14 @@ class Notification(models.Model):
         finally:
             # Send email notification
             if notification:
-                print notification.templates.all()
                 for template in notification.templates.filter(active=True):
                     template = replace_email_variables(template, variables)
-                    print "ENV/SEND"
                     DefaultEmailBackend(template).send_message()
 
-                # # Send sms notification
-                # for template in notification.sms_templates.filter(active=True):
-                #     template = replace_sms_variables(template, variables)
-                #     SmsHostBackend(template).send_message()
+                # Send sms notification
+                for template in notification.sms_templates.filter(active=True):
+                    template = replace_sms_variables(template, variables)
+                    SmsHostBackend(template).send_message()
 
 
 class Variable(models.Model):

@@ -97,8 +97,6 @@ class CartView(CartMixin, TemplateView):
 
     def get_checkout_form(self):
         form_kwargs = self.get_checkout_kwargs()
-        print "KWARGS"
-        print form_kwargs
         return self.checkout_form(**form_kwargs)
 
     def get_deliveries_queryset(self):

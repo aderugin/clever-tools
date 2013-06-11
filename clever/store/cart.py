@@ -183,6 +183,10 @@ class CartBase(object):
         ''' Загрузка корзины из сессии для использования с with '''
         return CartContext(request, cls)
 
+    def delete(self, request):
+        ''' Очистка корзины в сессии '''
+        request.session[CART_SESSION_NAME] = None
+
 
 # ------------------------------------------------------------------------------
 class CartContext(object):

@@ -91,13 +91,13 @@ class OrderBase(TimestableMixin, models.Model):
 
     # Информация о пользователе
     user_name = models.CharField(verbose_name=u'ФИО пользователя', max_length=300, blank=True)
-    user_email = models.EmailField(verbose_name=u'Email пользователя')
+    user_email = models.EmailField(verbose_name=u'Email пользователя', blank=True, null=True)
     user_phone = models.CharField(verbose_name=u'телефон пользователя', max_length=20)
 
     # Информация о оплате и доставке
     # status = FSMField(verbose_name=u'Статус заказа', default=NEW)
-    delivery = DeferredForeignKey(Delivery, verbose_name=u'Способ доставки', blank=False, null=False)
-    payment = DeferredForeignKey(Payment, verbose_name=u'Способ оплаты', blank=False, null=False)
+    delivery = DeferredForeignKey(Delivery, verbose_name=u'Способ доставки', blank=True, null=True)
+    payment = DeferredForeignKey(Payment, verbose_name=u'Способ оплаты', blank=True, null=True)
     address = models.TextField(blank=True, verbose_name=u'Адрес')
 
     delivery_date = models.DateField(verbose_name=u'Дата доставки', blank=True, null=True, max_length=100)

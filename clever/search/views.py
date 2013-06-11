@@ -17,9 +17,13 @@ class SearchView(ListView):
     def get_context_data(self, *args, **kwargs):
         context = super(SearchView, self).get_context_data(*args, **kwargs)
         query = self.request.GET.get("q", '')
-
+        result_objects = []
+        for item in context['object_list']:
+            result_objects.append(item.object)
         context.update({
             'query': query,
             'search_query': query,
+            'result_objects': result_objects,
         })
+
         return context
