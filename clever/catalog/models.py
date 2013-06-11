@@ -10,10 +10,6 @@
 
 from django.db import models
 from caching import base as cache_machine
-from clever.catalog.controls import SelectControl
-from clever.catalog.controls import CheckboxControl
-from clever.catalog.controls import RadioControl
-from clever.catalog.controls import RangeControl
 from clever.core.models import TimestableMixin
 from clever.core.models import ActivableMixin
 from clever.core.models import ActivableQuerySet
@@ -28,6 +24,11 @@ from clever.deferred.fields import DeferredForeignKey
 from clever.deferred.models import DeferredModelMetaclass
 from mptt import models as mptt
 from caching.base import CachingManager
+from clever.catalog.attributes import AbstractAttribute
+from clever.catalog.attributes import AttributeManager
+from clever.catalog.attributes import ImportProductAttributeValuesMetaclass
+from clever.catalog.attributes import ImportPseudoAttributeValuesMetaclass
+from decimal import Decimal
 
 
 # ------------------------------------------------------------------------------
@@ -191,8 +192,11 @@ class ProductBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, T
     )
 
     section = DeferredForeignKey(Section, verbose_name='Раздел', null=False, blank=False, related_name='products')
-    brand = DeferredForeignKey(Brand, verbose_name='Раздел', null=False, blank=False, related_name='products')
+    brand = DeferredForeignKey(Brand, verbose_name='Производитель', null=False, blank=False, related_name='products')
     code = models.CharField(verbose_name=u'Внутренний код', help_text=u'Код для связи с внешними сервисами, например 1C', max_length=50, blank=True)
+
+    # Это новая цена
+    price = models.DecimalField(verbose_name=u"Цена", default=Decimal(0.00), decimal_places=2, max_digits=10)
 
     objects = CachingPassThroughManager(ProductQuerySet)
     products = ProductFrontendManager(ProductQuerySet)
@@ -202,82 +206,18 @@ class ProductBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, T
 
 
 # ------------------------------------------------------------------------------
-# Аттрибуты(свойства) товаров каталога
-class AbstractAttribute:
-    ''' Промежуточный класс для работы с типами как классами '''
-    @property
-    def title(self):
-        """ Получение заголовка """
-        raise NotImplementedError
-
-    @property
-    def query_name(self):
-        """ Получение имени в queryset """
-        raise NotImplementedError
-
-    @property
-    def uid(self):
-        """ Получение ID/имени в форме фильтра """
-        raise NotImplementedError
-
-    @property
-    def control_object(self):
-        ''' Получение контрола управления в форме фильтре '''
-        raise NotImplementedError
-
-    def make_query(self):
-        ''' Создание начального фильтра в queryset '''
-        return None
-
-    def __unicode__(self):
-        return self.title
-
-
-# ------------------------------------------------------------------------------
-class AttributeManager:
-    # Элементы управления
-    CONTROL_CHOICES = []
-    CONTROL_CLASSES = {}
-    ATTRIBUTES = []
-
-    @classmethod
-    def register_control(cls, control_cls):
-        """ Регистрация нового элемента управления для аттрибута в форме фильтра """
-        cls.CONTROL_CLASSES[control_cls.tag] = control_cls
-        cls.CONTROL_CHOICES.append((control_cls.tag, control_cls.name))
-
-    @classmethod
-    def get_control(cls, control):
-        if control in cls.CONTROL_CLASSES:
-            return cls.CONTROL_CLASSES[control]()
-        return cls.CONTROL_CLASSES['checkbox']()
-
-    @classmethod
-    def register_attribute(cls, attribute_cls):
-        cls.ATTRIBUTES.append(attribute_cls)
-
-    @classmethod
-    def get_attributes(cls):
-        return [attribute_cls() for attribute_cls in cls.ATTRIBUTES]
-
-
-# Регистрация контролов в фильтре
-AttributeManager.register_control(SelectControl)
-AttributeManager.register_control(CheckboxControl)
-AttributeManager.register_control(RadioControl)
-AttributeManager.register_control(RangeControl)
-
-
-# Регистрация псевдо свойств в фильтре
 class BrandAttribute(AbstractAttribute):
     ''' Псевдо аттрибут для брэнда '''
     title = 'Производитель'
-    control_object = CheckboxControl()
+    control_object = AttributeManager.get_control('checkbox')
     query_name = 'brand'
     uid = 'brand'
 
     def get_values(self, section):
         return Brand.brands.filter(products__section=section).distinct().values_list('id', 'title')
+
+
+# Регистрация псевдо свойств в фильтре
 AttributeManager.register_attribute(BrandAttribute)
 
 
@@ -301,8 +241,11 @@ class AttributeBase(cache_machine.CachingMixin, models.Model, AbstractAttribute)
                                         help_text=u'Заполняется если нужно переопределить основной заголовок из 1С')
 
     is_filtered = models.BooleanField(verbose_name=u'Отображать в фильтре', default=True, blank=False, null=False)
+
+    type = models.CharField(verbose_name=u'Тип значения', help_text=u'для хранения и произведения операций',
+                               choices=AttributeManager.TYPES_CHOICES, max_length=30, null=False, blank=False, default='string')
     control = models.CharField(verbose_name=u'Элемент управления', help_text=u'для отображения в форме фильтра',
-                               choices=AttributeManager.CONTROL_CHOICES, max_length=30, null=False, blank=False, default='select')
+                               choices=AttributeManager.CONTROLS_CHOICES, max_length=30, null=False, blank=False, default='select')
 
     objects = CachingManager()
 
@@ -319,17 +262,38 @@ class AttributeBase(cache_machine.CachingMixin, models.Model, AbstractAttribute)
 
     @property
     def query_name(self):
-        return 'attributes__string_value'
+        return 'attributes__' + self.type_object.field_name
 
     def make_query(self):
         return models.Q(attributes__attribute=self)
 
     @property
     def control_object(self):
-        """Получение стратегии для работы с элементом для отображения свойства в фильтре"""
+        ''' Получение стратегии для работы с элементом для отображения свойства в фильтре '''
         if getattr(self, '_control_object', None) is None:
             self._control_object = AttributeManager.get_control(self.control)
         return self._control_object
+
+    @property
+    def type_object(self):
+        ''' Получение стратегии для работы с типом значений для свойства '''
+        if getattr(self, '_type_object', None) is None:
+            self._type_object = AttributeManager.get_type(self.type)
+        return self._type_object
+
+    def save(self, *args, **kwargs):
+        ''' При изменении типа надо поменять тип у всех существующих значений '''
+        # Проверка на изменение типа
+        is_changed = False
+        if self.pk is not None:
+            orig = Attribute.objects.get(pk=self.pk)
+            is_changed = orig.type != self.type
+
+        super(AttributeBase, self).save(*args, **kwargs)
+
+        if is_changed:
+            for product_attribute in ProductAttribute.objects.filter(attribute=self):
+                product_attribute.save()
 
     def __unicode__(self):
         return self.title
@@ -340,6 +304,7 @@ class ProductAttributeBase(cache_machine.CachingMixin, models.Model):
     """Базовая модель для хранения значения свойства у продукта"""
     __metaclass__ = DeferredModelMetaclass.for_point(
         ProductAttribute,
+        ImportProductAttributeValuesMetaclass,
         extend_meta(
             verbose_name=u'Значение свойства',
             verbose_name_plural=u'Значения свойства'
@@ -352,16 +317,36 @@ class ProductAttributeBase(cache_machine.CachingMixin, models.Model):
     product = DeferredForeignKey(Product, null=False, related_name='attributes')
     attribute = DeferredForeignKey(Attribute, null=False, related_name='values')
 
-    string_value = models.CharField(verbose_name=u"Значение", max_length=255)
+    # string_value = models.CharField(verbose_name=u"Значение", max_length=255)
+    raw_value = models.CharField(verbose_name=u"Значение", max_length=255, blank=True, null=True)
+
     objects = CachingManager()
 
     @property
     def value(self):
-        return self.string_value
+        '''
+        Получение типизированного значения свойства для продукта
+        '''
+        type = self.attribute.type_object
+        field_name = type.field_name
+        return getattr(self, field_name, type.filter_value(self.raw_value))
 
     @value.setter
     def value(self, value):
-        self.string_value = value
+        type = self.attribute.type_object
+        field_name = type.field_name
+        self.raw_value = unicode(value)
+        setattr(self, field_name, type.filter_value(value))
+
+    def save(self, *args, **kwargs):
+        for type_name, type in AttributeManager.get_types():
+            setattr(self, type.field_name, None)
+
+        # Точное обновление аргумента при сохранении
+        type = self.attribute.type_object
+        setattr(self, type.field_name, type.filter_value(self.raw_value))
+
+        super(ProductAttributeBase, self).save(*args, **kwargs)
 
 
 # ------------------------------------------------------------------------------
@@ -424,6 +409,7 @@ class PseudoSectionValueBase(models.Model):
     """ Значение для фильтра псевдо-категории """
     __metaclass__ = DeferredModelMetaclass.for_point(
         PseudoSectionValue,
+        ImportPseudoAttributeValuesMetaclass,
         extend_meta(
             verbose_name=u'Значение свойства в псевдо разделе',
             verbose_name_plural=u'Значения свойств в псевдо разделе'
@@ -435,7 +421,6 @@ class PseudoSectionValueBase(models.Model):
 
     pseudo_section = DeferredForeignKey(PseudoSection, verbose_name=u'Псевдо раздел')
     attribute = DeferredForeignKey(Attribute, verbose_name=u'Свойство')
-    string_value = models.CharField(verbose_name=u"Значение", max_length=255)
 
 
 # ------------------------------------------------------------------------------

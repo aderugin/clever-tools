@@ -2,19 +2,23 @@
 
 from django import forms
 from django.db import models
+from clever.catalog.attributes import AttributeControl
+from clever.catalog.attributes import AttributeManager
 
 
+# ------------------------------------------------------------------------------
 class RadioFilter(forms.CheckboxSelectMultiple):
     pass
 
 
+# ------------------------------------------------------------------------------
 class RadioFilterField(forms.MultipleChoiceField):
     widget = RadioFilter
 
 
-class RadioControl:
-    tag = 'radio'
-    name = u"Выбор одного элемента"
+# ------------------------------------------------------------------------------
+@AttributeManager.register_control(tag='radio', verbose_name=u'Переключатели')
+class RadioControl(AttributeControl):
     empty_label = u"----"
 
     def create_form_field(self, attribute, values):

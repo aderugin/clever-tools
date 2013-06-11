@@ -48,26 +48,48 @@ def thumbnail_column(size='106x80', **kwargs):
     return real_decorator
 
 
-def insert_in_list(self, name, values, before=False):
-    result = list(getattr(self, name, []))
-    if before:
-        result = list(values) + result
-    else:
-        result = result + list(values)
-    setattr(self, name, result)
-
-
 class AdminMixin:
     """Данный класс упрощает работу с AdminModel"""
 
+    def _insert_list(self, name, values, before=False):
+        result = getattr(self, name, [])
+        if result:
+            result = list(result)
+        else:
+            result = []
+        if before:
+            result = list(values) + result
+        else:
+            result = result + list(values)
+        setattr(self, name, result)
+
     def insert_fields(self, fields, before=False):
-        insert_in_list(self, 'fields', fields, before=before)
+        self._insert_list('fields', fields, before=before)
 
     def insert_list_display(self, list_display, before=False):
-        insert_in_list(self, 'list_display', list_display, before=before)
+        self._insert_list('list_display', list_display, before=before)
 
     def insert_list_display_links(self, list_display_links, before=False):
-        insert_in_list(self, 'list_display_links', list_display_links, before=before)
+        self._insert_list('list_display_links', list_display_links, before=before)
 
     def insert_inlines(self, inlines, before=False):
-        insert_in_list(self, 'inlines', inlines, before=before)
+        self._insert_list('inlines', inlines, before=before)
+
+    def insert_exclude(self, exclude, before=False):
+        self._insert_list('exclude', exclude, before=before)
+
+    def insert_filter_horizontal(self, filter_horizontal, before=False):
+        self._insert_list('filter_horizontal', filter_horizontal, before=before)
+
+    def insert_filter_vertical(self, filter_vertical, before=False):
+        self._insert_list('filter_vertical', filter_vertical, before=before)
+
+    def insert_search_fields(self, search_fields, before=False):
+        self._insert_list('search_fields', search_fields, before=before)
+
+    def insert_list_filter(self, list_filter, before=False):
+        self._insert_list('list_filter', list_filter, before=before)
+
+    def insert_dict(self, dict):
+        for key, list in dict.items():
+            self._insert_list(key, list)

@@ -47,7 +47,7 @@ class BrandView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(BrandView, self).get_context_data(**kwargs)
-        context['section_list'] = self.get_sections_queryset(self.get_object())
+        context['section_list'] = self.get_sections_queryset(self.object)
         return context
 
 
@@ -135,7 +135,7 @@ class SectionView(DetailView):
             kwargs['data'] = data
 
             # Создание фильтра
-            self._filter_form = filter_form(self.get_object(), *args, **kwargs)
+            self._filter_form = filter_form(self.object, *args, **kwargs)
         return getattr(self, '_filter_form', None)
 
     def get_pseudo_section_queryset(self):
@@ -147,17 +147,17 @@ class SectionView(DetailView):
         pseudo_slug = self.kwargs.get('pseudo_slug', None)
         if pseudo_slug and not self.pseudo_section:
             queryset = self.get_pseudo_section_queryset()
-            self.pseudo_section = get_object_or_404(klass=queryset, section=self.get_object(), slug=pseudo_slug)
+            self.pseudo_section = get_object_or_404(klass=queryset, section=self.object, slug=pseudo_slug)
         return self.pseudo_section
 
     def get_pseudo_sections_queryset(self):
         """Создание запроса для получения все активных псевдо категорий из раздела"""
-        queryset = models.PseudoSection.pseudo_sections.filter(section=self.get_object())
+        queryset = models.PseudoSection.pseudo_sections.filter(section=self.object)
         return queryset
 
     def get_products_queryset(self):
         """Создание запроса для получения продуктов из раздела"""
-        return Product.products.filter(section=self.get_object())
+        return Product.products.filter(section=self.object)
 
     def get_filter_queryset(self, queryset):
         filter_form = self.get_filter_form()
@@ -183,15 +183,35 @@ class SectionView(DetailView):
         return order, sort_by, queryset
 
     def get_sections_queryset(self):
-        return self.get_object().children.all()
+        return self.object.children.all()
 
     def prepare_pseudo_section(self, pseudo_category, filter_data):
         ''' Подготовка данных для формы фильтра '''
         # Фильтр по брэндам
         brands = models.Brand.brands.filter(pseudo_section_brands__pseudo_section=pseudo_category).values_list('id')
-        for brand in brands:  # Хак, для flatten list of list
+        for brand in brands:    # Хак, для flatten list of list
             filter_data.appendlist('brand', int(brand[0]))
 
+        # Фильтр по брэндам
+        values = models.PseudoSectionValue.objects.filter(pseudo_section=pseudo_category)
+        for value in values:
+            attribute = value.attribute
+            type = attribute.type_object
+            control = attribute.control_object
+
+            attribute_values = []
+            if control.is_range:
+                field_names = type.field_name
+            else:
+                field_names = type.range_names
+
+            for name in field_names:
+                field_value = getattr(value, name, None)
+                if field_value:
+                    attribute_values.append(field_value)
+
+            if attribute_values:
+                filter_data.appendlist(attribute.uid, attribute_values)
         return filter_data
 
     def get_context_data(self, **kwargs):
@@ -247,7 +267,7 @@ class SectionView(DetailView):
         if context['active_pseudo_section']:
             meta_object = context['active_pseudo_section']
         else:
-            meta_object = self.get_object()
+            meta_object = self.object
         context.update({
             'section_title': meta_object.title,
             'section_text': meta_object.text,
@@ -266,7 +286,7 @@ class ProductView(DetailView):
         return self.model.products.get_query_set()
 
     def get_attributes(self):
-        return models.ProductAttribute.objects.filter(product=self.get_object())
+        return models.ProductAttribute.objects.filter(product=self.object)
 
     def get_context_data(self, **kwargs):
         context = super(ProductView, self).get_context_data(**kwargs)

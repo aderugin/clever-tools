@@ -2,19 +2,23 @@
 
 from django import forms
 from django.db import models
+from clever.catalog.attributes import AttributeControl
+from clever.catalog.attributes import AttributeManager
 
 
+# ------------------------------------------------------------------------------
 class Checkbox(forms.CheckboxSelectMultiple):
     pass
 
 
+# ------------------------------------------------------------------------------
 class CheckboxField(forms.MultipleChoiceField):
     widget = Checkbox
 
 
-class CheckboxControl:
-    tag = 'checkbox'
-    name = u"Флажок"
+# ------------------------------------------------------------------------------
+@AttributeManager.register_control(tag='checkbox', verbose_name=u'Флажки')
+class CheckboxControl(AttributeControl):
     empty_label = u"----"
 
     def create_form_field(self, attribute, values):

@@ -27,7 +27,7 @@ def is_concrete_model(bases, dct):
     # Проверка метаданных Django ORM
     meta = dct.get('Meta', None)
     if not meta:
-       return True
+        return True
     return not getattr(meta, 'abstract', False)
 
 
@@ -35,7 +35,6 @@ def get_meta_param(dct, name, error_message="Параметр не найден 
     """Получение параметра из метаданных джанго и последующее его удаление"""
     djmeta = dct.get('Meta', None)
     if not djmeta or not getattr(djmeta, name, None):
-        import pdb; pdb.set_trace()
         raise RuntimeError(error_message)
     value = getattr(djmeta, name)
     delattr(djmeta, name)

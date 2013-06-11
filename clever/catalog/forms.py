@@ -12,12 +12,13 @@ import sys
 
 class FilterForm(forms.Form):
     ''' Базовая форма для фильтра '''
-    def __init__(self, section, *args, **kwargs):
+    def __init__(self, instance=None, *args, **kwargs):
         super(FilterForm, self).__init__(*args, **kwargs)
 
-        self.section = section
+        self.section = instance
+
         # Получаем аттрибуты для фильтрации
-        self.attributes_params = self.get_pseudo_attributes(section) + self.get_attributes(section)
+        self.attributes_params = self.get_pseudo_attributes(instance) + self.get_attributes(instance)
         self.attributes_params = self.sort_attributes_params(self.attributes_params)
 
         # Формируем поля для фильтра
@@ -71,15 +72,21 @@ class FilterForm(forms.Form):
         """Создание запроса для получение всех аттрибутов из данного раздела"""
         # TODO: Refactoring!!! Здесь хуева туча по времени для запросов.
         # Поиск всех аттрибутов
-        attributes = Attribute.objects.filter(values__product__section=self.section, is_filtered=True).order_by('additional_title', 'main_title').distinct()
+        attributes = Attribute.objects.filter(is_filtered=True).order_by('additional_title', 'main_title').distinct()
+        if section:
+            attributes = attributes.filter(values__product__section=self.section)
         attributes = list(attributes)
 
         # Поиск значений аттрибутов для раздела
-        attributes_values = ProductAttribute.objects.filter(attribute__in=attributes, product__section=self.section).distinct()
+        attributes_values = ProductAttribute.objects.filter(attribute__in=attributes).select_related('attribute').distinct()
+        if section:
+            attributes_values = attributes_values.filter(product__section=self.section)
         attributes_values = list(attributes_values)
 
         # Поиск параметров аттрибутов для раздела
-        attributes_params = SectionAttribute.objects.filter(attribute__in=attributes).distinct()
+        attributes_params = SectionAttribute.objects.filter(attribute__in=attributes).select_related('attribute').distinct()
+        if section:
+            attributes_params = attributes_params.filter(section=self.section)
         attributes_params = list(attributes_params)
 
         # Подготовка значений к выводу

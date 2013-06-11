@@ -24,30 +24,30 @@ def create_object_parser(model, tag_name, code_name='code', required=False):
     return parse_object
 
 
-def create_image_parser(tag_name, import_dir=IMPORT_DIRECTORY, required=False):
-    def get_image(self, name):
+def create_file_parser(tag_name, import_dir=IMPORT_DIRECTORY, required=False):
+    def get_file(self, name):
         """
-        If image exist return file
+        If file exist return file
         """
         file_path = os.path.join(settings.PROJECT_DIR, '../cache', import_dir, name)
         try:
-            image = open(file_path, 'r')
-            if image is not None:
-                return File(image, name)
+            file = open(file_path, 'r')
+            if file is not None:
+                return File(file, name)
         except:
             if required:
                 raise
         return None
 
-    def parse_image(self, item, field_name, source_name):
+    def parse_file(self, item, field_name, source_name):
         value = item.get(tag_name, None)
         if value:
-            return get_image(self, value)
+            return get_file(self, value)
         elif required:
-            raise RuntimeError('Not found image')
+            raise RuntimeError('Not found file')
         return None
 
-    return parse_image
+    return parse_file
 
 
 class XMLImporter(BaseXMLImporter):
@@ -135,10 +135,14 @@ class ImportFactory(object):
         self.parsers.append(cls)
 
     def print_errors(self, errors=None):
+        former_errors = set()
+
         if len(self.errors):
             for error in self.errors:
                 exception_message = '%s' % error['exception']
-                sys.stdout.write(''.join(["    Ошибка: \033[31m", exception_message, "\033[39m\n"]))
+                if not exception_message in former_errors:
+                    sys.stdout.write(''.join(["    Ошибка: \033[31m", exception_message, "\033[39m\n"]))
+                    former_errors.add(exception_message)
 
     def parse(self, source):
         def text_color(*args, **kwargs):

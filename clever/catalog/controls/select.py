@@ -2,19 +2,23 @@
 
 from django import forms
 from django.db import models
+from clever.catalog.attributes import AttributeControl
+from clever.catalog.attributes import AttributeManager
 
 
+# ------------------------------------------------------------------------------
 class Select(forms.Select):
     pass
 
 
+# ------------------------------------------------------------------------------
 class SelectField(forms.ChoiceField):
     widget = Select
 
 
-class SelectControl:
-    tag = 'select'
-    name = u"Выпадающий список"
+# ------------------------------------------------------------------------------
+@AttributeManager.register_control(tag='select', verbose_name=u'Выпадающий список')
+class SelectControl(AttributeControl):
     empty_label = u"----"
 
     def create_form_field(self, attribute, values):
