@@ -7,29 +7,7 @@
 
 .. moduleauthor:: Василий Шередеко <piphon@gmail.com>
 """
-
-from django.db import models
-from caching import base as cache_machine
-from clever.core.models import TimestableMixin
-from clever.core.models import ActivableMixin
-from clever.core.models import ActivableQuerySet
-from clever.core.models import TitleMixin
-from clever.core.models import TitleQuerySet
-from clever.core.models import PageMixin
-from clever.core.models import CachingPassThroughManager
-from clever.core.models import TreeCachingPassThroughManager
-from clever.core.models import extend_meta
 from clever.deferred import DeferredPoint
-from clever.deferred.fields import DeferredForeignKey
-from clever.deferred.models import DeferredModelMetaclass
-from mptt import models as mptt
-from caching.base import CachingManager
-from clever.catalog.attributes import AbstractAttribute
-from clever.catalog.attributes import AttributeManager
-from clever.catalog.attributes import ImportProductAttributeValuesMetaclass
-from clever.catalog.attributes import ImportPseudoAttributeValuesMetaclass
-from decimal import Decimal
-
 
 # ------------------------------------------------------------------------------
 Section = DeferredPoint('Section')
@@ -61,6 +39,28 @@ PseudoSectionValue = DeferredPoint('PseudoSectionValue')
 # ------------------------------------------------------------------------------
 PseudoSectionBrand = DeferredPoint('PseudoSectionBrand')
 
+
+# ------------------------------------------------------------------------------
+from django.db import models
+from caching import base as cache_machine
+from clever.deferred.fields import DeferredForeignKey
+from clever.deferred.models import DeferredModelMetaclass
+from clever.core.models import TimestableMixin
+from clever.core.models import ActivableMixin
+from clever.core.models import ActivableQuerySet
+from clever.core.models import TitleMixin
+from clever.core.models import TitleQuerySet
+from clever.core.models import PageMixin
+from clever.core.models import CachingPassThroughManager
+from clever.core.models import TreeCachingPassThroughManager
+from clever.core.models import extend_meta
+from mptt import models as mptt
+from caching.base import CachingManager
+from clever.catalog.attributes import AbstractAttribute
+from clever.catalog.attributes import AttributeManager
+from clever.catalog.attributes import ImportProductAttributeValuesMetaclass
+from clever.catalog.attributes import ImportPseudoAttributeValuesMetaclass
+from decimal import Decimal
 
 # ------------------------------------------------------------------------------
 # Разделы каталога
