@@ -17,7 +17,7 @@ class SelectField(forms.ChoiceField):
 
 
 # ------------------------------------------------------------------------------
-@AttributeManager.register_control(tag='select', verbose_name=u'Выпадающий список')
+@AttributeManager.register_control(tag='select', verbose_name=u'Выпадающий список', allowed_only=True)
 class SelectControl(AttributeControl):
     empty_label = u"----"
 

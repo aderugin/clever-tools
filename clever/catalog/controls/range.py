@@ -12,14 +12,18 @@ from clever.catalog.attributes import AttributeManager
 
 # ------------------------------------------------------------------------------
 class Range(RangeWidget):
-    def format_output(self, rendered_widgets):
-        widget_context = {'min': rendered_widgets[0], 'max': rendered_widgets[1]}
-        return render_to_string('blocks/input/range.html', widget_context)
+    pass
 
 
 # ------------------------------------------------------------------------------
-@AttributeManager.register_control(tag='range', verbose_name=u'Диапазон значений')
+@AttributeManager.register_control(tag='range', verbose_name=u'Диапазон значений', allowed_only=True)
 class RangeControl(AttributeControl):
+    template_name = 'blocks/input/range.html'
+
+    def __init__(self, *args, **kwargs):
+        self.template_name = kwargs.pop('template_name', self.template_name)
+        super(self.__class__, self).__init__(*args, **kwargs)
+
     def create_form_field(self, attribute, values):
         type = attribute.type_object
         if len(values) > 0:

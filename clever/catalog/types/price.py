@@ -11,13 +11,14 @@
 from django.db import models
 from clever.catalog.attributes import AttributeType
 from clever.catalog.attributes import AttributeManager
+from decimal import Decimal
 
 
 # ------------------------------------------------------------------------------
-@AttributeManager.register_type(tag='float', verbose_name='Дробное число', allowed_only=True)
-class FloatType(AttributeType):
+@AttributeManager.register_type(tag='price', verbose_name='Цена', allowed_only=True)
+class PriceType(AttributeType):
     def create_field(self):
-        return models.FloatField(blank=True, null=True)
+        return models.DecimalField(default=Decimal(0.00), decimal_places=2, max_digits=10)
 
     @property
     def is_range(self):
@@ -34,8 +35,8 @@ class FloatType(AttributeType):
                 value = unicode.replace(value, u',', u'.')
             elif isinstance(value, str):
                 value = str.replace(value, ',', '.')
-            return float(value)
+            return Decimal(value)
         except ValueError as e:
-            return 0.0
+            return Decimal(0.0)
         except TypeError as e:
-            return 0.0
+            return Decimal(0.0)

@@ -5,7 +5,7 @@ from clever.catalog.models import Brand
 
 
 # ------------------------------------------------------------------------------
-@AttributeManager.register_attribute(tag='brand', verbose_name=u'Производитель')
+@AttributeManager.register_attribute(tag='brand', verbose_name=u'Производитель', allowed_only=True)
 class BrandAttribute(PseudoAttribute):
     ''' Псевдо аттрибут для брэнда '''
 

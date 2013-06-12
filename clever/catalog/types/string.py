@@ -14,7 +14,7 @@ from clever.catalog.attributes import AttributeManager
 
 
 # ------------------------------------------------------------------------------
-@AttributeManager.register_type(tag='string', verbose_name='Строка')
+@AttributeManager.register_type(tag='string', verbose_name='Строка', allowed_only=True)
 class StringType(AttributeType):
     def create_field(self):
         return models.CharField(max_length=255, blank=True, null=True)

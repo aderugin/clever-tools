@@ -17,7 +17,7 @@ class CheckboxField(forms.MultipleChoiceField):
 
 
 # ------------------------------------------------------------------------------
-@AttributeManager.register_control(tag='checkbox', verbose_name=u'Флажки')
+@AttributeManager.register_control(tag='checkbox', verbose_name=u'Флажки', allowed_only=True)
 class CheckboxControl(AttributeControl):
     empty_label = u"----"
 

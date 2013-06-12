@@ -14,7 +14,7 @@ from clever.catalog.attributes import AttributeManager
 
 
 # ------------------------------------------------------------------------------
-@AttributeManager.register_type(tag='integer', verbose_name='Целое число')
+@AttributeManager.register_type(tag='integer', verbose_name='Целое число', allowed_only=True)
 class IntegerType(AttributeType):
     def create_field(self):
         return models.BigIntegerField(blank=True, null=True)

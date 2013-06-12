@@ -162,18 +162,22 @@ class AttributeManager(object):
         return cls.CONTROLS_CLASSES['checkbox']
 
     @classmethod
+    def get_controls(cls):
+        return cls.ATTRIBUTES_CLASSES.items()
+
+    @classmethod
     def get_type(cls, type):
         if type in cls.TYPES_CLASSES:
             return cls.TYPES_CLASSES[type]
         return cls.TYPES_CLASSES['checkbox']
 
     @classmethod
-    def get_attributes(cls):
-        return [attribute_cls() for attribute_cls in cls.ATTRIBUTES_CHOICES]
-
-    @classmethod
     def get_types(cls):
         return cls.TYPES_CLASSES.items()
+
+    @classmethod
+    def get_attributes(cls):
+        return [attribute for name, attribute in cls.ATTRIBUTES_CLASSES.items()]
 
     @classmethod
     def register_attribute(cls, tag, verbose_name, allowed_only=False):

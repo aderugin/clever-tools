@@ -17,7 +17,7 @@ class RadioFilterField(forms.MultipleChoiceField):
 
 
 # ------------------------------------------------------------------------------
-@AttributeManager.register_control(tag='radio', verbose_name=u'Переключатели')
+@AttributeManager.register_control(tag='radio', verbose_name=u'Переключатели', allowed_only=True)
 class RadioControl(AttributeControl):
     empty_label = u"----"
 
