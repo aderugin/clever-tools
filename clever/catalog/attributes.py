@@ -11,6 +11,7 @@
 from clever.magic import is_concrete_model
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from clever.catalog import settings
 
 
 # ------------------------------------------------------------------------------
@@ -127,6 +128,16 @@ class AttributeType(object):
 
 
 # ------------------------------------------------------------------------------
+class PseudoAttribute(AbstractAttribute):
+    uid = None
+    title = None
+
+    def __init__(self, uid, title):
+        self.uid = uid
+        self.title = title
+
+
+# ------------------------------------------------------------------------------
 class AttributeManager(object):
     '''
     Данный класс содержит информацию об свойствах товаров, их типах значений и
@@ -141,7 +152,8 @@ class AttributeManager(object):
     TYPES_CLASSES = {}
 
     # Псевдо пользовательские аттрибуты
-    PSEUDO_ATTRIBUTES = []
+    ATTRIBUTES_CHOICES = []
+    ATTRIBUTES_CLASSES = {}
 
     @classmethod
     def get_control(cls, control):
@@ -157,41 +169,89 @@ class AttributeManager(object):
 
     @classmethod
     def get_attributes(cls):
-        return [attribute_cls() for attribute_cls in cls.PSEUDO_ATTRIBUTES]
+        return [attribute_cls() for attribute_cls in cls.ATTRIBUTES_CHOICES]
 
     @classmethod
     def get_types(cls):
         return cls.TYPES_CLASSES.items()
 
     @classmethod
-    def register_attribute(cls, attribute_cls):
-        cls.PSEUDO_ATTRIBUTES.append(attribute_cls)
+    def register_attribute(cls, tag, verbose_name, allowed_only=False):
+        '''
+        Регистрация нового элемента управления для аттрибута в форме фильтра
 
-    @classmethod
-    def register_control(cls, tag, verbose_name):
-        def outer_wrapper(control_cls):
-            ''' Регистрация нового элемента управления для аттрибута в форме фильтра '''
-            if tag in cls.CONTROLS_CLASSES:
+        Аргументы:
+            tag - Краткий идентификатор
+            verbose_name - Наименование
+            allowed_only - Проверять использование в проекте
+        '''
+        def outer_wrapper(attribute_cls):
+            # Проверка на допустимость использования аттрибута в проекте
+            if not tag in settings.CLEVER_ATTRIBUTES and allowed_only:
+                return attribute_cls
+
+            # Проверка на существование в аттрибута в менеджере
+            if tag in cls.ATTRIBUTES_CLASSES:
                 raise RuntimeError("Элемент управления свойства с тегом %s уже существует" % tag)
 
-            control = control_cls(tag, verbose_name)
-            cls.CONTROLS_CLASSES[tag] = control
-            cls.CONTROLS_CHOICES.append((tag, verbose_name))
+            # Добавляем аттрибут в менеджер
+            attribute = attribute_cls(tag, verbose_name)
+            cls.ATTRIBUTES_CLASSES[tag] = attribute
+            cls.ATTRIBUTES_CHOICES.append((tag, verbose_name))
+
+            return attribute_cls
         return outer_wrapper
 
     @classmethod
-    def register_type(cls, tag, verbose_name):
+    def register_control(cls, tag, verbose_name, allowed_only=False):
         '''
         Регистрация нового элемента управления для аттрибута в форме фильтра
-        AttributeManager.register_type(tag='tag', verbose_name='Type name')
+
+        Аргументы:
+            tag - Краткий идентификатор
+            verbose_name - Наименование
+            allowed_only - Проверять использование в проекте
+        '''
+        def outer_wrapper(control_cls):
+            # Проверка на допустимость использования элемента управления в проекте
+            if not tag in settings.CLEVER_ATTRIBUTES_CONTROLS and allowed_only:
+                return control_cls
+
+            # Проверка на существование в элемента управления в менеджере
+            if tag in cls.CONTROLS_CLASSES:
+                raise RuntimeError("Элемент управления свойства с тегом %s уже существует" % tag)
+
+            # Добавляем элемента управления в менеджер
+            control = control_cls(tag, verbose_name)
+            cls.CONTROLS_CLASSES[tag] = control
+            cls.CONTROLS_CHOICES.append((tag, verbose_name))
+            return control_cls
+        return outer_wrapper
+
+    @classmethod
+    def register_type(cls, tag, verbose_name, allowed_only=False):
+        '''
+        Регистрация нового типа для аттрибута в форме фильтра
+
+        Аргументы:
+            tag - Краткий идентификатор
+            verbose_name - Наименование
+            allowed_only - Проверять использование в проекте
         '''
         def outer_wrapper(type_cls):
+            # Проверка на допустимость использования элемента управления в проекте
+            if not tag in settings.CLEVER_ATTRIBUTES_TYPES and allowed_only:
+                return type_cls
+
+            # Проверка на существование в элемента управления в менеджере
             if tag in cls.TYPES_CLASSES:
                 raise RuntimeError("Тип свойства с тегом %s уже существует" % tag)
 
+            # Добавляем элемента управления в менеджер
             type = type_cls(tag, verbose_name)
             cls.TYPES_CLASSES[tag] = type
             cls.TYPES_CHOICES.append((tag, verbose_name))
+            return type_cls
         return outer_wrapper
 
 
@@ -199,6 +259,7 @@ class AttributeManager(object):
 # Загружаем стандартные представления и типы для свойств
 import clever.catalog.controls
 import clever.catalog.types
+import clever.catalog.pseudo
 
 
 # ------------------------------------------------------------------------------

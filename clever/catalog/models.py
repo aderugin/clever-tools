@@ -206,22 +206,6 @@ class ProductBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, T
 
 
 # ------------------------------------------------------------------------------
-class BrandAttribute(AbstractAttribute):
-    ''' Псевдо аттрибут для брэнда '''
-    title = 'Производитель'
-    control_object = AttributeManager.get_control('checkbox')
-    query_name = 'brand'
-    uid = 'brand'
-
-    def get_values(self, section):
-        return Brand.brands.filter(products__section=section).distinct().values_list('id', 'title')
-
-
-# Регистрация псевдо свойств в фильтре
-AttributeManager.register_attribute(BrandAttribute)
-
-
-# ------------------------------------------------------------------------------
 class AttributeBase(cache_machine.CachingMixin, models.Model, AbstractAttribute):
     """Базовая модель для свойства"""
     class Meta:
@@ -243,7 +227,7 @@ class AttributeBase(cache_machine.CachingMixin, models.Model, AbstractAttribute)
     is_filtered = models.BooleanField(verbose_name=u'Отображать в фильтре', default=True, blank=False, null=False)
 
     type = models.CharField(verbose_name=u'Тип значения', help_text=u'для хранения и произведения операций',
-                               choices=AttributeManager.TYPES_CHOICES, max_length=30, null=False, blank=False, default='string')
+                            choices=AttributeManager.TYPES_CHOICES, max_length=30, null=False, blank=False, default='string')
     control = models.CharField(verbose_name=u'Элемент управления', help_text=u'для отображения в форме фильтра',
                                choices=AttributeManager.CONTROLS_CHOICES, max_length=30, null=False, blank=False, default='select')
 

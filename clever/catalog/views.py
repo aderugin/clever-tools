@@ -55,6 +55,7 @@ class BrandView(DetailView):
 class SectionView(DetailView):
     """Страница для просмотра отдельного раздела"""
     pseudo_section = None
+    filter_form = None
     allow_empty = True
     paginate_by = None
     paginator_class = Paginator
@@ -124,18 +125,18 @@ class SectionView(DetailView):
 
     def get_filter_form(self, *args, **kwargs):
         """Получение формы для фильтра"""
-        filter_form = getattr(self, 'filter_form', None)
-        if filter_form and not getattr(self, '_filter_form', None):
+        if self.filter_form and not getattr(self, '_filter_form', None):
             # Подготовка фильтра для псевдо раздела
             data = kwargs.get('data', self.request.GET).copy()
-            pseudo_section = self.get_pseudo_section()
-            if pseudo_section:
-                data = self.prepare_pseudo_section(self.pseudo_section, data)
-                kwargs = kwargs.copy()
+            if self.pseudo_section:
+                pseudo_section = self.get_pseudo_section()
+                if pseudo_section:
+                    data = self.prepare_pseudo_section(pseudo_section, data)
+                    kwargs = kwargs.copy()
             kwargs['data'] = data
 
             # Создание фильтра
-            self._filter_form = filter_form(self.object, *args, **kwargs)
+            self._filter_form = self.filter_form(self.object, *args, **kwargs)
         return getattr(self, '_filter_form', None)
 
     def get_pseudo_section_queryset(self):
