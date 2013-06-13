@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from django.utils.safestring import mark_safe
 from django import template
+from urlparse import urlparse
 
 register = template.Library()
 
@@ -85,3 +86,9 @@ def remove_query(var, remove):
     params = string_to_dict(var, '&')
     # import pdb; pdb.set_trace()
     return get_query(params, None, remove)
+
+
+@register.filter
+def get_path(url):
+    url = urlparse(url)
+    return url.path

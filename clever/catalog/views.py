@@ -54,6 +54,7 @@ class BrandView(DetailView):
 # ------------------------------------------------------------------------------
 class SectionView(DetailView):
     """Страница для просмотра отдельного раздела"""
+    has_pseudo_section = False
     pseudo_section = None
     filter_form = None
     allow_empty = True
@@ -128,12 +129,17 @@ class SectionView(DetailView):
         if self.filter_form and not getattr(self, '_filter_form', None):
             # Подготовка фильтра для псевдо раздела
             data = kwargs.get('data', self.request.GET).copy()
-            if self.pseudo_section:
+
+            if self.has_pseudo_section:
                 pseudo_section = self.get_pseudo_section()
                 if pseudo_section:
                     data = self.prepare_pseudo_section(pseudo_section, data)
                     kwargs = kwargs.copy()
             kwargs['data'] = data
+
+            import pprint
+            pp = pprint.PrettyPrinter(indent=4, depth=6)
+            pp.pprint(data)
 
             # Создание фильтра
             self._filter_form = self.filter_form(self.object, *args, **kwargs)
@@ -141,7 +147,7 @@ class SectionView(DetailView):
 
     def get_pseudo_section_queryset(self):
         """Создание запроса для получения активной псевдо категорий из раздела"""
-        return models.PseudoSection.pseudo_sections.active()
+        return models.PseudoSection.objects.active()
 
     def get_pseudo_section(self):
         """Получение активной псевдо категорий из раздела"""
@@ -191,28 +197,30 @@ class SectionView(DetailView):
         # Фильтр по брэндам
         brands = models.Brand.brands.filter(pseudo_section_brands__pseudo_section=pseudo_category).values_list('id')
         for brand in brands:    # Хак, для flatten list of list
-            filter_data.appendlist('brand', int(brand[0]))
+            filter_data.appendlist('brand', unicode(brand[0]))
 
-        # Фильтр по брэндам
+        # Фильтр по значениям
         values = models.PseudoSectionValue.objects.filter(pseudo_section=pseudo_category)
+
         for value in values:
             attribute = value.attribute
             type = attribute.type_object
             control = attribute.control_object
 
-            attribute_values = []
-            if control.is_range:
-                field_names = type.field_name
+            if type.is_range:
+                filter_data.update({
+                    attribute.uid + '_0': value.value,
+                    attribute.uid + '_1': value.value_to
+                })
             else:
-                field_names = type.range_names
+                filter_data.appendlist(attribute.uid, value.value)
 
-            for name in field_names:
-                field_value = getattr(value, name, None)
-                if field_value:
-                    attribute_values.append(field_value)
-
-            if attribute_values:
-                filter_data.appendlist(attribute.uid, attribute_values)
+        # Фильтр по ценам
+        if pseudo_category.price_from and pseudo_category.price_to:
+            filter_data.update({
+                'price_0': pseudo_category.price_from,
+                'price_1': pseudo_category.price_to
+            })
         return filter_data
 
     def get_context_data(self, **kwargs):

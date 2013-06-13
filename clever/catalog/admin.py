@@ -190,25 +190,49 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
         return list(super(ProductAdmin, self).get_readonly_fields(request, obj)) + ['slug']
 
 
+# # ------------------------------------------------------------------------------
+# class PseudoSectionValueForm(forms.ModelForm):
+#     def __init__(self, instance=None, *args, **kwargs):
+#         super(PseudoSectionValueForm, self).__init__(instance=instance, *args, **kwargs)
+
+#         # if instance:
+#             # Поиск значений аттрибутов для раздела
+#             # attributes_values = models.ProductAttribute.objects.filter(attribute__in=instance.attribute).distinct()
+#             # attributes_values = attributes_values.filter(product__section=instance.section)
+#             # attributes_values = list(attributes_values)
+
+#             # control_object = instance.attribute.control_object
+#             # self.fields['raw_value'] = control_object.create_form_field(instance.attribute, instance.attributes_values)
+
+
+
 # ------------------------------------------------------------------------------
-class PseudoSectionValueForm(forms.ModelForm):
-    def __init__(self, instance=None, *args, **kwargs):
-        super(PseudoSectionValueForm, self).__init__(instance=instance, *args, **kwargs)
-
-        # if instance:
-            # Поиск значений аттрибутов для раздела
-            # attributes_values = models.ProductAttribute.objects.filter(attribute__in=instance.attribute).distinct()
-            # attributes_values = attributes_values.filter(product__section=instance.section)
-            # attributes_values = list(attributes_values)
-
-            # control_object = instance.attribute.control_object
-            # self.fields['raw_value'] = control_object.create_form_field(instance.attribute, instance.attributes_values)
-
-
-# ------------------------------------------------------------------------------
-class PseudoSectionValueInline(admin.TabularInline):
-    form = PseudoSectionValueForm
+class PseudoSectionValueInline(AdminMixin, admin.TabularInline):
+    # form = PseudoSectionValueForm
     extra = 1
+
+    def __init__(self, *args, **kwargs):
+        super(PseudoSectionValueInline, self).__init__(*args, **kwargs)
+
+        exclude = []
+        for type_name, type in AttributeManager.get_types():
+            exclude.append(type.field_name)
+        self.insert_exclude(exclude)
+        self.insert_fields(['attribute', 'raw_value', 'raw_value_to', 'real_value', 'real_value_to'])
+
+    def get_readonly_fields(self, request, obj=None):
+        return list(super(PseudoSectionValueInline, self).get_readonly_fields(request, obj)) + [
+            'real_value',
+            'real_value_to'
+        ]
+
+    def real_value(self, instance):
+        return instance.value
+    real_value.short_description = u'Реальное значение'
+
+    def real_value_to(self, instance):
+        return instance.value_to
+    real_value.short_description = u'Реальное значение'
 
     # def get_formset(self, request, obj=None, **kwargs):
     #     value = super(PseudoSectionValueInline, self).get_formset(request, obj, **kwargs)

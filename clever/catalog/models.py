@@ -384,6 +384,10 @@ class PseudoSectionBase(cache_machine.CachingMixin, TitleMixin, TimestableMixin,
     objects = CachingPassThroughManager(PseudoSectionQuerySet)
     pseudo_sections = PseudoSectionFrontendManager(PseudoSectionQuerySet)
 
+    # Это новая цена
+    price_from = models.DecimalField(verbose_name=u"Цена от", default=None, decimal_places=2, max_digits=10, null=True, blank=True)
+    price_to = models.DecimalField(verbose_name=u"Цена до", default=None, decimal_places=2, max_digits=10, null=True, blank=True)
+
     def __unicode__(self):
         return ' '.join([self.section.title, ' > ', self.title])
 
@@ -405,6 +409,45 @@ class PseudoSectionValueBase(models.Model):
 
     pseudo_section = DeferredForeignKey(PseudoSection, verbose_name=u'Псевдо раздел')
     attribute = DeferredForeignKey(Attribute, verbose_name=u'Свойство')
+
+    raw_value = models.CharField(verbose_name=u"Значение", max_length=255, blank=True, null=True)
+    raw_value_to = models.CharField(verbose_name=u"Значение (до)", max_length=255, blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        for type_name, type in AttributeManager.get_types():
+            if not type.is_range:
+                setattr(self, type.field_name, None)
+            else:
+                setattr(self, type.range_names[0], None)
+                setattr(self, type.range_names[1], None)
+
+        # Точное обновление аргумента при сохранении
+        type = self.attribute.type_object
+        if not type.is_range:
+            setattr(self, type.field_name, type.filter_value(self.raw_value))
+        else:
+            setattr(self, type.range_names[0], type.filter_value(self.raw_value))
+            setattr(self, type.range_names[1], type.filter_value(self.raw_value_to))
+
+        super(PseudoSectionValueBase, self).save(*args, **kwargs)
+
+    @property
+    def value(self):
+        '''
+        Получение типизированного значения свойства для продукта
+        '''
+        type = self.attribute.type_object
+        field_name = type.range_names[0] if type.is_range else type.field_name
+        return getattr(self, field_name, type.filter_value(self.raw_value))
+
+    @property
+    def value_to(self):
+        '''
+        Получение типизированного значения свойства для продукта
+        '''
+        type = self.attribute.type_object
+        field_name = type.range_names[1] if type.is_range else type.field_name
+        return getattr(self, field_name, type.filter_value(self.raw_value_to))
 
 
 # ------------------------------------------------------------------------------

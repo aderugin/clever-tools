@@ -21,4 +21,20 @@
     }
 }());
 
+// Simple log function
+(function($) {
+    $.fn.debugScript = false;
+    $.log = function () {
+        if (!$.fn.debugScript)
+            return;
+        var msg = '[jquery.script] ' + Array.prototype.join.call(arguments, '');
+        if (window.console && window.console.log) {
+            window.console.log(msg);
+        }
+        else if (window.opera && window.opera.postError) {
+            window.opera.postError(msg);
+        }
+    };
+} (jQuery));
+
 // Place any jQuery/helper plugins in here.
