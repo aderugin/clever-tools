@@ -53,9 +53,14 @@ class FilterForm(forms.Form):
             for name, message in self.errors.items():
                 print name, message
 
-        if len(filter_args):
-            products_queryset = products_queryset.filter(models.Q(reduce(operator.and_, filter_args)))
-        return products_queryset
+        product_idexes = None
+        for filter_arg in filter_args:
+            current_indexes = set(Product.objects.filter(filter_arg, section=self.section).values_list('id'))
+            if product_idexes:
+                product_idexes &= current_indexes
+            else:
+                product_idexes = current_indexes
+        return products_queryset.filter(id__in=[v[0] for v in product_idexes])
 
     def get_pseudo_attributes(self, section):
         """Получение всех псевдо аттрибутов из данного раздела"""
@@ -113,6 +118,15 @@ class FilterForm(forms.Form):
             final_result.append(FilterAttribute(section, attrib, values, params))
         return final_result
 
+    def clean(self):
+        super(FilterForm, self).clean() #if necessary
+        import pprint
+        pp = pprint.PrettyPrinter(indent=4, depth=6)
+        pp.pprint('Errors:')
+        pp.pprint(self.errors)
+        # if self.cleaned_data.get('film') and 'director' in self._errors:
+        #     del self._errors['director']
+        return self.cleaned_data
 
 class FilterAttribute(object):
     def __init__(self, section, attrib, values, params=None):

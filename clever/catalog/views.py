@@ -137,10 +137,6 @@ class SectionView(DetailView):
                     kwargs = kwargs.copy()
             kwargs['data'] = data
 
-            import pprint
-            pp = pprint.PrettyPrinter(indent=4, depth=6)
-            pp.pprint(data)
-
             # Создание фильтра
             self._filter_form = self.filter_form(self.object, *args, **kwargs)
         return getattr(self, '_filter_form', None)

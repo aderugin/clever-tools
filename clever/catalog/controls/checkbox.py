@@ -15,6 +15,9 @@ class Checkbox(forms.CheckboxSelectMultiple):
 class CheckboxField(forms.MultipleChoiceField):
     widget = Checkbox
 
+    def validate(self, *args, **kwargs):
+        pass
+
 
 # ------------------------------------------------------------------------------
 @AttributeManager.register_control(tag='checkbox', verbose_name=u'Флажки', allowed_only=True)

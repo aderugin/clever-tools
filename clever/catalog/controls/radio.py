@@ -15,6 +15,8 @@ class RadioFilter(forms.CheckboxSelectMultiple):
 class RadioFilterField(forms.MultipleChoiceField):
     widget = RadioFilter
 
+    def validate(self, *args, **kwargs):
+        pass
 
 # ------------------------------------------------------------------------------
 @AttributeManager.register_control(tag='radio', verbose_name=u'Переключатели', allowed_only=True)

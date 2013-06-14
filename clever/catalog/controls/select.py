@@ -4,7 +4,8 @@ from django import forms
 from django.db import models
 from clever.catalog.attributes import AttributeControl
 from clever.catalog.attributes import AttributeManager
-
+from clever.forms.utils import FilterFieldMixin
+from django.utils.encoding import smart_text, force_text
 
 # ------------------------------------------------------------------------------
 class Select(forms.Select):
@@ -12,8 +13,20 @@ class Select(forms.Select):
 
 
 # ------------------------------------------------------------------------------
-class SelectField(forms.ChoiceField):
+class SelectField(FilterFieldMixin, forms.ChoiceField):
     widget = Select
+
+    def filter(self, value):
+        for k, v in self.choices:
+            if isinstance(v, (list, tuple)):
+                # This is an optgroup, so look inside the group for options
+                for k2, v2 in v:
+                    if value == smart_text(k2):
+                        return value
+            else:
+                if value == smart_text(k):
+                    return value
+        return None
 
 
 # ------------------------------------------------------------------------------
