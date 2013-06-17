@@ -48,6 +48,7 @@ class CartMixin(View):
 class BackRedirectMixin(CartMixin, RedirectView):
     ''' Вспомогательный вид для последущего редиректа '''
     permanent = False
+    url = '/cart/'
 
     def get_redirect_url(self, **kwargs):
         default_url = super(BackRedirectMixin, self).get_redirect_url(**kwargs)
@@ -67,9 +68,11 @@ class AddProductView(AjaxMixin, BackRedirectMixin):
     ''' Контроллер для добавление продукта в корзину '''
     def execute(self):
         try:
-            product = Product.objects.get(id=self.kwargs.get('id', None))
+            product = Product.objects.get(id=long(self.kwargs.get('id', None)))
             self.get_cart().add_product(product, int(self.request.REQUEST.get('quantity', 1)))
         except Product.DoesNotExist:
+            pass
+        except ValueError:
             pass
 
     def get_ajax_data(self, **kwargs):
@@ -77,14 +80,35 @@ class AddProductView(AjaxMixin, BackRedirectMixin):
 
 
 # ------------------------------------------------------------------------------
-class RemoveProductView(BackRedirectMixin):
+class UpdateProductView(AjaxMixin, BackRedirectMixin):
+    ''' Контроллер для обновления количества продукта в корзине '''
+    def execute(self):
+        try:
+            product = Product.objects.get(id=long(self.kwargs.get('id', None)))
+            self.get_cart().update_item_quantity(product, int(self.request.REQUEST.get('quantity', 1)))
+        except Product.DoesNotExist:
+            pass
+        except ValueError:
+            pass
+
+    def get_ajax_data(self, **kwargs):
+        return {'ok': True}
+
+
+# ------------------------------------------------------------------------------
+class RemoveProductView(AjaxMixin, BackRedirectMixin):
     ''' Контроллер для удаления продукта из корзины '''
     def execute(self):
         try:
-            product = Product.objects.get(id=self.kwargs.get('id', None))
+            product = Product.objects.get(id=long(self.kwargs.get('id', None)))
             self.get_cart().remove_product(product)
         except Product.DoesNotExist:
             pass
+        except ValueError:
+            pass
+
+    def get_ajax_data(self, **kwargs):
+        return {'ok': True}
 
 
 # ------------------------------------------------------------------------------

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 CART_SESSION_NAME = 'cart'
 
+from clever.catalog.models import Product
+
 
 # ------------------------------------------------------------------------------
 class ItemBase(object):
@@ -53,6 +55,14 @@ class CartBase(object):
     def __init__(self):
         self.items = list()
         self.unique_item_id = 0
+
+    def _cleanup(self):
+        '''
+        Очистка в корзины от несуществующих товаров
+        '''
+        products = Product.objects.filter(id__in=[item.product.id for item in self.items]).values_list('id')
+        products = sum(products, ())
+        self.items = filter(lambda x: x.product.id in products, self.items)
 
     @property
     def next_item_id(self):
@@ -172,7 +182,9 @@ class CartBase(object):
     @classmethod
     def load(cls, request):
         ''' Загрузка корзины из сессии '''
-        return request.session.get(CART_SESSION_NAME, None) or cls()
+        cart = request.session.get(CART_SESSION_NAME, None) or cls()
+        cart._cleanup()
+        return cart
 
     def save(self, request):
         ''' Сохранение корзины в сессии '''

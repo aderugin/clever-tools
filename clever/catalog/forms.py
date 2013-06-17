@@ -60,7 +60,11 @@ class FilterForm(forms.Form):
                 product_idexes &= current_indexes
             else:
                 product_idexes = current_indexes
-        return products_queryset.filter(id__in=[v[0] for v in product_idexes])
+
+        if product_idexes is not None:
+            return products_queryset.filter(id__in=[v[0] for v in product_idexes])
+        else:
+            return products_queryset
 
     def get_pseudo_attributes(self, section):
         """Получение всех псевдо аттрибутов из данного раздела"""
