@@ -72,14 +72,19 @@ class SectionParamsInline(admin.TabularInline):
 
 
 # ------------------------------------------------------------------------------
-class SectionAdmin(AdminMixin, editor.TreeEditor):
-    """
-    ..todo: Протестировать все!
-    """
+class SectionForm(forms.ModelForm):
     class Meta:
         widgets = {
             'text': CKEditorWidget(config_name='default')
         }
+
+
+# ------------------------------------------------------------------------------
+class SectionAdmin(AdminMixin, editor.TreeEditor):
+    """
+    ..todo: Протестировать все!
+    """
+    form = SectionForm
 
     def __init__(self, model, *args, **kwargs):
         super(SectionAdmin, self).__init__(model, *args, **kwargs)
@@ -156,14 +161,19 @@ class ProductAttributeInline(AdminMixin, admin.TabularInline):
 
 
 # ------------------------------------------------------------------------------
+class ProductForm(forms.ModelForm):
+    class Meta:
+        widgets = {
+            'text': CKEditorWidget(config_name='default')
+        }
+
+
+# ------------------------------------------------------------------------------
 class ProductAdmin(AdminMixin, admin.ModelAdmin):
     """
     ..todo: Протестировать все!
     """
-    class Meta(object):
-        widgets = {
-            'text': CKEditorWidget(config_name='default')
-        }
+    form = ProductForm
 
     def __init__(self, model, admin_site, *args, **kwargs):
         # Добавляем базовые элементы в админку
@@ -188,22 +198,6 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         return list(super(ProductAdmin, self).get_readonly_fields(request, obj)) + ['slug']
-
-
-# # ------------------------------------------------------------------------------
-# class PseudoSectionValueForm(forms.ModelForm):
-#     def __init__(self, instance=None, *args, **kwargs):
-#         super(PseudoSectionValueForm, self).__init__(instance=instance, *args, **kwargs)
-
-#         # if instance:
-#             # Поиск значений аттрибутов для раздела
-#             # attributes_values = models.ProductAttribute.objects.filter(attribute__in=instance.attribute).distinct()
-#             # attributes_values = attributes_values.filter(product__section=instance.section)
-#             # attributes_values = list(attributes_values)
-
-#             # control_object = instance.attribute.control_object
-#             # self.fields['raw_value'] = control_object.create_form_field(instance.attribute, instance.attributes_values)
-
 
 
 # ------------------------------------------------------------------------------
@@ -234,18 +228,6 @@ class PseudoSectionValueInline(AdminMixin, admin.TabularInline):
         return instance.value_to
     real_value.short_description = u'Реальное значение'
 
-    # def get_formset(self, request, obj=None, **kwargs):
-    #     value = super(PseudoSectionValueInline, self).get_formset(request, obj, **kwargs)
-    #     if obj:
-    #         try:
-    #             value.form.base_fields['attribute'].choices = PrumaCatalogAttributeIterator(
-    #                 value.form.base_fields['attribute'],
-    #                 obj.category
-    #             )
-    #         except ObjectDoesNotExist:
-    #             pass
-    #     return value
-
 
 # ------------------------------------------------------------------------------
 class PseudoSectionBrandInline(admin.TabularInline):
@@ -253,11 +235,16 @@ class PseudoSectionBrandInline(admin.TabularInline):
 
 
 # ------------------------------------------------------------------------------
-class PseudoSectionAdmin(AdminMixin, admin.ModelAdmin):
+class PseudoSectionForm(forms.ModelForm):
     class Meta:
         widgets = {
             'text': CKEditorWidget(config_name='default')
         }
+
+
+# ------------------------------------------------------------------------------
+class PseudoSectionAdmin(AdminMixin, admin.ModelAdmin):
+    form = PseudoSectionForm
 
     def __init__(self, model, admin_site, *args, **kwargs):
         super(PseudoSectionAdmin, self).__init__(model, admin_site, *args, **kwargs)

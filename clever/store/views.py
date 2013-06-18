@@ -12,14 +12,12 @@ from django.views.generic.base import View
 from django.views.generic.base import RedirectView
 from django.views.generic import TemplateView
 from django.views.generic.edit import CreateView
+from django.shortcuts import redirect
 from clever.catalog.models import Product
 from clever.store import Cart
 from clever.store.forms import CheckoutForm
 from clever.store.models import Delivery
 from clever.store.models import Payment
-from django.core.serializers.json import DjangoJSONEncoder
-from django.http import HttpResponse
-import json
 from clever.core.views import AjaxMixin
 
 
@@ -128,6 +126,11 @@ class CartView(CartMixin, TemplateView):
 
     def get_payments_queryset(self):
         return Payment.objects.order_by('sort').all()
+
+    def render_to_response(self, context):
+        if not len(self.get_cart()):
+            return redirect('/')
+        return super(CartView, self).render_to_response(context)
 
     def get_context_data(self, **kwargs):
         context = super(CartView, self).get_context_data(**kwargs)

@@ -201,7 +201,7 @@ class SectionView(DetailView):
         for value in values:
             attribute = value.attribute
             type = attribute.type_object
-            control = attribute.control_object
+            # control = attribute.control_object
 
             if type.is_range:
                 filter_data.update({
@@ -218,6 +218,16 @@ class SectionView(DetailView):
                 'price_1': pseudo_category.price_to
             })
         return filter_data
+
+    # def get_active_brand(self):
+    #     filter_form = self.get_filter_form()
+    #     cleaned_data = filter_form.cleaned_data
+    #     cleaned_data = filter(lambda x: x, cleaned_data)
+    #     import pprint
+    #     pp = pprint.PrettyPrinter(indent=4, depth=6)
+    #     pp.pprint(cleaned_data)
+
+    #     return None
 
     def get_context_data(self, **kwargs):
         context = super(SectionView, self).get_context_data(**kwargs)
@@ -266,6 +276,7 @@ class SectionView(DetailView):
             'order_by': order_by,
             'sort_by': sort_by,
             'sort_list': sort_list,
+            # 'brand': self.get_active_brand(),
         })
 
         # Получем метаинформацию: заголовок и текст страницы раздела
