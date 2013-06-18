@@ -53,16 +53,16 @@ class FilterForm(forms.Form):
             for name, message in self.errors.items():
                 print name, message
 
-        product_idexes = None
+        product_indexes = None
         for filter_arg in filter_args:
             current_indexes = set(Product.objects.filter(filter_arg, section=self.section).values_list('id'))
-            if product_idexes:
-                product_idexes &= current_indexes
+            if product_indexes:
+                product_indexes &= current_indexes
             else:
-                product_idexes = current_indexes
+                product_indexes = current_indexes
 
-        if product_idexes is not None:
-            return products_queryset.filter(id__in=[v[0] for v in product_idexes])
+        if product_indexes is not None:
+            return products_queryset.filter(id__in=[v[0] for v in product_indexes])
         else:
             return products_queryset
 
