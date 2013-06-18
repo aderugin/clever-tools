@@ -1,4 +1,5 @@
 {% load flatblock_tags %}
+{% load seo %}
 
 <!DOCTYPE html>
 <!--[if lt IE 7]> <html lang="{{ LANGUAGE_CODE }}" class="i-ua_js_no i-ua_css_standard no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
@@ -18,11 +19,12 @@
             })(document);
         </script>
 
+        {% get_metadata as metadata %}
         {% block page_metadata %}
-            {% if metadata.title.value|length == 0 %}
-                {% if object.title|length != 0 %}
+            {% if not metadata.title.value %}
+                {% if object.title %}
                     <title>{{ object.title }}</title>
-                {% elif object.name|length != 0 %}
+                {% elif object.name %}
                     <title>{{ object.name }}</title>
                 {% else %}
                     <title>{% block page_title %}{% endblock %}</title>
