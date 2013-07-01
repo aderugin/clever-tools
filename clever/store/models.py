@@ -100,8 +100,8 @@ class OrderBase(TimestableMixin, models.Model):
     payment = DeferredForeignKey(Payment, verbose_name=u'Способ оплаты', blank=True, null=True)
     address = models.TextField(blank=True, verbose_name=u'Адрес')
 
-    delivery_date = models.DateField(verbose_name=u'Дата доставки', blank=True, null=True, max_length=100)
-    delivery_time = models.CharField(verbose_name=u'Время доставки', blank=True, max_length=100)
+    # delivery_date = models.DateField(verbose_name=u'Дата доставки', blank=True, null=True, max_length=100)
+    delivery_time = models.CharField(verbose_name=u'Удобные дата и время для доставки', blank=True, max_length=100)
 
     # Информация об стоимости
     price = models.DecimalField(verbose_name=u'Общая стоимость заказа', default=Decimal(0.00), decimal_places=2, max_digits=10)

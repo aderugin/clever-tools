@@ -18,5 +18,4 @@ class SmsHostBackend(object):
 
         performed_text = re.sub('\s+', '+', text)
         prepared_url = SMS_GATE_URL + '?api_id=' + API_ID + '&to=' + to_phones + '&text=' + performed_text
-        print prepared_url
         urllib.urlopen(prepared_url)

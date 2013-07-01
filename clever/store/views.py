@@ -119,7 +119,7 @@ class CartView(CartMixin, TemplateView):
 
     def get_checkout_form(self):
         form_kwargs = self.get_checkout_kwargs()
-        return self.checkout_form(**form_kwargs)
+        return self.checkout_form(self.request, **form_kwargs)
 
     def get_deliveries_queryset(self):
         return Delivery.objects.order_by('sort').all()
@@ -144,3 +144,6 @@ class CartView(CartMixin, TemplateView):
 # ------------------------------------------------------------------------------
 class CheckoutView(CartMixin, CreateView):
     form = CheckoutForm
+
+    def get_form(self, form_class):
+        return form_class(self.request, **self.get_form_kwargs())
