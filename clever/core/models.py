@@ -78,27 +78,19 @@ class TitleMixin(models.Model):
     class Meta:
         abstract = True
     title = models.CharField(verbose_name=u"Название", max_length=255)
-    # TODO: , editable=True - в админке при создании нового элемента, не срабатывает autopopulate
-    slug = autoslug.AutoSlugField(verbose_name=u"ЧПУ сегмент", populate_from='title', sep='-', unique=True)
-
-    # @models.permalink
-    # def get_absolute_url(self):
-    #     """
-    #     Получение каноничного пути до раздела каталога
-    #     """
-    #     return (magic.get_meta_param(self, 'url_name'), (), {'slug': self.slug})
+    slug = autoslug.AutoSlugField(verbose_name=u"ЧПУ сегмент", populate_from='title', sep='-', unique=True, editable=True, blank=True)
 
     def __unicode__(self):
         return self.title
 
 
 class TitleQuerySet(query.QuerySet):
-    """
-    Запрос для получение активных и неактивных объектов из БД
-    """
-    def by_slug(self, slug):
-        """Фильтровать активные элементы"""
-        return self.filter(slug=slug)
+        """
+        Запрос для получение активных и неактивных объектов из БД
+        """
+        def by_slug(self, slug):
+            """Фильтровать активные элементы"""
+            return self.filter(slug=slug)
 
 
 class PageMixin(models.Model):
@@ -109,6 +101,11 @@ class PageMixin(models.Model):
         abstract = True
     image = models.ImageField(upload_to=generate_upload_name, verbose_name=u'Изображение', null=True, blank=True)
     text = models.TextField(verbose_name=u'Описание', blank=True)
+
+
+class SitePageMixin(TimestableMixin, ActivableMixin, TitleMixin, PageMixin):
+    class Meta:
+        abstract = True
 
 
 class CachingPassThroughManager(managers.PassThroughManager, cache_machine.CachingManager):

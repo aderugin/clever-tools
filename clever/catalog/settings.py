@@ -11,18 +11,21 @@
 """
 from django.conf import settings
 
-# Настройка опция по умолчанию для списка разрешенных аттрибутов
+# Настройка списка разрешенных аттрибутов
 CLEVER_ATTRIBUTES = getattr(settings, 'CLEVER_ATTRIBUTES', [
     'price'
 ])
 
-# Настройка опция по умолчанию для списка разрешенных типов аттрибутов
+# Настройка списка разрешенных типов аттрибутов
 CLEVER_ATTRIBUTES_TYPES = getattr(settings, 'CLEVER_ATTRIBUTES_TYPES', [
     'string'
 ])
 
-# Настройка опция по умолчанию для списка разрешенных элементов управления аттрибутов
+# Настройка списка разрешенных элементов управления аттрибутов
 CLEVER_ATTRIBUTES_CONTROLS = getattr(settings, 'CLEVER_ATTRIBUTES_CONTROLS', [
     'checkbox',
     'select'
 ])
+
+# Настройка класса для недавно просмотренных товаров
+CLEVER_RECENTLY_VIEWED = getattr(settings, 'CLEVER_RECENTLY_VIEWED', 'clever.catalog.recently_viewed.RecentlyViewed')

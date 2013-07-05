@@ -143,7 +143,11 @@ class SectionView(DetailView):
 
     def get_pseudo_section_queryset(self):
         """Создание запроса для получения активной псевдо категорий из раздела"""
-        return models.PseudoSection.objects.active()
+        if self.has_pseudo_section:
+            return models.PseudoSection.objects.active()
+        else:
+            # TODO: Заменить на EmptyQuerySet
+            return None
 
     def get_pseudo_section(self):
         """Получение активной псевдо категорий из раздела"""
@@ -155,8 +159,12 @@ class SectionView(DetailView):
 
     def get_pseudo_sections_queryset(self):
         """Создание запроса для получения все активных псевдо категорий из раздела"""
-        queryset = models.PseudoSection.pseudo_sections.filter(section=self.object)
-        return queryset
+        if self.has_pseudo_section:
+            queryset = models.PseudoSection.pseudo_sections.filter(section=self.object)
+            return queryset
+        else:
+            # TODO: Заменить на EmptyQuerySet
+            return None
 
     def get_products_queryset(self):
         """Создание запроса для получения продуктов из раздела"""
