@@ -9,7 +9,6 @@ from clever.core.admin import AdminMixin
 from clever.catalog import models
 from clever.catalog.forms import FilterForm
 from clever.catalog.attributes import AttributeManager
-from clever.magic.classmaker import classmaker
 
 
 # ------------------------------------------------------------------------------
