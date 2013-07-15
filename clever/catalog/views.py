@@ -302,7 +302,7 @@ class ProductView(DetailView):
         return self.model.products.get_query_set()
 
     def get_attributes(self):
-        return models.ProductAttribute.objects.filter(product=self.object)
+        return models.ProductAttribute.objects.filter(product=self.object).order_by('sort')
 
     def get_context_data(self, **kwargs):
         context = super(ProductView, self).get_context_data(**kwargs)

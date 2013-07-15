@@ -150,7 +150,7 @@ class ProductAttributeInline(AdminMixin, admin.TabularInline):
         for type_name, type in AttributeManager.get_types():
             exclude.append(type.field_name)
         self.insert_exclude(exclude)
-        self.insert_fields(['attribute', 'raw_value', 'real_value', 'is_main', 'is_hidden'])
+        self.insert_fields(['attribute', 'raw_value', 'real_value', 'sort', 'is_main', 'is_hidden'])
 
     def get_readonly_fields(self, request, obj=None):
         return list(super(ProductAttributeInline, self).get_readonly_fields(request, obj)) + ['real_value']
