@@ -74,17 +74,18 @@ class XMLImporter(BaseXMLImporter):
             items = [x for x in items]
             count = len(items)
 
-            def _show(_i):
-                x = int(size*_i/count)
-                sys.stdout.write("%s[%s%s] %i/%i\r" % (prefix, "#"*x, "."*(size-x), _i, count))
-                sys.stdout.flush()
+            if count:
+                def _show(_i):
+                    x = int(size*_i/count)
+                    sys.stdout.write("%s[%s%s] %i/%i\r" % (prefix, "#"*x, "."*(size-x), _i, count))
+                    sys.stdout.flush()
 
-            _show(0)
-            for i, item in enumerate(items):
-                yield item
-                _show(i+1)
-            sys.stdout.write("\n")
-            sys.stdout.flush()
+                _show(0)
+                for i, item in enumerate(items):
+                    yield item
+                    _show(i+1)
+                sys.stdout.write("\n")
+                sys.stdout.flush()
 
         """
         Parses all data from the source, saving model instances.
