@@ -93,20 +93,27 @@ class SectionAdmin(AdminMixin, editor.TreeEditor):
 
         self.insert_list_display_links(['admin_thumbnail', '__unicode__', '__str__'])
 
+        inlines_objects = []
         # Создание inline редактора для свойств товара
-        brand_inline = type(model.__name__ + "_SectionBrandInline", (SectionParamsInline,), {
-            'model': models.SectionBrand,
-            'field_name': 'brand',
-            'related_model': models.Brand,
-            'filter_field': 'products__section',
-        })
-        attribute_inline = type(model.__name__ + "_SectionAttributeInline", (SectionParamsInline,), {
-            'model': models.SectionAttribute,
-            'field_name': 'attribute',
-            'related_model': models.Attribute,
-            'filter_field': 'values__product__section',
-        })
-        self.insert_inlines([brand_inline, attribute_inline], before=True)
+        if models.SectionBrand.deferred_instance:
+            brand_inline = type(model.__name__ + "_SectionBrandInline", (SectionParamsInline,), {
+                'model': models.SectionBrand,
+                'field_name': 'brand',
+                'related_model': models.Brand,
+                'filter_field': 'products__section',
+            })
+            inlines_objects.append(brand_inline)
+
+        if models.SectionAttribute.deferred_instance:
+            attribute_inline = type(model.__name__ + "_SectionAttributeInline", (SectionParamsInline,), {
+                'model': models.SectionAttribute,
+                'field_name': 'attribute',
+                'related_model': models.Attribute,
+                'filter_field': 'values__product__section',
+            })
+            inlines_objects.append(attribute_inline)
+
+        self.insert_inlines(inlines_objects, before=True)
 
     @thumbnail_column(size='106x80')
     def admin_thumbnail(self, inst):
