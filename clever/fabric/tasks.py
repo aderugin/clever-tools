@@ -8,6 +8,7 @@ from fabric.api import lcd
 from fabric.api import prefix
 from fabric.api import hide
 from fabric.contrib import files
+from fabric.utils import abort
 from fabric import operations
 from clever.fabric import local_env
 from clever.fabric.utils import backup_mysql
@@ -36,13 +37,23 @@ __all__ = [
 ]
 
 
+def is_active_env(func):
+    def wrapper(*args, **kwargs):
+        if not getattr(env, 'name', None):
+            abort(u'Remote server is not specified')
+        func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    wrapper.__doc__ = func.__doc__
+    return wrapper
+
+
 def active_env(name):
     """
     Подготовка окружения
     """
     env_params = getattr(local_env, name, None)
     if not env_params:
-        raise RuntimeError("Не найдено окружение")
+        abort("Не найдено окружение")
 
     # Имя пользователя от которого запущен проект
     env.user = env_params.get('user')
@@ -80,6 +91,7 @@ def production():
 
 
 @task
+@is_active_env
 def update(branch=None, force=False):
     """
     Обновление исходного кода из ветки
@@ -120,8 +132,16 @@ def update(branch=None, force=False):
                 else:
                     run('git pull origin %s' % branch)
 
+        # Обновления в clever-tools
+        if local_env.CLEVER_REVISION:
+            virtualenv = os.environ.get('VIRTUAL_ENV', None)
+            tools_branch = 'version/' + local_env.CLEVER_REVISION
+            with cd(os.path.join(virtualenv, 'src/clever-tools')):
+                run('git pull origin ' + tools_branch)
+
 
 @task
+@is_active_env
 def install(branch=None):
     """
     Установка зависимостей
@@ -132,13 +152,13 @@ def install(branch=None):
     with cd(env.root):
         # Обновляем зависимости для проекта
         with prefix(env.activate):
-            run('pip install -r ' + local_env.REQUIREMENTS_NAME)
-
             if local_env.CLEVER_REVISION:
-                run('pip install git+git@bitbucket.org:cleversite/clever-tools.git@version/' + local_env.CLEVER_REVISION + '#egg=clever-tools')
+                run('pip install --upgrade git+git@bitbucket.org:cleversite/clever-tools.git@version/' + local_env.CLEVER_REVISION + '#egg=clever-tools')
+            run('pip install -r ' + local_env.REQUIREMENTS_NAME)
 
 
 @task
+@is_active_env
 def backup():
     """Резервное копирование базы данных"""
 
@@ -160,6 +180,7 @@ def backup():
 
 
 @task
+@is_active_env
 def rollback():
     """Восстановление предыдущего состояния кода и базы данных"""
     # Загружаем информацию о точке востоновления
@@ -182,6 +203,7 @@ def rollback():
 
 
 @task
+@is_active_env
 def migrate(merge=False):
     """
     Миграция изменений схемы в БД
@@ -200,6 +222,7 @@ def migrate(merge=False):
 
 
 @task
+@is_active_env
 def collect():
     """
     Сборка и обновление статических файлов проекта
@@ -211,6 +234,7 @@ def collect():
 
 
 @task
+@is_active_env
 def restart():
     """
     Перезапуск приложения
@@ -222,6 +246,7 @@ def restart():
 
 
 @task
+@is_active_env
 def flush_cache():
     """
     Сбросить кэш Reddis'а
@@ -230,6 +255,7 @@ def flush_cache():
 
 
 @task
+@is_active_env
 def deploy(branch=None, flush=False):
     """
     Выполнить полное развертывание приложения на сервере
@@ -249,6 +275,7 @@ def deploy(branch=None, flush=False):
 
 
 @task
+@is_active_env
 def import_xml(*args):
     """
     Обновление каталога на сайте
