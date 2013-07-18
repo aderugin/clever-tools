@@ -14,7 +14,6 @@ from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
 from django.core.paginator import InvalidPage
-from django.core.exceptions import ImproperlyConfigured
 from django.http import Http404
 from django.utils.translation import ugettext as _
 from clever.catalog import models
@@ -154,7 +153,7 @@ class SectionView(DetailView):
         return self.pseudo_section
 
     def get_pseudo_sections_queryset(self):
-        """Создание запроса для получения все активных псевдо категорий из раздела"""
+        """Создание запроса для получения всех активных псевдо категорий из раздела"""
         queryset = models.PseudoSection.pseudo_sections.filter(section=self.object)
         return queryset
 
@@ -218,16 +217,6 @@ class SectionView(DetailView):
                 'price_1': pseudo_category.price_to
             })
         return filter_data
-
-    # def get_active_brand(self):
-    #     filter_form = self.get_filter_form()
-    #     cleaned_data = filter_form.cleaned_data
-    #     cleaned_data = filter(lambda x: x, cleaned_data)
-    #     import pprint
-    #     pp = pprint.PrettyPrinter(indent=4, depth=6)
-    #     pp.pprint(cleaned_data)
-
-    #     return None
 
     def get_context_data(self, **kwargs):
         context = super(SectionView, self).get_context_data(**kwargs)

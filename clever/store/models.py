@@ -1,12 +1,8 @@
 # -*- coding: utf-8 -*-
 from django.db import models
-from django_fsm.db.fields import FSMField
-from django_fsm.db.fields import transition
 from clever.deferred import DeferredPoint
 from clever.deferred.fields import DeferredForeignKey
-from clever.deferred.fields import DeferredManyToManyField
 from clever.deferred.models import DeferredModelMetaclass
-from clever.deferred.models import DeferredMetaclass
 from clever.core.models import TimestableMixin
 from clever.catalog.models import Product
 from clever.core.models import extend_meta
@@ -106,16 +102,14 @@ class OrderBase(TimestableMixin, models.Model):
     # Информация об стоимости
     price = models.DecimalField(verbose_name=u'Общая стоимость заказа', default=Decimal(0.00), decimal_places=2, max_digits=10)
     delivery_price = models.DecimalField(verbose_name=u'Стоимость доставки', default=Decimal(0.00), decimal_places=2, max_digits=10, null=True)
-    discount_price = models.DecimalField(verbose_name=u'Общая стоимость заказа с учетом скидки', default=Decimal(0.00), decimal_places=2, max_digits=10, null=True)
-
-    discount_amount = models.DecimalField(verbose_name=u'Скидка в процентах', default=Decimal(0.00), decimal_places=2, max_digits=10, null=True, blank=True)
-    discount_code = models.CharField(verbose_name=u'Код на скидку', max_length=50, null=True, blank=True)
-    crated_at = models.DateField(auto_now_add=True)
 
     # Дополнительная информация о
     comment = models.TextField(blank=True, verbose_name=u'Комментарий к заказу')
     # to_1c = models.BooleanField(verbose_name=u'Экспортировать в 1С', default=False)
     # code = models.CharField(verbose_name=u'1С ID', max_length=50, blank=True)
+
+    def __unicode__(self):
+        return u"Заказ №%d" % (self.id)
 
 
 # ------------------------------------------------------------------------------
@@ -131,8 +125,11 @@ class ItemBase(models.Model):
         )
     )
 
+    order = DeferredForeignKey(Order, verbose_name=u"Заказ", related_name='items')
     product = DeferredForeignKey(Product, verbose_name=u'Товар')
+
     quantity = models.IntegerField(verbose_name=u'Количество', default=1)
     price = models.DecimalField(verbose_name=u"Цена", default=Decimal(0.00), decimal_places=2, max_digits=10)
 
-    order = DeferredForeignKey(Order, verbose_name=u"Заказ", related_name='items')
+    def __unicode__(self):
+        return unicode(self.order) + ' ' + unicode(self.product)
