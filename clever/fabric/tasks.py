@@ -134,6 +134,9 @@ def install(branch=None):
         with prefix(env.activate):
             run('pip install -r ' + local_env.REQUIREMENTS_NAME)
 
+            if local_env.CLEVER_REVISION:
+                run('pip install git+git@bitbucket.org:cleversite/clever-tools.git@version/' + local_env.CLEVER_REVISION + '#egg=clever-tools')
+
 
 @task
 def backup():

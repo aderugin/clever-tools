@@ -24,3 +24,6 @@ class Enviroment(UserDict):
 
         # Окружение рабочего сервера
         self.PRODUCTION_ENVIRONMENT = { }
+
+        # Текущий репозиторий
+        self.CLEVER_REVISION = 'master'
