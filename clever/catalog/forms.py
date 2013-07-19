@@ -12,10 +12,11 @@ import sys
 
 class FilterForm(forms.Form):
     ''' Базовая форма для фильтра '''
-    def __init__(self, instance=None, *args, **kwargs):
+    def __init__(self, instance=None, sections=None, *args, **kwargs):
         super(FilterForm, self).__init__(*args, **kwargs)
 
         self.section = instance
+        self.sections = sections if not sections is None else [section]
 
         # Получаем аттрибуты для фильтрации
         self.attributes_params = self.get_pseudo_attributes(instance) + self.get_attributes(instance)
@@ -82,14 +83,14 @@ class FilterForm(forms.Form):
         # TODO: Refactoring!!! Здесь хуева туча по времени для запросов.
         # Поиск всех аттрибутов
         attributes = Attribute.objects.filter(is_filtered=True).order_by('additional_title', 'main_title').distinct()
-        if section:
-            attributes = attributes.filter(values__product__section=self.section)
+        if len(self.sections):
+            attributes = attributes.filter(values__product__section__in=self.sections)
         attributes = list(attributes)
 
         # Поиск значений аттрибутов для раздела
         attributes_values = ProductAttribute.objects.filter(attribute__in=attributes).select_related('attribute').distinct()
-        if section:
-            attributes_values = attributes_values.filter(product__section=self.section)
+        if len(self.sections):
+            attributes_values = attributes_values.filter(product__section__in=self.sections)
         attributes_values = list(attributes_values)
 
         # Поиск параметров аттрибутов для раздела

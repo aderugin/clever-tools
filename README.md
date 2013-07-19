@@ -23,3 +23,5 @@ Clever Tools
 * `clever-install-python` - Установка Python 2.7 в виртуальном окружении
 * `clever-install-redis` - Установка key-value базы данных Redis в виртуальном окружении
 * `clever-install-xapian` - Установка поискового движка Xapian в виртуальном окружении
+
+Добавилась поддержка фильтрации по атрибутам подкатегорий

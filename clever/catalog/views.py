@@ -58,9 +58,11 @@ class SectionView(DetailView):
     pseudo_section = None
     filter_form = None
     allow_empty = True
+    is_subsection = False
     paginate_by = None
     paginator_class = Paginator
     page_kwarg = 'page'
+
     count_kwarg = 'count'
     order_by = {
         # TODO: Добавить сортировку по идентификатору
@@ -138,7 +140,7 @@ class SectionView(DetailView):
             kwargs['data'] = data
 
             # Создание фильтра
-            self._filter_form = self.filter_form(self.object, *args, **kwargs)
+            self._filter_form = self.filter_form(self.object, self.get_products_sections(), *args, **kwargs)
         return getattr(self, '_filter_form', None)
 
     def get_pseudo_section_queryset(self):
@@ -166,9 +168,17 @@ class SectionView(DetailView):
             # TODO: Заменить на EmptyQuerySet
             return None
 
+    def get_products_sections(self):
+        sections = [self.object]
+        if self.is_subsection:
+            sections += self.object.get_children()
+        return sections
+
     def get_products_queryset(self):
         """Создание запроса для получения продуктов из раздела"""
-        return Product.products.filter(section=self.object)
+        # return Product.products.filter(section.self.object)
+
+        return Product.products.filter(section__in=self.get_products_sections())
 
     def get_filter_queryset(self, queryset):
         filter_form = self.get_filter_form()
