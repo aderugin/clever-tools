@@ -110,6 +110,13 @@ def update(branch=None, force=False):
         with lcd(local_env.MARKUP_DIRECTORY):
             local("git push origin %s" % branch)
 
+    # Обновления в clever-tools
+        if local_env.CLEVER_REVISION:
+            virtualenv = os.environ.get('VIRTUAL_ENV', None)
+            tools_branch = 'version/' + local_env.CLEVER_REVISION
+            with lcd(os.path.join(virtualenv, 'src/clever-tools')):
+                local('git pull origin ' + tools_branch)
+
     with cd(env.root):
         # Обновляем бранчи если надо
         if branch != env.branch:
@@ -132,13 +139,6 @@ def update(branch=None, force=False):
                 else:
                     run('git pull origin %s' % branch)
 
-        # Обновления в clever-tools
-        if local_env.CLEVER_REVISION:
-            virtualenv = os.environ.get('VIRTUAL_ENV', None)
-            tools_branch = 'version/' + local_env.CLEVER_REVISION
-            with cd(os.path.join(virtualenv, 'src/clever-tools')):
-                run('git pull origin ' + tools_branch)
-
 
 @task
 @is_active_env
@@ -153,7 +153,7 @@ def install(branch=None):
         # Обновляем зависимости для проекта
         with prefix(env.activate):
             if local_env.CLEVER_REVISION:
-                run('pip install --upgrade git+git@bitbucket.org:cleversite/clever-tools.git@version/' + local_env.CLEVER_REVISION + '#egg=clever-tools')
+                run('pip install --upgrade -e git+git@bitbucket.org:cleversite/clever-tools.git@version/' + local_env.CLEVER_REVISION + '#egg=clever-tools')
             run('pip install -r ' + local_env.REQUIREMENTS_NAME)
 
 
