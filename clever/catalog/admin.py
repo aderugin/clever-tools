@@ -184,9 +184,16 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
     def __init__(self, model, admin_site, *args, **kwargs):
         # Добавляем базовые элементы в админку
         self.insert_list_display(['admin_thumbnail'], before=True)
-        self.insert_list_display(['active', 'section', 'brand', 'price', 'code'])
+
+        list_display_items = ['active', 'section', 'brand', 'price', 'code']
+        list_filter_items = ['brand', 'section']
+        if not models.SectionBrand.deferred_instance:
+            list_display_items.remove('brand');
+            list_filter_items.remove('brand');
+
+        self.insert_list_display(list_display_items)
+        self.insert_list_filter(list_filter_items)
         self.insert_list_display_links(['admin_thumbnail', '__unicode__', '__str__'])
-        self.insert_list_filter(['brand', 'section'])
         self.insert_search_fields(['title'])
 
         # Создание inline редактора для свойств товара
