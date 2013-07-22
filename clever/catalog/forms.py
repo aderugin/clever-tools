@@ -16,7 +16,7 @@ class FilterForm(forms.Form):
         super(FilterForm, self).__init__(*args, **kwargs)
 
         self.section = instance
-        self.sections = sections if not sections is None else [section]
+        self.sections = sections if not sections is None else [self.section]
 
         # Получаем аттрибуты для фильтрации
         self.attributes_params = self.get_pseudo_attributes(instance) + self.get_attributes(instance)
