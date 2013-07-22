@@ -106,9 +106,6 @@ class SectionAdmin(AdminMixin, editor.TreeEditor):
         """ Выводит картинку а админке """
         return [inst.image]
 
-    def get_readonly_fields(self, request, obj=None):
-        return list(super(SectionAdmin, self).get_readonly_fields(request, obj)) + ['slug']
-
 
 # ------------------------------------------------------------------------------
 class AttributeForm(forms.ModelForm):
@@ -188,9 +185,6 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
         """ Выводит картинку а админке """
         return [inst.image]
 
-    def get_readonly_fields(self, request, obj=None):
-        return list(super(ProductAdmin, self).get_readonly_fields(request, obj)) + ['slug']
-
 
 # ------------------------------------------------------------------------------
 class PseudoSectionValueInline(AdminMixin, admin.TabularInline):
@@ -258,6 +252,3 @@ class PseudoSectionAdmin(AdminMixin, admin.ModelAdmin):
             pseudo_section_value_inline,
             product_attribute_inline
         ])
-
-    def get_readonly_fields(self, request, obj=None):
-        return list(super(PseudoSectionAdmin, self).get_readonly_fields(request, obj)) + ['slug']
