@@ -13,6 +13,7 @@ from clever.catalog.attributes import AttributeManager
 
 # ------------------------------------------------------------------------------
 class SectionParamsIterator(forms.models.ModelChoiceIterator):
+    ### TODO: TEST THIS!!!!
     def __init__(self, inline, field, section):
         self.section = section
         self.inline = inline
@@ -85,20 +86,27 @@ class SectionAdmin(AdminMixin, editor.TreeEditor):
 
         self.insert_list_display_links(['admin_thumbnail', '__unicode__', '__str__'])
 
+        inlines_objects = []
         # Создание inline редактора для свойств товара
-        brand_inline = type(model.__name__ + "_SectionBrandInline", (SectionParamsInline,), {
-            'model': models.SectionBrand,
-            'field_name': 'brand',
-            'related_model': models.Brand,
-            'filter_field': 'products__section',
-        })
-        attribute_inline = type(model.__name__ + "_SectionAttributeInline", (SectionParamsInline,), {
-            'model': models.SectionAttribute,
-            'field_name': 'attribute',
-            'related_model': models.Attribute,
-            'filter_field': 'values__product__section',
-        })
-        self.insert_inlines([brand_inline, attribute_inline], before=True)
+        if models.SectionBrand.deferred_instance:
+            brand_inline = type(model.__name__ + "_SectionBrandInline", (SectionParamsInline,), {
+                'model': models.SectionBrand,
+                'field_name': 'brand',
+                'related_model': models.Brand,
+                'filter_field': 'products__section',
+            })
+            inlines_objects.append(brand_inline)
+
+        if models.SectionAttribute.deferred_instance:
+            attribute_inline = type(model.__name__ + "_SectionAttributeInline", (SectionParamsInline,), {
+                'model': models.SectionAttribute,
+                'field_name': 'attribute',
+                'related_model': models.Attribute,
+                'filter_field': 'values__product__section',
+            })
+            inlines_objects.append(attribute_inline)
+
+        self.insert_inlines(inlines_objects, before=True)
 
     @thumbnail_column(size='106x80')
     def admin_thumbnail(self, inst):
@@ -138,7 +146,7 @@ class ProductAttributeInline(AdminMixin, admin.TabularInline):
         for type_name, type in AttributeManager.get_types():
             exclude.append(type.field_name)
         self.insert_exclude(exclude)
-        self.insert_fields(['attribute', 'raw_value', 'real_value', 'sort', 'is_main', 'is_hidden'])
+        self.insert_fields(['attribute', 'raw_value', 'real_value'])
 
     def get_readonly_fields(self, request, obj=None):
         return list(super(ProductAttributeInline, self).get_readonly_fields(request, obj)) + ['real_value']
@@ -166,9 +174,16 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
     def __init__(self, model, admin_site, *args, **kwargs):
         # Добавляем базовые элементы в админку
         self.insert_list_display(['admin_thumbnail'], before=True)
-        self.insert_list_display(['active', 'section', 'brand', 'price', 'code', 'popular_index'])
+
+        list_display_items = ['active', 'section', 'brand', 'price', 'code']
+        list_filter_items = ['brand', 'section']
+        if not models.SectionBrand.deferred_instance:
+            list_display_items.remove('brand');
+            list_filter_items.remove('brand');
+
+        self.insert_list_display(list_display_items)
+        self.insert_list_filter(list_filter_items)
         self.insert_list_display_links(['admin_thumbnail', '__unicode__', '__str__'])
-        self.insert_list_filter(['brand', 'section'])
         self.insert_search_fields(['title'])
 
         # Создание inline редактора для свойств товара
