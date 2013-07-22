@@ -23,7 +23,7 @@ setup(
     test_suite='clever.tests.runtests.runtests',
     install_requires=[
         # Concrete version
-        'Django == 1.5',
+        'Django == 1.4',
         'django-cache-machine == 0.6',
 
         # Latest version
@@ -44,6 +44,8 @@ setup(
         'pytils >= 0.2.3',
         'sorl-thumbnail >= 11.12',
         "django-fsm >= 1.4.1",
+        "templated-emails == 0.6.9",
+        "django-eml-email-backend == 0.1",
 
         #'git+git://github.com/alurin/django-whatever.git',
         #'git+git://github.com/django-mptt/django-mptt.git',
