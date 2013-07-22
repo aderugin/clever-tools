@@ -14,19 +14,11 @@ from clever.magic.classmaker import classmaker
 
 # ------------------------------------------------------------------------------
 class SectionParamsIterator(forms.models.ModelChoiceIterator):
-    ### TODO: TEST THIS!!!!
     def __init__(self, inline, field, section):
         self.section = section
         self.inline = inline
 
         super(SectionParamsIterator, self).__init__(field)
-
-    # def get_parents(self):
-    #     sections = Section.objects.filter(parent=self.section)
-    #     parents = [self.section.id]
-    #     if (sections):
-    #         parents = parents + list(set(item.id for item in sections.all()))
-    #     return parents
 
     def __iter__(self):
         related_manager = self.inline.related_model.objects
@@ -114,9 +106,6 @@ class SectionAdmin(AdminMixin, editor.TreeEditor):
         """ Выводит картинку а админке """
         return [inst.image]
 
-    def get_readonly_fields(self, request, obj=None):
-        return list(super(SectionAdmin, self).get_readonly_fields(request, obj)) + ['slug']
-
 
 # ------------------------------------------------------------------------------
 class AttributeForm(forms.ModelForm):
@@ -196,9 +185,6 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
         """ Выводит картинку а админке """
         return [inst.image]
 
-    def get_readonly_fields(self, request, obj=None):
-        return list(super(ProductAdmin, self).get_readonly_fields(request, obj)) + ['slug']
-
 
 # ------------------------------------------------------------------------------
 class PseudoSectionValueInline(AdminMixin, admin.TabularInline):
@@ -266,6 +252,3 @@ class PseudoSectionAdmin(AdminMixin, admin.ModelAdmin):
             pseudo_section_value_inline,
             product_attribute_inline
         ])
-
-    def get_readonly_fields(self, request, obj=None):
-        return list(super(PseudoSectionAdmin, self).get_readonly_fields(request, obj)) + ['slug']

@@ -62,7 +62,10 @@ class FilterForm(forms.Form):
                 product_indexes = current_indexes
 
         if product_indexes is not None:
-            return products_queryset.filter(id__in=[v[0] for v in product_indexes])
+            if len(product_indexes) > 0:
+                return products_queryset.filter(id__in=[v[0] for v in product_indexes])
+            else:
+                return products_queryset.none()
         else:
             return products_queryset
 
@@ -122,15 +125,6 @@ class FilterForm(forms.Form):
             final_result.append(FilterAttribute(section, attrib, values, params))
         return final_result
 
-    def clean(self):
-        super(FilterForm, self).clean() #if necessary
-        import pprint
-        pp = pprint.PrettyPrinter(indent=4, depth=6)
-        pp.pprint('Errors:')
-        pp.pprint(self.errors)
-        # if self.cleaned_data.get('film') and 'director' in self._errors:
-        #     del self._errors['director']
-        return self.cleaned_data
 
 class FilterAttribute(object):
     def __init__(self, section, attrib, values, params=None):

@@ -7,6 +7,7 @@ from fabric.api import cd
 from fabric.api import lcd
 from fabric.api import prefix
 from fabric.api import hide
+from fabric.api import get
 from fabric.contrib import files
 from fabric.utils import abort
 from fabric import operations
@@ -15,6 +16,7 @@ from clever.fabric.utils import backup_mysql
 from clever.fabric.utils import get_head_hash
 from clever.fabric.utils import git_revert
 from clever.fabric.utils import revert_mysql
+from clever.fabric.utils import get_django_setting
 import os
 import json
 
@@ -32,6 +34,8 @@ __all__ = [
     'flush_cache',
     'deploy',
     'help',
+    'copy_backup',
+    'copy_media',
     'active_env',
     'import_xml'
 ]
@@ -47,7 +51,7 @@ def is_active_env(func):
     return wrapper
 
 
-def active_env(name):
+def active_env(name, environ_name):
     """
     Подготовка окружения
     """
@@ -71,7 +75,7 @@ def active_env(name):
     env.activate = env_params.get('venv')
 
     # Имя окружения
-    env.name = name
+    env.name = environ_name
 
 
 @task
@@ -79,7 +83,7 @@ def staging():
     """
     Подготовка окружения тестового сервера
     """
-    active_env('STAGING_ENVIRONMENT')
+    active_env('STAGING_ENVIRONMENT', 'staging')
 
 
 @task
@@ -87,7 +91,7 @@ def production():
     """
     Подготовка окружения рабочего сервера
     """
-    active_env('PRODUCTION_ENVIRONMENT')
+    active_env('PRODUCTION_ENVIRONMENT', 'production')
 
 
 @task
@@ -199,7 +203,38 @@ def rollback():
                 git_revert(data['markup'])
 
     # Восстановление базы данныx
-    revert_mysql(data['dump'])
+    with cd(env.root):
+        revert_mysql(data['dump'])
+
+
+@task
+@is_active_env
+def copy_backup():
+    """
+    Копирование послежнего бэкапа на компьютер пользоватеоя
+    """
+    # Загружаем информацию о точке востоновления
+    input = os.path.join(local_env.BACKUP_DIRECTORY, 'backup.json')
+    output = os.path.join(local_env.BACKUP_DIRECTORY, '%(host)s-%(path)s')
+    with cd(env.root):
+        fullname = operations.get(input, local_path=output)[0]
+
+        with open(fullname) as json_data:
+            data = json.load(json_data)
+
+        get(data['dump'], os.path.join(local_env.BACKUP_DIRECTORY, env.name + '.sql'))
+
+
+@task
+@is_active_env
+def copy_media():
+    media_root = get_django_setting('MEDIA_ROOT')
+
+    with cd(os.path.dirname(media_root)):
+        archive = os.path.join(env.root, local_env.BACKUP_DIRECTORY, 'media.tar.gz')
+        run('tar -czvf %s %s --exclude=%s' % (archive, os.path.basename(media_root), os.path.join(os.path.basename(media_root), 'thumbs')))
+        get(archive, os.path.join(local_env.BACKUP_DIRECTORY, env.name + '.tar.gz'))
+        run('rm %s' % (archive))
 
 
 @task

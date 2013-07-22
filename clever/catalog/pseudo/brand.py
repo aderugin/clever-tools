@@ -2,6 +2,8 @@
 from clever.catalog.attributes import PseudoAttribute
 from clever.catalog.attributes import AttributeManager
 from clever.catalog.models import Brand
+from clever.catalog.models import SectionBrand
+import sys
 
 
 # ------------------------------------------------------------------------------
@@ -13,4 +15,11 @@ class BrandAttribute(PseudoAttribute):
     query_name = 'brand'
 
     def get_values(self, section):
-        return Brand.brands.filter(products__section=section).distinct().values_list('id', 'title')
+        brands = Brand.objects.filter(active=True, products__section=section).distinct().values_list('id', 'title')
+        params = dict(SectionBrand.objects.filter(section=section).values_list('brand', 'order'))
+        def brand_order(brand):
+            brand_id, brand_title = brand
+            if brand_id in params:
+                return params[brand_id]
+            return sys.maxint
+        return sorted(brands, key=brand_order)

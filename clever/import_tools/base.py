@@ -24,12 +24,13 @@ def create_object_parser(model, tag_name, code_name='code', required=False):
     return parse_object
 
 
-def create_file_parser(tag_name, import_dir=IMPORT_DIRECTORY, required=False):
+def create_file_parser(tag_name, import_dir=IMPORT_DIRECTORY, file_dir='', required=False):
     def get_file(self, name):
         """
         If file exist return file
         """
-        file_path = os.path.join(settings.PROJECT_DIR, '../cache', import_dir, name)
+        file_path = os.path.join(settings.PROJECT_DIR, '../cache', import_dir, file_dir, name)
+        print file_path
         try:
             file = open(file_path, 'r')
             if file is not None:

@@ -67,7 +67,7 @@ class SectionView(DetailView):
     default_order = None
 
     def get_queryset(self):
-        return self.model.sections.get_query_set()
+        return self.model.objects.filter(active=True)
 
     def paginate_queryset(self, queryset, page_size):
         """
@@ -185,7 +185,7 @@ class SectionView(DetailView):
         return order, sort_by, queryset
 
     def get_sections_queryset(self):
-        return self.object.children.all()
+        return self.object.children.filter(active=True)
 
     def prepare_pseudo_section(self, pseudo_category, filter_data):
         ''' Подготовка данных для формы фильтра '''
