@@ -178,7 +178,7 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
     def __init__(self, model, admin_site, *args, **kwargs):
         # Добавляем базовые элементы в админку
         self.insert_list_display(['admin_thumbnail'], before=True)
-        self.insert_list_display(['active', 'section', 'brand', 'price', 'code'])
+        self.insert_list_display(['active', 'section', 'brand', 'price', 'code', 'popular_index'])
         self.insert_list_display_links(['admin_thumbnail', '__unicode__', '__str__'])
         self.insert_list_filter(['brand', 'section'])
         self.insert_search_fields(['title'])

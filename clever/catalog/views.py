@@ -175,7 +175,7 @@ class SectionView(DetailView):
         if order in self.order_by and order is not None:
             order_by = self.order_by[order]
             result_order = order_by['fields']
-            for field in range(len(result_order)):      # TODO
+            for field in range(len(result_order)):
                 if sort_by == 'desc':
                     if result_order[field][0] != '-':
                         result_order[field] = '-' + result_order[field]
