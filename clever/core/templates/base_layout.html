@@ -44,12 +44,6 @@
             {% else %}
                 {{ metadata.keywords }}
             {% endif %}
-
-            {% if metadata.title.value|length == 0 %}
-                <title>{% block title %}{% endblock %}</title>
-            {% else %}
-                {{ metadata.title }}
-            {% endif %}
         {% endblock page_metadata %}
 
         {% block page_head %}{% endblock %}
