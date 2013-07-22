@@ -62,7 +62,10 @@ class FilterForm(forms.Form):
                 product_indexes = current_indexes
 
         if product_indexes is not None:
-            return products_queryset.filter(id__in=[v[0] for v in product_indexes])
+            if len(product_indexes) > 0:
+                return products_queryset.filter(id__in=[v[0] for v in product_indexes])
+            else:
+                return products_queryset.none()
         else:
             return products_queryset
 
