@@ -14,11 +14,12 @@ from django.views.generic.list import ListView
 from django.shortcuts import get_object_or_404
 from django.core.paginator import Paginator
 from django.core.paginator import InvalidPage
-from django.core.exceptions import ImproperlyConfigured
 from django.http import Http404
 from django.utils.translation import ugettext as _
 from clever.catalog import models
 from clever.catalog.models import Product
+from clever.catalog.settings import CLEVER_RECENTLY_VIEWED
+from clever.magic import load_class
 
 
 # ------------------------------------------------------------------------------
@@ -176,8 +177,6 @@ class SectionView(DetailView):
 
     def get_products_queryset(self):
         """Создание запроса для получения продуктов из раздела"""
-        # return Product.products.filter(section.self.object)
-
         return Product.products.filter(section__in=self.get_products_sections())
 
     def get_filter_queryset(self, queryset):
@@ -314,8 +313,13 @@ class ProductView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(ProductView, self).get_context_data(**kwargs)
-
         context['attributes'] = self.get_attributes()
+
+        # Добавляем товар в не давно просмотренные
+        RecentlyViewed = load_class(CLEVER_RECENTLY_VIEWED)
+        recently_viewed = RecentlyViewed.load(self.request)
+        recently_viewed.add(self.object.id)
+        recently_viewed.save(self.request)
 
         # Возвращаем все
         return context

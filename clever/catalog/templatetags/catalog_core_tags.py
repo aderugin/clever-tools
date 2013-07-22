@@ -3,6 +3,8 @@
 from django import template
 from clever.catalog.settings import CLEVER_RECENTLY_VIEWED
 from clever.magic import load_class
+from clever.catalog.models import Product
+
 register = template.Library()
 
 
@@ -12,8 +14,12 @@ def show_recently_viewed(context, template_name='catalog/blocks/recent-viewed.ht
 
     # Render template
     recent = someclass.load(context['request'])
-    t = template.loader.get_template(template_name)
-    return t.render(template.Context({
+    if isinstance(context['object'], Product.get_deferred_instance()):
+        recent.add_exclude(context['object'].id)
+    context = context.__copy__()
+    context.update({
         'request': context['request'],
         'products': recent.get_ordered_objects(),
-    }))
+    })
+    t = template.loader.get_template(template_name)
+    return t.render(context)

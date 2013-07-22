@@ -10,6 +10,7 @@ class RecentlyViewed(object):
 
     def __init__(self):
         self.items = []
+        self.exclude = []
 
     def add(self, id):
         self.items = self.items
@@ -19,8 +20,8 @@ class RecentlyViewed(object):
 
     def get_objects(self):
         if len(self.items) > 0:
-            return Product.objects.filter(id__in=self.items)
-        return []
+            return Product.objects.filter(id__in=self.items).exclude(id__in=self.exclude)
+        return Product.objects.none()
 
     def get_ordered_objects(self):
         list = self.items
@@ -33,10 +34,15 @@ class RecentlyViewed(object):
         ordered.reverse()
         return ordered
 
+    def add_exclude(self, id):
+        self.exclude.append(id)
+
     @classmethod
     def load(cls, request):
         ''' Загрузка корзины из сессии '''
-        return request.session.get(RECENTLY_SESSION_NAME, None) or cls()
+        recently_viewed = request.session.get(RECENTLY_SESSION_NAME, None) or cls()
+        recently_viewed.exclude = []
+        return recently_viewed
 
     def save(self, request):
         ''' Сохранение корзины в сессии '''
