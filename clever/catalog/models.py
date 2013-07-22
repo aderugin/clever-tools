@@ -153,7 +153,8 @@ class SectionBrandBase(cache_machine.CachingMixin, models.Model):
         SectionBrand,
         extend_meta(
             verbose_name=u'Параметры для производителя в разделе',
-            verbose_name_plural=u'Параметры для производителей в разделе'
+            verbose_name_plural=u'Параметры для производителей в разделе',
+            ordering=['order', 'brand__title', 'id']
         )
     )
 
@@ -340,7 +341,8 @@ class SectionAttributeBase(cache_machine.CachingMixin, models.Model):
         SectionAttribute,
         extend_meta(
             verbose_name=u'Параметры для свойства в разделе',
-            verbose_name_plural=u'Параметры для свойств в разделе'
+            verbose_name_plural=u'Параметры для свойств в разделе',
+            ordering = ['order', 'attribute__main_title', 'id']
         )
     )
 

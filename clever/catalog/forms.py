@@ -122,15 +122,6 @@ class FilterForm(forms.Form):
             final_result.append(FilterAttribute(section, attrib, values, params))
         return final_result
 
-    def clean(self):
-        super(FilterForm, self).clean() #if necessary
-        import pprint
-        pp = pprint.PrettyPrinter(indent=4, depth=6)
-        pp.pprint('Errors:')
-        pp.pprint(self.errors)
-        # if self.cleaned_data.get('film') and 'director' in self._errors:
-        #     del self._errors['director']
-        return self.cleaned_data
 
 class FilterAttribute(object):
     def __init__(self, section, attrib, values, params=None):

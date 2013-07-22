@@ -14,19 +14,11 @@ from clever.magic.classmaker import classmaker
 
 # ------------------------------------------------------------------------------
 class SectionParamsIterator(forms.models.ModelChoiceIterator):
-    ### TODO: TEST THIS!!!!
     def __init__(self, inline, field, section):
         self.section = section
         self.inline = inline
 
         super(SectionParamsIterator, self).__init__(field)
-
-    # def get_parents(self):
-    #     sections = Section.objects.filter(parent=self.section)
-    #     parents = [self.section.id]
-    #     if (sections):
-    #         parents = parents + list(set(item.id for item in sections.all()))
-    #     return parents
 
     def __iter__(self):
         related_manager = self.inline.related_model.objects
