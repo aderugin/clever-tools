@@ -24,12 +24,13 @@ def create_object_parser(model, tag_name, code_name='code', required=False):
     return parse_object
 
 
-def create_file_parser(tag_name, import_dir=IMPORT_DIRECTORY, required=False):
+def create_file_parser(tag_name, import_dir=IMPORT_DIRECTORY, file_dir='', required=False):
     def get_file(self, name):
         """
         If file exist return file
         """
-        file_path = os.path.join(settings.PROJECT_DIR, '../cache', import_dir, name)
+        file_path = os.path.join(settings.PROJECT_DIR, '../cache', import_dir, file_dir, name)
+        print file_path
         try:
             file = open(file_path, 'r')
             if file is not None:
@@ -74,17 +75,18 @@ class XMLImporter(BaseXMLImporter):
             items = [x for x in items]
             count = len(items)
 
-            def _show(_i):
-                x = int(size*_i/count)
-                sys.stdout.write("%s[%s%s] %i/%i\r" % (prefix, "#"*x, "."*(size-x), _i, count))
-                sys.stdout.flush()
+            if count:
+                def _show(_i):
+                    x = int(size*_i/count)
+                    sys.stdout.write("%s[%s%s] %i/%i\r" % (prefix, "#"*x, "."*(size-x), _i, count))
+                    sys.stdout.flush()
 
-            _show(0)
-            for i, item in enumerate(items):
-                yield item
-                _show(i+1)
-            sys.stdout.write("\n")
-            sys.stdout.flush()
+                _show(0)
+                for i, item in enumerate(items):
+                    yield item
+                    _show(i+1)
+                sys.stdout.write("\n")
+                sys.stdout.flush()
 
         """
         Parses all data from the source, saving model instances.
@@ -158,10 +160,8 @@ class ImportFactory(object):
             with open(filename):
                 pass
         except IOError:
-            print u'Файл `%s` не найден', unicode(filename)
+            u'Файл `%s` не найден' % unicode(filename)
             return False
-
-        import sys
 
         # Импорт экземпляров моделей в базу
         count = len(self.parsers)

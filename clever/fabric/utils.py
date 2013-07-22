@@ -26,6 +26,14 @@ def git_revert(commit):
     run("git reset --hard")
 
 
+console_line = "DJANGO_SETTINGS_MODULE=%s python -c \"from django.conf import settings; print settings.%s\""
+def get_django_setting(name):
+    with cd(env.root):
+        with prefix(env.activate):
+            with hide('output', 'running'):
+                return run(console_line % (local_env.DJANGO_SETTINGS, name))
+
+
 def get_mysql_params():
     console_line = "DJANGO_SETTINGS_MODULE=%s python -c \"from django.conf import settings; print settings.DATABASES['default']['%s']\""
     with cd(env.root):

@@ -102,7 +102,7 @@ class SectionBase(cache_machine.CachingMixin, mptt.MPTTModel, TimestableMixin, A
     @property
     def descendant_sections(self):
         ''' Получить queryset для подкатегорий '''
-        return self.__class__.sections.filter(section=self)
+        return self.__class__.objects.filter(section=self, active=True)
 
 
 # ------------------------------------------------------------------------------
@@ -138,9 +138,7 @@ class BrandBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, Tit
     @property
     def descendant_sections(self):
         ''' Получить queryset для категорий в которых есть продукт данного производителя '''
-        return Section.sections.filter(products__brand=self).distinct()
-        # context['section_list'] = self.get_sec(self.get_object())
-        # return self.__class__.sections.filter(section=self)
+        return self.__class__.objects.filter(products__brand=self, active=True).distinct()
 
 
 # ------------------------------------------------------------------------------
@@ -153,7 +151,8 @@ class SectionBrandBase(cache_machine.CachingMixin, models.Model):
         SectionBrand,
         extend_meta(
             verbose_name=u'Параметры для производителя в разделе',
-            verbose_name_plural=u'Параметры для производителей в разделе'
+            verbose_name_plural=u'Параметры для производителей в разделе',
+            ordering=['order', 'brand__title', 'id']
         )
     )
 
@@ -340,7 +339,8 @@ class SectionAttributeBase(cache_machine.CachingMixin, models.Model):
         SectionAttribute,
         extend_meta(
             verbose_name=u'Параметры для свойства в разделе',
-            verbose_name_plural=u'Параметры для свойств в разделе'
+            verbose_name_plural=u'Параметры для свойств в разделе',
+            ordering = ['order', 'attribute__main_title', 'id']
         )
     )
 

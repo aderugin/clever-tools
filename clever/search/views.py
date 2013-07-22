@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
-from haystack.query import SearchQuerySet, EmptySearchQuerySet
-#from mistress_dream.apps.recipes.models import Recipe
 from django.views.generic import ListView
+from clever.search.util import make_queryset
+from haystack.query import SearchQuerySet
+from haystack.query import EmptySearchQuerySet
+
 
 
 ##============================================================================##
 class SearchView(ListView):
+    queryset_class = SearchQuerySet
+    empty_queryset_class = EmptySearchQuerySet
+
     def get_queryset(self):
         query = self.request.GET.get("q", '')
-        if query:
-            results = SearchQuerySet().auto_query(query)
-        else:
-            results = EmptySearchQuerySet()
-        return results
+        return make_queryset(query, queryset_class=self.queryset_class, empty_queryset_class=self.empty_queryset_class)
 
     def get_context_data(self, *args, **kwargs):
         context = super(SearchView, self).get_context_data(*args, **kwargs)

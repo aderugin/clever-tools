@@ -13,9 +13,9 @@ class SmsHostBackend(object):
         to_phones = self.template.to
         text = self.template.message
 
-        API_ID = 'd4dc9702-f056-9684-2507-fcfbc161b238'
-        SMS_GATE_URL = 'http://sms.ru/sms/send'
+        API_ID = u'd4dc9702-f056-9684-2507-fcfbc161b238'
+        SMS_GATE_URL = u'http://sms.ru/sms/send'
 
         performed_text = re.sub('\s+', '+', text)
-        prepared_url = SMS_GATE_URL + '?api_id=' + API_ID + '&to=' + to_phones + '&text=' + performed_text
-        urllib.urlopen(prepared_url)
+        prepared_url = unicode(SMS_GATE_URL) + u'?api_id=' + unicode(API_ID) + u'&to=' + unicode(to_phones) + u'&text=' + unicode(performed_text)
+        urllib.urlopen(prepared_url.encode('utf-8'))

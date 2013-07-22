@@ -13,19 +13,11 @@ from clever.catalog.attributes import AttributeManager
 
 # ------------------------------------------------------------------------------
 class SectionParamsIterator(forms.models.ModelChoiceIterator):
-    ### TODO: TEST THIS!!!!
     def __init__(self, inline, field, section):
         self.section = section
         self.inline = inline
 
         super(SectionParamsIterator, self).__init__(field)
-
-    # def get_parents(self):
-    #     sections = Section.objects.filter(parent=self.section)
-    #     parents = [self.section.id]
-    #     if (sections):
-    #         parents = parents + list(set(item.id for item in sections.all()))
-    #     return parents
 
     def __iter__(self):
         related_manager = self.inline.related_model.objects
@@ -113,9 +105,6 @@ class SectionAdmin(AdminMixin, editor.TreeEditor):
         """ Выводит картинку а админке """
         return [inst.image]
 
-    def get_readonly_fields(self, request, obj=None):
-        return list(super(SectionAdmin, self).get_readonly_fields(request, obj)) + ['slug']
-
 
 # ------------------------------------------------------------------------------
 class AttributeForm(forms.ModelForm):
@@ -149,7 +138,7 @@ class ProductAttributeInline(AdminMixin, admin.TabularInline):
         for type_name, type in AttributeManager.get_types():
             exclude.append(type.field_name)
         self.insert_exclude(exclude)
-        self.insert_fields(['attribute', 'raw_value', 'real_value'])
+        self.insert_fields(['attribute', 'raw_value', 'real_value', 'sort', 'is_main', 'is_hidden'])
 
     def get_readonly_fields(self, request, obj=None):
         return list(super(ProductAttributeInline, self).get_readonly_fields(request, obj)) + ['real_value']
@@ -177,7 +166,7 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
     def __init__(self, model, admin_site, *args, **kwargs):
         # Добавляем базовые элементы в админку
         self.insert_list_display(['admin_thumbnail'], before=True)
-        self.insert_list_display(['active', 'section', 'brand', 'price', 'code'])
+        self.insert_list_display(['active', 'section', 'brand', 'price', 'code', 'popular_index'])
         self.insert_list_display_links(['admin_thumbnail', '__unicode__', '__str__'])
         self.insert_list_filter(['brand', 'section'])
         self.insert_search_fields(['title'])
@@ -194,9 +183,6 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
     def admin_thumbnail(self, inst):
         """ Выводит картинку а админке """
         return [inst.image]
-
-    def get_readonly_fields(self, request, obj=None):
-        return list(super(ProductAdmin, self).get_readonly_fields(request, obj)) + ['slug']
 
 
 # ------------------------------------------------------------------------------
@@ -265,6 +251,3 @@ class PseudoSectionAdmin(AdminMixin, admin.ModelAdmin):
             pseudo_section_value_inline,
             product_attribute_inline
         ])
-
-    def get_readonly_fields(self, request, obj=None):
-        return list(super(PseudoSectionAdmin, self).get_readonly_fields(request, obj)) + ['slug']

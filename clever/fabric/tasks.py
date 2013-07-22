@@ -7,13 +7,16 @@ from fabric.api import cd
 from fabric.api import lcd
 from fabric.api import prefix
 from fabric.api import hide
+from fabric.api import get
 from fabric.contrib import files
+from fabric.utils import abort
 from fabric import operations
 from clever.fabric import local_env
 from clever.fabric.utils import backup_mysql
 from clever.fabric.utils import get_head_hash
 from clever.fabric.utils import git_revert
 from clever.fabric.utils import revert_mysql
+from clever.fabric.utils import get_django_setting
 import os
 import json
 
@@ -31,18 +34,30 @@ __all__ = [
     'flush_cache',
     'deploy',
     'help',
+    'copy_backup',
+    'copy_media',
     'active_env',
     'import_xml'
 ]
 
 
-def active_env(name):
+def is_active_env(func):
+    def wrapper(*args, **kwargs):
+        if not getattr(env, 'name', None):
+            abort(u'Remote server is not specified')
+        func(*args, **kwargs)
+    wrapper.__name__ = func.__name__
+    wrapper.__doc__ = func.__doc__
+    return wrapper
+
+
+def active_env(name, environ_name):
     """
     Подготовка окружения
     """
     env_params = getattr(local_env, name, None)
     if not env_params:
-        raise RuntimeError("Не найдено окружение")
+        abort("Не найдено окружение")
 
     # Имя пользователя от которого запущен проект
     env.user = env_params.get('user')
@@ -60,7 +75,7 @@ def active_env(name):
     env.activate = env_params.get('venv')
 
     # Имя окружения
-    env.name = name
+    env.name = environ_name
 
 
 @task
@@ -68,7 +83,7 @@ def staging():
     """
     Подготовка окружения тестового сервера
     """
-    active_env('STAGING_ENVIRONMENT')
+    active_env('STAGING_ENVIRONMENT', 'staging')
 
 
 @task
@@ -76,10 +91,11 @@ def production():
     """
     Подготовка окружения рабочего сервера
     """
-    active_env('PRODUCTION_ENVIRONMENT')
+    active_env('PRODUCTION_ENVIRONMENT', 'production')
 
 
 @task
+@is_active_env
 def update(branch=None, force=False):
     """
     Обновление исходного кода из ветки
@@ -97,6 +113,13 @@ def update(branch=None, force=False):
     if local_env.MARKUP_DIRECTORY:
         with lcd(local_env.MARKUP_DIRECTORY):
             local("git push origin %s" % branch)
+
+    # Обновления в clever-tools
+        if local_env.CLEVER_REVISION:
+            virtualenv = os.environ.get('VIRTUAL_ENV', None)
+            tools_branch = 'version/' + local_env.CLEVER_REVISION
+            with lcd(os.path.join(virtualenv, 'src/clever-tools')):
+                local('git pull origin ' + tools_branch)
 
     with cd(env.root):
         # Обновляем бранчи если надо
@@ -122,6 +145,7 @@ def update(branch=None, force=False):
 
 
 @task
+@is_active_env
 def install(branch=None):
     """
     Установка зависимостей
@@ -132,10 +156,13 @@ def install(branch=None):
     with cd(env.root):
         # Обновляем зависимости для проекта
         with prefix(env.activate):
+            if local_env.CLEVER_REVISION:
+                run('pip install --upgrade -e git+git@bitbucket.org:cleversite/clever-tools.git@version/' + local_env.CLEVER_REVISION + '#egg=clever-tools')
             run('pip install -r ' + local_env.REQUIREMENTS_NAME)
 
 
 @task
+@is_active_env
 def backup():
     """Резервное копирование базы данных"""
 
@@ -157,6 +184,7 @@ def backup():
 
 
 @task
+@is_active_env
 def rollback():
     """Восстановление предыдущего состояния кода и базы данных"""
     # Загружаем информацию о точке востоновления
@@ -175,10 +203,42 @@ def rollback():
                 git_revert(data['markup'])
 
     # Восстановление базы данныx
-    revert_mysql(data['dump'])
+    with cd(env.root):
+        revert_mysql(data['dump'])
 
 
 @task
+@is_active_env
+def copy_backup():
+    """
+    Копирование послежнего бэкапа на компьютер пользоватеоя
+    """
+    # Загружаем информацию о точке востоновления
+    input = os.path.join(local_env.BACKUP_DIRECTORY, 'backup.json')
+    output = os.path.join(local_env.BACKUP_DIRECTORY, '%(host)s-%(path)s')
+    with cd(env.root):
+        fullname = operations.get(input, local_path=output)[0]
+
+        with open(fullname) as json_data:
+            data = json.load(json_data)
+
+        get(data['dump'], os.path.join(local_env.BACKUP_DIRECTORY, env.name + '.sql'))
+
+
+@task
+@is_active_env
+def copy_media():
+    media_root = get_django_setting('MEDIA_ROOT')
+
+    with cd(os.path.dirname(media_root)):
+        archive = os.path.join(env.root, local_env.BACKUP_DIRECTORY, 'media.tar.gz')
+        run('tar -czvf %s %s --exclude=%s' % (archive, os.path.basename(media_root), os.path.join(os.path.basename(media_root), 'thumbs')))
+        get(archive, os.path.join(local_env.BACKUP_DIRECTORY, env.name + '.tar.gz'))
+        run('rm %s' % (archive))
+
+
+@task
+@is_active_env
 def migrate(merge=False):
     """
     Миграция изменений схемы в БД
@@ -197,6 +257,7 @@ def migrate(merge=False):
 
 
 @task
+@is_active_env
 def collect():
     """
     Сборка и обновление статических файлов проекта
@@ -208,6 +269,7 @@ def collect():
 
 
 @task
+@is_active_env
 def restart():
     """
     Перезапуск приложения
@@ -219,6 +281,7 @@ def restart():
 
 
 @task
+@is_active_env
 def flush_cache():
     """
     Сбросить кэш Reddis'а
@@ -227,6 +290,7 @@ def flush_cache():
 
 
 @task
+@is_active_env
 def deploy(branch=None, flush=False):
     """
     Выполнить полное развертывание приложения на сервере
@@ -246,6 +310,7 @@ def deploy(branch=None, flush=False):
 
 
 @task
+@is_active_env
 def import_xml(*args):
     """
     Обновление каталога на сайте

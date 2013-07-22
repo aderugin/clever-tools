@@ -68,7 +68,7 @@ class SectionView(DetailView):
     default_order = None
 
     def get_queryset(self):
-        return self.model.sections.get_query_set()
+        return self.model.objects.filter(active=True)
 
     def paginate_queryset(self, queryset, page_size):
         """
@@ -184,7 +184,7 @@ class SectionView(DetailView):
         if order in self.order_by and order is not None:
             order_by = self.order_by[order]
             result_order = order_by['fields']
-            for field in range(len(result_order)):      # TODO
+            for field in range(len(result_order)):
                 if sort_by == 'desc':
                     if result_order[field][0] != '-':
                         result_order[field] = '-' + result_order[field]
@@ -194,7 +194,7 @@ class SectionView(DetailView):
         return order, sort_by, queryset
 
     def get_sections_queryset(self):
-        return self.object.children.all()
+        return self.object.children.filter(active=True)
 
     def prepare_pseudo_section(self, pseudo_category, filter_data):
         ''' Подготовка данных для формы фильтра '''
@@ -226,16 +226,6 @@ class SectionView(DetailView):
                 'price_1': pseudo_category.price_to
             })
         return filter_data
-
-    # def get_active_brand(self):
-    #     filter_form = self.get_filter_form()
-    #     cleaned_data = filter_form.cleaned_data
-    #     cleaned_data = filter(lambda x: x, cleaned_data)
-    #     import pprint
-    #     pp = pprint.PrettyPrinter(indent=4, depth=6)
-    #     pp.pprint(cleaned_data)
-
-    #     return None
 
     def get_context_data(self, **kwargs):
         context = super(SectionView, self).get_context_data(**kwargs)
