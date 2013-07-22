@@ -2,6 +2,7 @@
 CART_SESSION_NAME = 'cart'
 
 from clever.catalog.models import Product
+from decimal import Decimal
 
 
 # ------------------------------------------------------------------------------
@@ -160,7 +161,7 @@ class CartBase(object):
     def get_total_price(self, **kwargs):
         '''  Возвращает общую стоимость корзины '''
 
-        cost = 0
+        cost = Decimal(0.0)
         for item in self.items:
             cost += item.get_total_price(**kwargs)
 

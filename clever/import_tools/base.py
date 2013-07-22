@@ -159,10 +159,8 @@ class ImportFactory(object):
             with open(filename):
                 pass
         except IOError:
-            print u'Файл `%s` не найден', unicode(filename)
+            u'Файл `%s` не найден' % unicode(filename)
             return False
-
-        import sys
 
         # Импорт экземпляров моделей в базу
         count = len(self.parsers)
