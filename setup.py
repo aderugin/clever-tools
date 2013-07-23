@@ -23,7 +23,7 @@ setup(
     test_suite='clever.tests.runtests.runtests',
     install_requires=[
         # Concrete version
-        'Django == 1.4',
+        'Django >= 1.4',
         'django-cache-machine == 0.6',
 
         # Latest version
