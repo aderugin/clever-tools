@@ -149,17 +149,17 @@ class SectionView(DetailView):
         pseudo_slug = self.kwargs.get('pseudo_slug', None)
         if pseudo_slug and not self.pseudo_section:
             queryset = self.get_pseudo_section_queryset()
-            self.pseudo_section = get_object_or_404(klass=queryset, section=self.object, slug=pseudo_slug)
+            self.pseudo_section = get_object_or_404(klass=queryset, section=self.object, slug=pseudo_slug, active=True)
         return self.pseudo_section
 
     def get_pseudo_sections_queryset(self):
         """Создание запроса для получения всех активных псевдо категорий из раздела"""
-        queryset = models.PseudoSection.pseudo_sections.filter(section=self.object)
+        queryset = models.PseudoSection.objects.filter(section=self.object, active=True)
         return queryset
 
     def get_products_queryset(self):
         """Создание запроса для получения продуктов из раздела"""
-        return Product.products.filter(section=self.object)
+        return Product.objects.filter(section=self.object, active=True)
 
     def get_filter_queryset(self, queryset):
         filter_form = self.get_filter_form()
