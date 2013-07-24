@@ -18,7 +18,7 @@ class PriceAttribute(PseudoAttribute):
 
     def get_values(self, section):
         # return Brand.brands.filter(products__section=section).distinct().values_list('id', 'title')
-        prices = Product.objects.filter(section=section).aggregate(max_price=models.Max('price'), min_price=models.Min('price'))
+        prices = Product.objects.filter(section=section, active=True).aggregate(max_price=models.Max('price'), min_price=models.Min('price'))
         return (
             (prices['min_price'], prices['min_price']),
             (prices['max_price'], prices['max_price']),

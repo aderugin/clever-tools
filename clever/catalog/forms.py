@@ -90,7 +90,7 @@ class FilterForm(forms.Form):
         attributes = list(attributes)
 
         # Поиск значений аттрибутов для раздела
-        attributes_values = ProductAttribute.objects.filter(attribute__in=attributes).select_related('attribute').distinct()
+        attributes_values = ProductAttribute.objects.filter(attribute__in=attributes, product__active=True).select_related('attribute').distinct()
         if section:
             attributes_values = attributes_values.filter(product__section=self.section)
         attributes_values = list(attributes_values)
@@ -122,7 +122,8 @@ class FilterForm(forms.Form):
                     params = section_attrib
 
             # Добавляем поле в финальный результат
-            final_result.append(FilterAttribute(section, attrib, values, params))
+            if len(values):
+                final_result.append(FilterAttribute(section, attrib, values, params))
         return final_result
 
 
