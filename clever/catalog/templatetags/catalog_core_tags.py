@@ -14,7 +14,7 @@ def show_recently_viewed(context, template_name='catalog/blocks/recent-viewed.ht
 
     # Render template
     recent = someclass.load(context['request'])
-    if isinstance(context['object'], Product.get_deferred_instance()):
+    if 'object' in context and isinstance(context['object'], Product.get_deferred_instance()):
         recent.add_exclude(context['object'].id)
     context = context.__copy__()
     context.update({

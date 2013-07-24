@@ -68,7 +68,7 @@ class SectionQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQue
     """Базовый запрос для получения продуктов из каталога"""
 
     def with_products(self):
-        return self.annotate(products_count=models.Count('products')).filter(products_count__gt=0)
+        return self.filter(products__active=True).annotate(products_count=models.Count('products')).filter(products_count__gt=0)
 
 
 # ------------------------------------------------------------------------------
