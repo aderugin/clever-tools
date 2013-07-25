@@ -138,7 +138,7 @@ class BrandBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, Tit
     @property
     def descendant_sections(self):
         ''' Получить queryset для категорий в которых есть продукт данного производителя '''
-        return self.__class__.objects.filter(products__brand=self, active=True).distinct()
+        return Section.objects.filter(products__brand=self, active=True).distinct()
 
 
 # ------------------------------------------------------------------------------

@@ -77,7 +77,8 @@ class FilterForm(forms.Form):
         # Поиск значений для псевдо свойств
         for attrib in AttributeManager.get_attributes():
             values = attrib.get_values(section)
-            final_result.append(FilterAttribute(section, attrib, values,))
+            if len(values):
+                final_result.append(FilterAttribute(section, attrib, values,))
         return final_result
 
     def get_attributes(self, section):
