@@ -29,3 +29,6 @@ CLEVER_ATTRIBUTES_CONTROLS = getattr(settings, 'CLEVER_ATTRIBUTES_CONTROLS', [
 
 # Настройка класса для недавно просмотренных товаров
 CLEVER_RECENTLY_VIEWED = getattr(settings, 'CLEVER_RECENTLY_VIEWED', 'clever.catalog.recently_viewed.RecentlyViewed')
+
+# Настройка списка разрешенных аттрибутов
+CLEVER_BRAND_REQUIRED = getattr(settings, 'CLEVER_BRAND_REQUIRED', True)

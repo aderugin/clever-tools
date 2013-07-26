@@ -60,7 +60,9 @@ from clever.catalog.attributes import AbstractAttribute
 from clever.catalog.attributes import AttributeManager
 from clever.catalog.attributes import ImportProductAttributeValuesMetaclass
 from clever.catalog.attributes import ImportPseudoAttributeValuesMetaclass
+from clever.catalog.settings import CLEVER_BRAND_REQUIRED
 from decimal import Decimal
+
 
 # ------------------------------------------------------------------------------
 # Разделы каталога
@@ -112,7 +114,6 @@ class BrandQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQuery
     def with_products(self):
         return self.annotate(products_count=models.Count('products')).filter(products_count__gt=0)
 
-
 # ------------------------------------------------------------------------------
 class BrandBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, TitleMixin, PageMixin):
     """Базовая модель для производителя в каталоге"""
@@ -157,7 +158,7 @@ class SectionBrandBase(cache_machine.CachingMixin, models.Model):
     )
 
     section = DeferredForeignKey(Section, verbose_name=u'Раздел', null=False, blank=False)
-    brand = DeferredForeignKey(Brand, verbose_name=u'Производитель', null=False, blank=False)
+    brand = DeferredForeignKey(Brand, verbose_name=u'Производитель')
     order = models.IntegerField(verbose_name=u'Позиция', help_text=u'Расположение в фильтре', default=500)
 
     objects = CachingManager()
@@ -191,7 +192,7 @@ class ProductBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, T
     )
 
     section = DeferredForeignKey(Section, verbose_name='Раздел', null=False, blank=False, related_name='products')
-    brand = DeferredForeignKey(Brand, verbose_name='Производитель', null=False, blank=False, related_name='products')
+    brand = DeferredForeignKey(Brand, verbose_name='Производитель', null=not CLEVER_BRAND_REQUIRED, blank=not CLEVER_BRAND_REQUIRED, related_name='products')
     code = models.CharField(verbose_name=u'Внутренний код', help_text=u'Код для связи с внешними сервисами, например 1C', max_length=50, blank=True)
 
     # Это новая цена
