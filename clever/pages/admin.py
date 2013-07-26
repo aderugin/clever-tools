@@ -23,4 +23,4 @@ class PageAdmin(editor.TreeEditor):
     prepopulated_fields = {'slug': ('title',)}
     # inlines = [get_inline(Metadata)]
 
-#admin.site.register(Page, PageAdmin)
+admin.site.register(Page, PageAdmin)
