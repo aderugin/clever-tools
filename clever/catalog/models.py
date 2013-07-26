@@ -331,6 +331,9 @@ class ProductAttributeBase(cache_machine.CachingMixin, models.Model):
 
         super(ProductAttributeBase, self).save(*args, **kwargs)
 
+    def __unicode__(self):
+        return u"%s: %s" % (self.attribute.title, unicode(self.value))
+
 
 # ------------------------------------------------------------------------------
 class SectionAttributeBase(cache_machine.CachingMixin, models.Model):
