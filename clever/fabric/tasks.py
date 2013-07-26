@@ -115,11 +115,11 @@ def update(branch=None, force=False):
             local("git push origin %s" % branch)
 
     # Обновления в clever-tools
-        if local_env.CLEVER_REVISION:
-            virtualenv = os.environ.get('VIRTUAL_ENV', None)
-            tools_branch = 'version/' + local_env.CLEVER_REVISION
-            with lcd(os.path.join(virtualenv, 'src/clever-tools')):
-                local('git pull origin ' + tools_branch)
+    if local_env.CLEVER_REVISION:
+        virtualenv = os.environ.get('VIRTUAL_ENV', None)
+        tools_branch = 'version/' + local_env.CLEVER_REVISION
+        with lcd(os.path.join(virtualenv, 'src/clever-tools')):
+            local('git push origin ' + tools_branch)
 
     with cd(env.root):
         # Обновляем бранчи если надо
