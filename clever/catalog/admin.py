@@ -170,7 +170,7 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
         self.insert_list_display(['active', 'section', 'brand', 'price', 'code', 'popular_index'])
         self.insert_list_display_links(['admin_thumbnail', '__unicode__', '__str__'])
         self.insert_list_filter(['brand', 'section'])
-        self.insert_search_fields(['title'])
+        self.insert_search_fields(['title', 'code', 'brand', 'section'])
 
         # Создание inline редактора для свойств товара
         product_attribute_inline = type(model.__name__ + "_ProductAttributeInline", (ProductAttributeInline,), {
