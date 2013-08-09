@@ -9,6 +9,8 @@ from django_importer.importers.xml_importer import ElementTree
 
 IMPORT_DIRECTORY = 'exchange_1c/import'
 
+BACKUP_DIRECTORY = 'backup/import'
+
 
 def create_object_parser(model, tag_name, code_name='code', required=False):
     ''' Создание типа для объекта '''
@@ -30,7 +32,6 @@ def create_file_parser(tag_name, import_dir=IMPORT_DIRECTORY, file_dir='', requi
         If file exist return file
         """
         file_path = os.path.join(settings.PROJECT_DIR, '../cache', import_dir, file_dir, name)
-        print file_path
         try:
             file = open(file_path, 'r')
             if file is not None:
@@ -187,6 +188,11 @@ class ImportFactory(object):
             ]))
             self.print_errors(parser.errors)
             index += 1
+
+        # Удаляем файл файл в архив
+        dt = str(datetime.datetime.now())
+        newname = 'import_' + dt.replace(' ', '_') + '.xml'
+        os.rename(file_path, os.path.join(settings.PROJECT_DIR, '../cache', BACKUP_DIRECTORY, newname))
 
         # Вывод полной информации о импорте
         print u'---------------------------------------------------------------'

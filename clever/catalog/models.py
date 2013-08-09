@@ -310,24 +310,24 @@ class ProductAttributeBase(cache_machine.CachingMixin, models.Model):
         '''
         Получение типизированного значения свойства для продукта
         '''
-        type = self.attribute.type_object
-        field_name = type.field_name
-        return getattr(self, field_name, type.filter_value(self.raw_value))
+        type_obj = self.attribute.type_object
+        field_name = type_obj.field_name
+        return getattr(self, field_name, type_obj.filter_value(self.raw_value))
 
     @value.setter
     def value(self, value):
-        type = self.attribute.type_object
-        field_name = type.field_name
+        type_obj = self.attribute.type_object
+        field_name = type_obj.field_name
         self.raw_value = unicode(value)
-        setattr(self, field_name, type.filter_value(value))
+        setattr(self, field_name, type_obj.filter_value(value))
 
     def save(self, *args, **kwargs):
-        for type_name, type in AttributeManager.get_types():
-            setattr(self, type.field_name, None)
+        for type_name, type_obj in AttributeManager.get_types():
+            setattr(self, type_obj.field_name, None)
 
         # Точное обновление аргумента при сохранении
-        type = self.attribute.type_object
-        setattr(self, type.field_name, type.filter_value(self.raw_value))
+        type_obj = self.attribute.type_object
+        setattr(self, type_obj.field_name, type_obj.filter_value(self.raw_value))
 
         super(ProductAttributeBase, self).save(*args, **kwargs)
 
