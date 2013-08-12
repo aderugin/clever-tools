@@ -56,6 +56,7 @@ class XMLImporter(BaseXMLImporter):
     def __init__(self, source=None):
         super(XMLImporter, self).__init__(source)
 
+        self.errors = []
         self.element_count = 0
         self.created_count = 0
         self.updated_count = 0
@@ -139,15 +140,17 @@ class ImportFactory(object):
 
     def print_errors(self, errors=None):
         former_errors = set()
+        if errors is None:
+            errors = self.errors
 
-        if len(self.errors):
-            for error in self.errors:
+        if len(errors):
+            for error in errors:
                 exception_message = '%s' % error['exception']
                 if not exception_message in former_errors:
                     sys.stdout.write(''.join(["    Ошибка: \033[31m", exception_message, "\033[39m\n"]))
                     former_errors.add(exception_message)
 
-    def parse(self, source):
+    def parse(self, source, store=False):
         def text_color(*args, **kwargs):
             color = kwargs.get('color', 'green')
             string = u''.join(args)
@@ -190,9 +193,10 @@ class ImportFactory(object):
             index += 1
 
         # Удаляем файл файл в архив
-        dt = str(datetime.datetime.now())
-        newname = 'import_' + dt.replace(' ', '_') + '.xml'
-        os.rename(file_path, os.path.join(settings.PROJECT_DIR, '../cache', BACKUP_DIRECTORY, newname))
+        if not store:
+            dt = str(datetime.datetime.now())
+            newname = 'import_' + dt.replace(' ', '_') + '.xml'
+            os.rename(file_path, os.path.join(settings.PROJECT_DIR, '../cache', BACKUP_DIRECTORY, newname))
 
         # Вывод полной информации о импорте
         print u'---------------------------------------------------------------'
