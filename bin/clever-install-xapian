@@ -8,13 +8,13 @@ cd $VENV/packages
 
 if [ ! -f xapian-core-1.2.8.tar.gz ]
 then
-    wget http://oligarchy.co.uk/xapian/1.2.8/xapian-core-1.2.8.tar.gz
+    wget http://www.flax.co.uk/xapian/128/xapian-core-1.2.8.tar.gz
     tar xzvf xapian-core-1.2.8.tar.gz
 fi
 
 if [ ! -f xapian-bindings-1.2.8.tar.gz ]
 then
-    wget http://oligarchy.co.uk/xapian/1.2.8/xapian-bindings-1.2.8.tar.gz
+    wget http://www.flax.co.uk/xapian/128/xapian-bindings-1.2.8.tar.gz
     tar xzvf xapian-bindings-1.2.8.tar.gz
 fi
 
