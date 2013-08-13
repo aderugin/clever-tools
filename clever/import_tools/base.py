@@ -5,6 +5,7 @@ import os
 from django.core.files import File
 from django_importer.importers.xml_importer import XMLImporter as BaseXMLImporter
 from lxml import etree
+import gc
 
 
 IMPORT_DIRECTORY = 'exchange_1c/import'
@@ -83,7 +84,7 @@ class XMLImporter(BaseXMLImporter):
             if count:
                 def _show(_i):
                     x = int(size*_i/count)
-                    sys.stdout.write("%s[%s%s] %i/%i\r" % (prefix, "#"*x, "."*(size-x), _i, count))
+                    sys.stdout.write("%s[%s%s] %i/%i\r" % (prefix, "#" * x, "." * (size - x), _i, count))
                     sys.stdout.flush()
 
                 _show(0)
@@ -93,6 +94,10 @@ class XMLImporter(BaseXMLImporter):
 
                     # Unload item
                     item.clear()
+
+                    # cleanup
+                    if i % 1000:
+                        gc.collect()
 
                     # Show progress
                     _show(i + 1)
