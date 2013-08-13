@@ -125,6 +125,9 @@ class XMLImporter(BaseXMLImporter):
                 self.errors_count += 1
                 self.save_error(data, sys.exc_info())
 
+            # Unload item
+            item.clear()
+
         # Unload the source
         self.unload()
 
