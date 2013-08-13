@@ -4,7 +4,7 @@ import sys
 import os
 from django.core.files import File
 from django_importer.importers.xml_importer import XMLImporter as BaseXMLImporter
-from django_importer.importers.xml_importer import ElementTree
+from lxml import etree
 
 
 IMPORT_DIRECTORY = 'exchange_1c/import'
@@ -68,9 +68,12 @@ class XMLImporter(BaseXMLImporter):
         Iterator of the list of items in the XML source.
         """
         # Use `iterparse`, it's more efficient, specially for big files
-        for event, item in ElementTree.iterparse(self.source):
+        # for item in etree.parse(self.source).iter(self.item_tag_name):
+        for event, item in etree.iterparse(self.source):
             if item.tag == self.item_tag_name:
                 yield item
+            else:
+                item.clear()
 
     def parse(self):
         def progressbar(items, prefix="", size=60):
@@ -84,9 +87,15 @@ class XMLImporter(BaseXMLImporter):
                     sys.stdout.flush()
 
                 _show(0)
-                for i, item in enumerate(items):
+                for i in xrange(0, count):
+                    item = items.pop(0)
                     yield item
-                    _show(i+1)
+
+                    # Unload item
+                    item.clear()
+
+                    # Show progress
+                    _show(i + 1)
                 sys.stdout.write("\n")
                 sys.stdout.flush()
 
@@ -124,9 +133,6 @@ class XMLImporter(BaseXMLImporter):
             except Exception, e:
                 self.errors_count += 1
                 self.save_error(data, sys.exc_info())
-
-            # Unload item
-            item.clear()
 
         # Unload the source
         self.unload()
@@ -207,4 +213,5 @@ class ImportFactory(object):
         for parser in parsers:
             model_verbose_name = parser.model._meta.verbose_name_plural.title()
             print text_color(u'Импортировано ', unicode(model_verbose_name), ' ', unicode(parser.processed_count), u' из ', unicode(parser.element_count), color='green')
+            gc.collect()
         return True
