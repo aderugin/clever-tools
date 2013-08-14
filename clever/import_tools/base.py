@@ -32,9 +32,9 @@ def create_file_parser(tag_name, import_dir=IMPORT_DIRECTORY, file_dir='', requi
         """
         If file exist return file
         """
-        file_path = os.path.join(settings.PROJECT_DIR, '../cache', import_dir, file_dir, name)
+        filepath = os.path.join(settings.PROJECT_DIR, '../cache', import_dir, file_dir, name)
         try:
-            file = open(file_path, 'r')
+            file = open(filepath, 'r')
             if file is not None:
                 return File(file, name)
         except:
@@ -85,6 +85,7 @@ class XMLImporter(BaseXMLImporter):
             is_updated = False
             is_deleted = False
             self.processed_count += 1
+
             if self.is_delete_item(item, data, instance):
                 is_deleted = True
                 if instance.pk:
