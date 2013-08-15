@@ -69,6 +69,10 @@ class XMLImporter(BaseXMLImporter):
     def is_delete_item(self, item, data, instance):
         return False
 
+    def delete_item(self, item, data, instance):
+        if instance.pk:
+            instance.delete()
+
     def process_item(self, item, parent):
         data = None
         try:
