@@ -9,6 +9,7 @@
 """
 
 from django.db import models
+import importlib
 
 def get_model_fields(model):
     """Получение полей из модели Django ORM"""
@@ -96,3 +97,15 @@ class ModelMetaclass(models.base.ModelBase):
         else:
             model = super(ModelMetaclass, meta).__new__(meta, name, bases, dct)
         return model
+
+
+def load_class(cls):
+    if not cls:
+        raise ValueError(u'Пустое имя класса')
+
+    module_name, class_name = cls.rsplit(".", 1)
+    somemodule = importlib.import_module(module_name)
+    clazz = getattr(somemodule, class_name)
+    if not clazz:
+        raise RuntimeError(u'Класс %s не найден' % cls)
+    return clazz
