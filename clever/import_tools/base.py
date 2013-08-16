@@ -6,6 +6,7 @@ from django.core.files import File
 from django_importer.importers.xml_importer import XMLImporter as BaseXMLImporter
 from lxml import etree
 import gc
+import datetime
 
 
 IMPORT_DIRECTORY = 'exchange_1c/import'

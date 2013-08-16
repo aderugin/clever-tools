@@ -16,7 +16,7 @@ class Notification(models.Model):
         return "%s (%s)" % (self.name, self.slug)
 
     @classmethod
-    def send(cls, slug, variables, sms_notice):
+    def send(cls, slug, variables, sms_notice=False):
         """
             Send message using defined backend
             :slug: String event slug
