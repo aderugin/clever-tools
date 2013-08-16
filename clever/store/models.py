@@ -109,7 +109,9 @@ class OrderBase(TimestableMixin, models.Model):
     # code = models.CharField(verbose_name=u'1С ID', max_length=50, blank=True)
 
     def __unicode__(self):
-        return u"Заказ №%d" % (self.id)
+        if self.id:
+            return u"Заказ №%d" % (self.id)
+        return u"Новый заказ"
 
 
 # ------------------------------------------------------------------------------
