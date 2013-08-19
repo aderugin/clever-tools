@@ -11,7 +11,7 @@ METADATA_CLASS = load_class(CLEVER_SEO_CLASS)
 
 def inject_seo_inline():
     '''
-    Декоратор для добовления редактора в экземпляры моделей в админке
+    Декоратор для добавления редактора в экземпляры моделей в админке
     '''
     def outer_wrapper(cls):
 
