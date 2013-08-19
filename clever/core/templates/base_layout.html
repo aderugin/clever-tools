@@ -22,7 +22,9 @@
         {% get_metadata as metadata %}
         {% block page_metadata %}
             {% if not metadata.title.value %}
-                {% if object.title %}
+                {% if object.seo_title %}
+                    <title>{{ object.seo_title }}</title>
+                {% elif object.title %}
                     <title>{{ object.title }}</title>
                 {% elif object.name %}
                     <title>{{ object.name }}</title>
