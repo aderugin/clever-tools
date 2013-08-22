@@ -7,6 +7,7 @@ from models import Product
 
 class ProductIndex(SearchIndex, Indexable):
     """Поисковой индекс по страницам"""
+    active = BooleanField(model_attr='active')
     text = CharField(document=True, use_template=True)
     title = CharField(model_attr='title')
     price = FloatField(model_attr='price')

@@ -60,4 +60,3 @@ def remove_files(sender, instance, **kwargs):
 for model in find_models_with_imagefield():
     pre_save.connect(remove_old_files, sender=model, weak=False)
     post_delete.connect(remove_files, sender=model, weak=False)
-

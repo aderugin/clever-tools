@@ -5,6 +5,7 @@ from clever.magic import load_class
 from django.db.models.signals import pre_save
 from django.db.models.fields import FieldDoesNotExist
 
+
 def remove_unused_metadata(instance, *args, **kwargs):
     '''
     Удаление старых метаданных из SEO
