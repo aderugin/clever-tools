@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-#import datetime
 from haystack.indexes import *
 from models import Product
 
