@@ -23,11 +23,11 @@ def make_queryset(query_string, queryset_class=SearchQuerySet, empty_queryset_cl
         # Включаем эти группы в поиск
         queryset = queryset_class()
         for qp in query_parts:
-            queryset_part = queryset_class().filter_or(text__startswith=qp).filter_or(text=qp)
+            queryset_part = queryset_class().filter_or(text__startswith=qp).filter_or(text=qp).filter_or(contains=qp)
 
             suggestion = SearchQuerySet().filter(text__startswith=qp).spelling_suggestion()
             if suggestion:
-                queryset_part = queryset_part.filter_or(text__startswith=suggestion).filter_or(text=suggestion)
+                queryset_part = queryset_part.filter_or(text__startswith=suggestion).filter_or(text=suggestion).filter_or(contains=suggestion)
             queryset &= queryset_part
         return queryset
     else:
