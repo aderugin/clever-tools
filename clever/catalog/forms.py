@@ -56,7 +56,7 @@ class FilterForm(forms.Form):
         product_indexes = None
         for filter_arg in filter_args:
             current_indexes = set(Product.objects.filter(filter_arg, section=self.section).values_list('id'))
-            if product_indexes:
+            if product_indexes is not None:
                 product_indexes &= current_indexes
             else:
                 product_indexes = current_indexes
