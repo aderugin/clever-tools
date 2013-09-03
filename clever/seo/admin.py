@@ -14,7 +14,6 @@ def inject_seo_inline():
     Декоратор для добавления редактора в экземпляры моделей в админке
     '''
     def outer_wrapper(cls):
-
         inlines = list(getattr(cls, 'inlines', []))
         inlines.append(get_inline(METADATA_CLASS))
         cls.inlines = inlines

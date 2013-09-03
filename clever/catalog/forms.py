@@ -124,6 +124,9 @@ class FilterForm(forms.Form):
 
             # Добавляем поле в финальный результат
             if len(values):
+                type_object = attrib.type_object
+                values = [(type_object.filter_value(v), t) for v, t in values]
+                values = sorted(values)
                 final_result.append(FilterAttribute(section, attrib, values, params))
         return final_result
 

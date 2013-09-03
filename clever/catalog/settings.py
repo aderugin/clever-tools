@@ -26,3 +26,6 @@ CLEVER_ATTRIBUTES_CONTROLS = getattr(settings, 'CLEVER_ATTRIBUTES_CONTROLS', [
     'checkbox',
     'select'
 ])
+
+# Настройка опция по умолчанию для списка отсуствующих параметров
+CLEVER_EMPTY_LABEL = getattr(settings, 'CLEVER_EMPTY_LABEL', u"----")

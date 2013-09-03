@@ -21,9 +21,12 @@ def nearby(lst, obj, count=9):
         pos = 0
     dist = count / 2
 
-    if pos <= dist:
+    # import pdb; pdb.set_trace()
+    if l <= count:
+        return lst
+    elif pos <= dist:
         return lst[:count]
-    if pos >= l - dist:
+    elif pos >= l - dist:
         return lst[l-count:]
     else:
         return lst[pos-dist:pos+dist+1]
