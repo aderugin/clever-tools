@@ -278,7 +278,7 @@ class ImportFactory(object):
         if not store:
             dt = str(datetime.datetime.now())
             newname = 'import_' + dt.replace(' ', '_') + '.xml'
-            os.rename(file_path, os.path.join(settings.PROJECT_DIR, '../cache', BACKUP_DIRECTORY, newname))
+            os.rename(filename, os.path.join(settings.PROJECT_DIR, '../cache', BACKUP_DIRECTORY, newname))
 
         # Вывод полной информации о импорте
         print u'---------------------------------------------------------------'
