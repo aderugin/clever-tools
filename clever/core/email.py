@@ -45,8 +45,8 @@ def send_create_email_to_managers(template_name, var_name='instance', admin=True
                 send_templated_email(email_lists, "emails/" + template_name, {
                     var_name: instance,
 
-                    'admin_url': get_frontend_view_url(instance),
-                    'view_url': get_backend_edit_url(instance)
+                    'admin_url': get_backend_edit_url(instance),
+                    'view_url': get_frontend_view_url(instance),
                 })
 
         post_save.connect(send_feedback_email, sender=cls, weak=False)

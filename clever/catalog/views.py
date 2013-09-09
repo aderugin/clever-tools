@@ -313,7 +313,9 @@ class ProductView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(ProductView, self).get_context_data(**kwargs)
-        context['attributes'] = self.get_attributes()
+
+        if models.ProductAttribute.deferred_instance:
+            context['attributes'] = self.get_attributes()
 
         # Добавляем товар в не давно просмотренные
         RecentlyViewed = load_class(CLEVER_RECENTLY_VIEWED)

@@ -37,7 +37,7 @@ class FormsetMixin(object):
                 raise RuntimeError(u'Незадано имя ForeignKey для главной формы у formset\'а')
 
             # Базовые параметры
-            form_kwargs.setdefault('extra', 1)
+            form_kwargs.setdefault('extra', 0)
             model = form_kwargs.get('form', None)
             if not model:
                 meta = getattr(form_class, 'Meta', None)
