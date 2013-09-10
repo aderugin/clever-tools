@@ -23,6 +23,7 @@ class PageAdmin(editor.TreeEditor):
     form = PageAdminForm
     list_display = ('title', 'slug', 'path', 'active', 'created_at', 'updated_at', )
     prepopulated_fields = {'slug': ('title',)}
+    # inlines = [get_inline(Metadata)]
 
 
 # ------------------------------------------------------------------------------

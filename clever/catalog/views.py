@@ -172,7 +172,7 @@ class SectionView(DetailView):
     def get_products_sections(self):
         sections = [self.object]
         if self.is_subsection:
-            sections += self.object.get_children()
+            sections += self.object.get_descendants()
         return sections
 
     def get_products_queryset(self):

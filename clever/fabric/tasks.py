@@ -119,7 +119,7 @@ def update(branch=None, force=False):
             virtualenv = os.environ.get('VIRTUAL_ENV', None)
             tools_branch = 'version/' + local_env.CLEVER_REVISION
             with lcd(os.path.join(virtualenv, 'src/clever-tools')):
-                local('git pull origin ' + tools_branch)
+                local('git push origin ' + tools_branch)
 
     with cd(env.root):
         # Обновляем бранчи если надо

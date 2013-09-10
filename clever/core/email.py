@@ -42,6 +42,7 @@ def send_create_email_to_managers(template_name, var_name='instance', admin=True
             if querypart and created:
                 users = User.objects.filter(querypart)
                 email_lists = [user.email for user in users]
+                email_lists = filter(lambda email: email is not None and len(email) > 0, email_lists)
                 send_templated_email(email_lists, "emails/" + template_name, {
                     var_name: instance,
 
