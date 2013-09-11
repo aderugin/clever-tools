@@ -38,6 +38,13 @@ class DeferredPoint(object):
             raise RuntimeError("Не найден конкретный класс для %s" % name)
         return self.__dict__['__instance']
 
+    @property
+    def deferred_instance(self):
+        ''' Найден ли конкретный класс '''
+        if not self.__dict__['__instance']:
+            return False
+        return True
+
     def __getattr__(self, name):
         instance = self.get_deferred_instance()
         return getattr(instance, name)
