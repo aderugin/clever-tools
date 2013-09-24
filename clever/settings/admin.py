@@ -11,14 +11,13 @@ from django.contrib.sites.models import Site
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse
 from django.conf.urls import url
-
+from django.db import models
 
 def show_site_settings(request):
     """
     Show site settings and edit
     """
     site = Site.objects.get_current()
-
     # Collect all forms
     form_collection = []
     for name, model in get_models().items():
@@ -29,6 +28,12 @@ def show_site_settings(request):
 
         form_class = create_form(model)
         form_collection.append((form_class, instance, name, model._meta.verbose_name))
+
+    has_file_field = False
+    for item in form_collection[0][1]._meta.fields:
+        if type(item) == models.FileField or type(item) == models.ImageField:
+            has_file_field = True
+            break
 
     # Initialise all the forms, in a dictionary that we can later use
     # as context
@@ -55,7 +60,8 @@ def show_site_settings(request):
 
     context = {
         'form_url': reverse('admin:site_settings'),
-        'forms': forms.values()
+        'forms': forms.values(),
+        'has_file_field': has_file_field
     }
     return render_to_response(
         'clever/settings/form.html', context,
