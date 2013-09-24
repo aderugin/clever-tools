@@ -18,7 +18,7 @@ import autoslug
 import os
 
 
-def generate_upload_name(instance, filename, prefix=None, unique=False):
+def generate_upload_name(instance, filename, prefix=None, unique=True):
     """
     Авто генерация имени для файлов и изображений, загруженных с помощью  FileField и ImageField.
 
