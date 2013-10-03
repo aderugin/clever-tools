@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.forms.formsets import formset_factory
+from django.forms.models import inlineformset_factory
 
 
 class FormsetMixin(object):
@@ -46,11 +46,13 @@ class FormsetMixin(object):
                     raise RuntimeError(u'Незадана модель для formset\'а')
 
             # Создаем
-            formset = formset_factory(form_class, **form_kwargs)
+            #import pdb; pdb.set_trace()
+            formset = inlineformset_factory(self.Meta.model, model,
+                    form=form_class)
             if 'data' in kwargs:
-                form = formset(kwargs.get('data'), kwargs.get('files'))
+                form = formset(kwargs.get('data'), kwargs.get('files'), instance=self.instance)
             else:
-                form = formset()
+                form = formset(instance=self.instance)
             self.formsets[name] = (form, fk_name, model)
 
     def __getattr__(self, name):
