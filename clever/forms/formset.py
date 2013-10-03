@@ -60,10 +60,8 @@ class FormsetMixin(object):
             # Создаем
             form_kwargs['form'] = form_class
             formset = inlineformset_factory(self.Meta.model, model, **form_kwargs)
-            if 'data' in kwargs:
-                form = formset(**kwargs)
-            else:
-                form = formset(instance=self.instance)
+            kwargs['instance'] = self.instance
+            form = formset(**kwargs)
             self.formsets[name] = (form, fk_name, model)
 
     def __getattr__(self, name):
