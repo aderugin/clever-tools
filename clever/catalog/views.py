@@ -63,7 +63,6 @@ class SectionView(DetailView):
     paginate_by = None
     paginator_class = Paginator
     page_kwarg = 'page'
-
     count_kwarg = 'count'
     order_by = {
         # TODO: Добавить сортировку по идентификатору
@@ -157,13 +156,13 @@ class SectionView(DetailView):
         pseudo_slug = self.kwargs.get('pseudo_slug', None)
         if pseudo_slug and not self.pseudo_section:
             queryset = self.get_pseudo_section_queryset()
-            self.pseudo_section = get_object_or_404(klass=queryset, section=self.object, slug=pseudo_slug)
+            self.pseudo_section = get_object_or_404(klass=queryset, section=self.object, slug=pseudo_slug, active=True)
         return self.pseudo_section
 
     def get_pseudo_sections_queryset(self):
         """Создание запроса для получения все активных псевдо категорий из раздела"""
         if self.has_pseudo_section:
-            queryset = models.PseudoSection.pseudo_sections.filter(section=self.object)
+            queryset = models.PseudoSection.pseudo_sections.filter(section=self.object, active=True)
             return queryset
         else:
             # TODO: Заменить на EmptyQuerySet
@@ -177,7 +176,7 @@ class SectionView(DetailView):
 
     def get_products_queryset(self):
         """Создание запроса для получения продуктов из раздела"""
-        return Product.products.filter(section__in=self.get_products_sections())
+        return Product.products.filter(section__in=self.get_products_sections(), active=True)
 
     def get_filter_queryset(self, queryset):
         filter_form = self.get_filter_form()
@@ -309,7 +308,7 @@ class ProductView(DetailView):
         return self.model.products.get_query_set()
 
     def get_attributes(self):
-        return models.ProductAttribute.objects.filter(product=self.object)
+        return models.ProductAttribute.objects.filter(product=self.object).order_by('sort')
 
     def get_context_data(self, **kwargs):
         context = super(ProductView, self).get_context_data(**kwargs)

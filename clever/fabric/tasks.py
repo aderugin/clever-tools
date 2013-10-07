@@ -239,21 +239,17 @@ def copy_media():
 
 @task
 @is_active_env
-def migrate(merge=False):
+def migrate(*args):
     """
     Миграция изменений схемы в БД
     """
-    append = ""
-    if merge:
-        append = " --merge"
-
     with cd(env.root):
         with prefix(env.activate):
             # Обновления БД в соответствии с джанго
             run('python manage.py syncdb')
 
             # Мигрируем изменения в БД
-            run('python manage.py migrate' + append)
+            run('python manage.py migrate ' + ' '.join(args))
 
 
 @task

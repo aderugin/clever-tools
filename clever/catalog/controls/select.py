@@ -6,6 +6,7 @@ from clever.catalog.attributes import AttributeControl
 from clever.catalog.attributes import AttributeManager
 from clever.forms.utils import FilterFieldMixin
 from django.utils.encoding import smart_text, force_text
+from clever.catalog.settings import CLEVER_EMPTY_LABEL
 
 # ------------------------------------------------------------------------------
 class Select(forms.Select):
@@ -32,7 +33,7 @@ class SelectField(FilterFieldMixin, forms.ChoiceField):
 # ------------------------------------------------------------------------------
 @AttributeManager.register_control(tag='select', verbose_name=u'Выпадающий список', allowed_only=True)
 class SelectControl(AttributeControl):
-    empty_label = u"----"
+    empty_label = CLEVER_EMPTY_LABEL
 
     def create_form_field(self, attribute, values):
         return SelectField(

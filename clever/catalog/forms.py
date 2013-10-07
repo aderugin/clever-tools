@@ -57,7 +57,7 @@ class FilterForm(forms.Form):
         product_indexes = None
         for filter_arg in filter_args:
             current_indexes = set(Product.objects.filter(filter_arg, section__in=self.sections).values_list('id'))
-            if product_indexes:
+            if product_indexes is not None:
                 product_indexes &= current_indexes
             else:
                 product_indexes = current_indexes
@@ -78,7 +78,8 @@ class FilterForm(forms.Form):
         # Поиск значений для псевдо свойств
         for attrib in AttributeManager.get_attributes():
             values = attrib.get_values(section)
-            final_result.append(FilterAttribute(section, attrib, values,))
+            if len(values):
+                final_result.append(FilterAttribute(section, attrib, values,))
         return final_result
 
     def get_attributes(self, section):
@@ -123,7 +124,11 @@ class FilterForm(forms.Form):
                     params = section_attrib
 
             # Добавляем поле в финальный результат
-            final_result.append(FilterAttribute(section, attrib, values, params))
+            if len(values):
+                type_object = attrib.type_object
+                values = [(type_object.filter_value(v), t) for v, t in values]
+                values = sorted(values)
+                final_result.append(FilterAttribute(section, attrib, values, params))
         return final_result
 
 

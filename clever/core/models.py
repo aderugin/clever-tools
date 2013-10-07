@@ -78,7 +78,7 @@ class TitleMixin(models.Model):
     class Meta:
         abstract = True
     title = models.CharField(verbose_name=u"Название", max_length=255)
-    slug = autoslug.AutoSlugField(verbose_name=u"ЧПУ сегмент", populate_from='title', sep='-', unique=True, editable=True, blank=True)
+    slug = autoslug.AutoSlugField(verbose_name=u"ЧПУ сегмент", max_length=255, populate_from='title', sep='-', unique=True, editable=True, blank=True)
 
     def __unicode__(self):
         return self.title
