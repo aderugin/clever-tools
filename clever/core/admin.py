@@ -30,12 +30,12 @@ def thumbnail_column(size='106x80', **kwargs):
             logger = logging.getLogger(__name__)
 
             for image in images:
-                #try:
-                if image:
-                    im = get_thumbnail(image, size, crop=crop, quality=quality)
-                    return u'<img src="%s%s" />' % (settings.MEDIA_URL, im)
-                #except Exception, e:
-                #    logger.debug(e)
+                try:
+                    if image:
+                        im = get_thumbnail(image, size, crop=crop, quality=quality)
+                        return u'<img src="%s" width="%d" height="%d" />' % (im.url, im.width, im.height)
+                except Exception as e:
+                    logger.debug(e)
             return u'(Картинки нет)'
 
         # Дополнительные параметры для поля
