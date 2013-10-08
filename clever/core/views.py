@@ -7,11 +7,13 @@ from django.http import HttpResponse
 import json
 
 
+#-------------------------------------------------------------------------------
 class AjaxDataMixin(object):
     def get_ajax_data(self, **kwargs):
         return {}
 
 
+#-------------------------------------------------------------------------------
 class AjaxMixin(View, AjaxDataMixin):
     '''
     Миксин, формирующий JSON ответ для GET запроса. Достаточно переопределить
@@ -27,6 +29,23 @@ class AjaxMixin(View, AjaxDataMixin):
             return response
 
 
+#-------------------------------------------------------------------------------
+class AjaxListMixin(ListView, AjaxDataMixin):
+    '''
+    Миксин, формирующий JSON ответ для GET запроса. Достаточно переопределить
+    get_ajax_data и вернуть в нем словарь
+    '''
+
+    def get(self, request, *args, **kwargs):
+        response = super(AjaxListMixin, self).get(request, request, *args, **kwargs)
+        if request.is_ajax():
+            data = self.get_ajax_data(object_list=self.object_list, **kwargs)
+            return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), mimetype='application/json')
+        else:
+            return response
+
+
+#-------------------------------------------------------------------------------
 class AjaxProcessMixin(View, AjaxDataMixin):
     '''
     Миксин, формирующий JSON ответ для GET запроса. Достаточно переопределить
@@ -38,6 +57,7 @@ class AjaxProcessMixin(View, AjaxDataMixin):
         return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), mimetype='application/json')
 
 
+#-------------------------------------------------------------------------------
 class AjaxFormMixin(object):
     def json_response(self, response):
         return HttpResponse(json.dumps(response, cls=DjangoJSONEncoder), mimetype='application/json')

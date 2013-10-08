@@ -44,7 +44,6 @@ class DeferredPoint(object):
             return False
         return True
 
-
     def __getattr__(self, name):
         instance = self.get_deferred_instance()
         return getattr(instance, name)

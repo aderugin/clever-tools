@@ -187,10 +187,11 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
         self.insert_search_fields(['title'])
 
         # Создание inline редактора для свойств товара
-        product_attribute_inline = type(model.__name__ + "_ProductAttributeInline", (ProductAttributeInline,), {
-            'model': models.ProductAttribute,
-        })
-        self.insert_inlines([product_attribute_inline])
+        if models.ProductAttribute.deferred_instance:
+            product_attribute_inline = type(model.__name__ + "_ProductAttributeInline", (ProductAttributeInline,), {
+                'model': models.ProductAttribute,
+            })
+            self.insert_inlines([product_attribute_inline])
 
         super(ProductAdmin, self).__init__(model, admin_site, *args, **kwargs)
 
