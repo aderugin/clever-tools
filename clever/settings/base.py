@@ -4,6 +4,8 @@ from django.db.models.base import ModelBase
 from django.db.models.base import Model
 from django.contrib.sites.models import Site
 from django.core.exceptions import ObjectDoesNotExist
+from caching import base as cache_machine
+
 
 _models = {}
 _options = {}
@@ -36,7 +38,7 @@ class SettingsMetaclass(ModelBase):
         return model
 
 
-class SettingsModel(Model):
+class SettingsModel(cache_machine.CachingMixin, Model):
     class Meta:
         abstract = True
     __metaclass__ = SettingsMetaclass

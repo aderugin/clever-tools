@@ -74,6 +74,8 @@ def active_env(name, environ_name):
     # Путь до virtualenv директории на серверах
     env.activate = env_params.get('venv')
 
+    # Путь до virtualenv директории на серверах
+    env.supervisor = env_params.get('supervisor', None)
     # Имя окружения
     env.name = environ_name
 
@@ -272,8 +274,11 @@ def restart():
     """
     with cd(env.root):
         with prefix(env.activate):
-            # Перезапуск приложения Django
-            run('killall -u ' + env.user + ' ' + local_env.DJANGO_WSGI_NAME)
+            if env.supervisor:
+                run('supervisorctl restart %s' % ' '.join(env.supervisor))
+            else:
+                # Перезапуск приложения Django
+                run('killall -u ' + env.user + ' ' + local_env.DJANGO_WSGI_NAME)
 
 
 @task
