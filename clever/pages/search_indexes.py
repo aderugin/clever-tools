@@ -6,6 +6,7 @@ from models import Page
 
 class PageIndex(SearchIndex, Indexable):
     """Поисковой индекс по страницам"""
+    active = BooleanField(model_attr='active')
     text = CharField(document=True, use_template=True)
     title = CharField(model_attr='title')
     updated_at = DateTimeField(model_attr='updated_at')

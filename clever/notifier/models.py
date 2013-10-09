@@ -16,7 +16,7 @@ class Notification(models.Model):
         return "%s (%s)" % (self.name, self.slug)
 
     @classmethod
-    def send(cls, slug, variables):
+    def send(cls, slug, variables, sms_notice=False):
         """
             Send message using defined backend
             :slug: String event slug
@@ -42,9 +42,10 @@ class Notification(models.Model):
                     DefaultEmailBackend(template).send_message()
 
                 # Send sms notification
-                for template in notification.sms_templates.filter(active=True):
-                    template = replace_sms_variables(template, variables)
-                    SmsHostBackend(template).send_message()
+                if (sms_notice):
+                    for template in notification.sms_templates.filter(active=True):
+                        template = replace_sms_variables(template, variables)
+                        SmsHostBackend(template).send_message()
 
 
 class Variable(models.Model):

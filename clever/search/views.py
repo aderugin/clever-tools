@@ -5,7 +5,6 @@ from haystack.query import SearchQuerySet
 from haystack.query import EmptySearchQuerySet
 
 
-
 ##============================================================================##
 class SearchView(ListView):
     queryset_class = SearchQuerySet

@@ -26,6 +26,8 @@ CLEVER_ATTRIBUTES_CONTROLS = getattr(settings, 'CLEVER_ATTRIBUTES_CONTROLS', [
     'checkbox',
     'select'
 ])
-
 # Настройка класса для недавно просмотренных товаров
 CLEVER_RECENTLY_VIEWED = getattr(settings, 'CLEVER_RECENTLY_VIEWED', 'clever.catalog.recently_viewed.RecentlyViewed')
+
+# Настройка опция по умолчанию для списка отсуствующих параметров
+CLEVER_EMPTY_LABEL = getattr(settings, 'CLEVER_EMPTY_LABEL', u"----")

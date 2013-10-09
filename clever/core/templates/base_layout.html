@@ -22,7 +22,9 @@
         {% get_metadata as metadata %}
         {% block page_metadata %}
             {% if not metadata.title.value %}
-                {% if object.title %}
+                {% if object.seo_title %}
+                    <title>{{ object.seo_title }}</title>
+                {% elif object.title %}
                     <title>{{ object.title }}</title>
                 {% elif object.name %}
                     <title>{{ object.name }}</title>
@@ -43,12 +45,6 @@
                 <meta name="keywords" content="{% block page_keywords %}{% endblock %}" />
             {% else %}
                 {{ metadata.keywords }}
-            {% endif %}
-
-            {% if metadata.title.value|length == 0 %}
-                <title>{% block title %}{% endblock %}</title>
-            {% else %}
-                {{ metadata.title }}
             {% endif %}
         {% endblock page_metadata %}
 

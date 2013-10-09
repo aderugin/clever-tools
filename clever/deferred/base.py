@@ -40,6 +40,7 @@ class DeferredPoint(object):
 
     @property
     def deferred_instance(self):
+        ''' Найден ли конкретный класс '''
         if not self.__dict__['__instance']:
             return False
         return True

@@ -11,6 +11,8 @@ class DefaultEmailBackend(object):
 
         to_emails = self.template.email_to.split(',')
         for to in to_emails:
-            message = EmailMessage(self.template.subject, self.template.message, self.template.email_from, [to.strip()])
-            message.content_subtype = 'html'
-            message.send()
+            email_to = to.strip()
+            if len(email_to):
+                message = EmailMessage(self.template.subject, self.template.message, self.template.email_from, [email_to])
+                message.content_subtype = 'html'
+                message.send()

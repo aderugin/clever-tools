@@ -9,11 +9,11 @@ from clever.core.admin import AdminMixin
 from clever.catalog import models
 from clever.catalog.forms import FilterForm
 from clever.catalog.attributes import AttributeManager
+from clever.magic.classmaker import classmaker
 
 
 # ------------------------------------------------------------------------------
 class SectionParamsIterator(forms.models.ModelChoiceIterator):
-    ### TODO: TEST THIS!!!!
     def __init__(self, inline, field, section):
         self.section = section
         self.inline = inline
@@ -174,16 +174,24 @@ class ProductAdmin(AdminMixin, admin.ModelAdmin):
     def __init__(self, model, admin_site, *args, **kwargs):
         # Добавляем базовые элементы в админку
         self.insert_list_display(['admin_thumbnail'], before=True)
-
         list_display_items = ['active', 'section', 'brand', 'price', 'code']
         list_filter_items = ['brand', 'section']
-        if not models.SectionBrand.deferred_instance:
-            list_display_items.remove('brand');
-            list_filter_items.remove('brand');
+        list_filter = ['brand', 'section']
+
+        if not models.Section.deferred_instance:
+            list_display_items.remove('section')
+            list_filter_items.remove('section')
+            list_filter.remove('section')
+
+        if not models.Brand.deferred_instance:
+            list_display_items.remove('brand')
+            list_filter_items.remove('brand')
+            list_filter.remove('brand')
 
         self.insert_list_display(list_display_items)
         self.insert_list_filter(list_filter_items)
         self.insert_list_display_links(['admin_thumbnail', '__unicode__', '__str__'])
+        self.insert_list_filter(list_filter)
         self.insert_search_fields(['title'])
 
         # Создание inline редактора для свойств товара
