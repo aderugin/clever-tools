@@ -506,7 +506,7 @@ def init():
             idx   = 1
             count = len(steps)
             for step in steps:
-                print "%d/%d %s" % (idx, count, blue(step.prompt))
+                print "## ============= %d/%d %s" % (idx, count, blue(step.prompt))
                 step(self)
                 idx += 1
 
@@ -647,7 +647,7 @@ def init():
                 run('git clone %s %s' %(markup_repository, local_env.MARKUP_DIRECTORY))
 
     ##--------------------------------------------------------------------------
-    @builder.step(prompt='Создать локальные настройки для проекта')
+    @builder.step(prompt='Создание локальных настроек для проекта')
     def configure_local_settings(self, mysql_database, mysql_user, mysql_password, vhost_name, vhost_path, raven_dsn):
         context = {
             'project_name': project_name,
@@ -665,7 +665,7 @@ def init():
         files.upload_template(template, output, context=context)
 
     ##--------------------------------------------------------------------------
-    @builder.step(prompt='Создать скрипты для Supervisor\'а')
+    @builder.step(prompt='Создание скрипты для Supervisor\'а')
     def configure_supervisor_scripts(self, vhost_name, vhost_port):
         context = {
             'project_name': project_name,
@@ -693,7 +693,7 @@ def init():
 
     ##--------------------------------------------------------------------------
     # Создаем базу в MySQl
-    @builder.step(prompt='Создать базу данных')
+    @builder.step(prompt='Создание базы данных MySQL')
     def configure_database(self, mysql_user, mysql_password, mysql_database):
         with cd(env.root):
             with hide('running'):
@@ -701,7 +701,7 @@ def init():
 
     ##--------------------------------------------------------------------------
     # Создаем виртуальное окружение для Python
-    @builder.step(prompt='Создать виртуальноое окружение')
+    @builder.step(prompt='Создание виртуального окружения')
     def configure_virtualenv(self):
         with cd(env.root):
             run('virtualenv %s' % env.virtualenv)
@@ -714,7 +714,7 @@ def init():
                     run('rm -rf %s/lib/python2.6/' % env.virtualenv)
 
     ##--------------------------------------------------------------------------
-    @builder.step(prompt='Создать .htaccess')
+    @builder.step(prompt='Создание настроек Apache (.htaccess)')
     def configure_htaccess(self, vhost_port):
         template = os.path.join(os.path.dirname(__file__), '.fabric/apache/.htaccess')
         files.upload_template(template, os.path.join(env.root, vhost_path, '.htaccess'), {
