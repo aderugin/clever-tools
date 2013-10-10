@@ -55,8 +55,10 @@ def get_option(name, default=None):
     if model is not None:
         try:
             site = Site.objects.get_current()
-            object = model.objects.get(_site=site)
+            object = model.objects.filter(_site=site)[0]
             return getattr(object, name, default)
+        except IndexError:
+            pass
         except ObjectDoesNotExist:
             pass
     return default

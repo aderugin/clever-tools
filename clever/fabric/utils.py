@@ -75,3 +75,23 @@ def revert_mysql(fullname):
             params['db_name'],
             fullname
             ))
+
+
+def install_packages(*packages):
+    ''' Проверить существование пакетов на сервере '''
+    with hide('output'):
+        run('apt-get update')
+
+    run('apt-get install -q -y %s' % ' '.join(packages))
+
+
+def is_python27():
+    with hide('output', 'running'):
+        result = run('python --version')
+        return result.startswith("Python 2.7")
+
+
+def generate_secret_key():
+    with hide('output', 'running'):
+        result = run("python -c \"import random; print (''.join([random.choice('abcdefghijklmnopqrstuvwxyz0123456789\!@#$%^&*(-_=+)') for i in range(50)]))\"")
+        return result.encode('utf-8')
