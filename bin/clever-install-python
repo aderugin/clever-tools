@@ -46,7 +46,7 @@ fi
 
 export LD_LIBRARY_PATH=$VENV/lib:$LD_LIBRARY_PATH
 cd Python-2.7.3
-env CPPFLAGS="-I/$VENV/include" LDFLAGS="-L/$VENV/lib" ./configure --prefix=$VENV --enable-shared --prefix=$VENV LDFLAGS=-Wl,-rpath=$VENV/lib && make -j4 && make install
+env CPPFLAGS="-I/$VENV/include" LDFLAGS="-L/$VENV/lib" ./configure --prefix=$VENV --enable-shared --prefix=$VENV LDFLAGS=-Wl,-rpath=$VENV/lib && make && make install
 
 cd $VENV/..
 name=`basename $VENV`
