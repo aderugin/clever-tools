@@ -110,7 +110,7 @@ class SectionBase(cache_machine.CachingMixin, mptt.MPTTModel, TimestableMixin, A
 # ------------------------------------------------------------------------------
 # Производители(бренды) каталога
 class BrandQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQuerySet):
-    """Базовый запрос для получения продуктов из каталога"""
+    """Базовый запрос для получения брэндов с продуктами из каталога"""
     def with_products(self):
         return self.annotate(products_count=models.Count('products')).filter(products_count__gt=0)
 
