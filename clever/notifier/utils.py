@@ -1,17 +1,37 @@
 # -*- coding: utf-8 -*-
 from django.contrib.sites.models import Site
 from django.conf import settings
+from django.core.validators import validate_email
+from django import forms
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+def get_admin_emails():
+    admins = User.objects.filter(is_superuser=True)
+    admin_list = []
+    for admin in admins:
+        try:
+            validate_email(admin.email)
+            admin_list.append(admin.email)
+        except forms.ValidationError:
+            pass
+    return ','.join(admin_list)
 
 
 def replace_email_variables(template, variables):
     """ Replace variables on email template"""
-
     current_site = Site.objects.get_current()
-    variables['DOMAIN'] = current_site.domain
-    variables['SITE_NAME'] = current_site.name
+    admin_emails = get_admin_emails()
 
-    #variables['DEFAULT_EMAIL_FROM'] = settings.DEFAULT_EMAIL_FROM if settings.DEFAULT_EMAIL_FROM else ''
-    variables['DEFAULT_SMS_FROM'] = ''
+    variables.update({
+        'DOMAIN':              current_site.domain,
+        'SITE_NAME':           current_site.name,
+        'DEFAULT_SMS_FROM':    '',
+        'ADMIN_EMAIL':         admin_emails,
+        'ADMIN_EMAILS':        admin_emails,
+        'ADMINS_EMAIL':        admin_emails,
+    })
 
     for var, value in variables.iteritems():
         if not value:
