@@ -25,7 +25,7 @@ def show_site_settings(request):
         try:
             instance = model.objects.get(_site=site)
         except ObjectDoesNotExist:
-            instance = None
+            instance = model(_site=site)
 
         form_class = create_form(model)
         form_collection.append((form_class, instance, name, model._meta.verbose_name))

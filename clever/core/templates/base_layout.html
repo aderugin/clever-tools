@@ -7,60 +7,62 @@
 <!--[if IE 8]> <html lang="{{ LANGUAGE_CODE }}" class="i-ua_js_no i-ua_css_standard no-js lt-ie9"> <![endif]-->
 <!--[if gt IE 8]><!--> <html lang="{{ LANGUAGE_CODE }}" class="i-ua_js_no i-ua_css_standard no-js"> <!--<![endif]-->
     <head>
-        <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-        <script>
-            ;(function(d, e, c, r) {
-                e = d.documentElement;
-                c = "className";
-                r = "replace";
-                e[c] = e[c][r]("i-ua_js_no", "i-ua_js_yes");
-                if (d.compatMode != "CSS1Compat") e[c] = e[c][r]("i-ua_css_standart", "i-ua_css_quirks")
-            })(document);
-        </script>
+        {% spaceless %}
+            <meta charset="utf-8">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+            <script>
+                ;(function(d, e, c, r) {
+                    e = d.documentElement;
+                    c = "className";
+                    r = "replace";
+                    e[c] = e[c][r]("i-ua_js_no", "i-ua_js_yes");
+                    if (d.compatMode != "CSS1Compat") e[c] = e[c][r]("i-ua_css_standart", "i-ua_css_quirks")
+                })(document);
+            </script>
 
-        {% get_metadata as metadata %}
-        {% block page_metadata %}
-            {% if not metadata.title.value %}
-                {% if object.seo_title %}
-                    <title>{{ object.seo_title }}</title>
-                {% elif object.title %}
-                    <title>{{ object.title }}</title>
-                {% elif object.name %}
-                    <title>{{ object.name }}</title>
+            {% get_metadata as metadata %}
+            {% block page_metadata %}
+                {% if not metadata.title.value %}
+                    {% if object.seo_title %}
+                        <title>{{ object.seo_title }}</title>
+                    {% elif object.title %}
+                        <title>{{ object.title }}</title>
+                    {% elif object.name %}
+                        <title>{{ object.name }}</title>
+                    {% else %}
+                        <title>{% block page_title %}{% endblock %}</title>
+                    {% endif %}
                 {% else %}
-                    <title>{% block page_title %}{% endblock %}</title>
+                    {{ metadata.title }}
                 {% endif %}
-            {% else %}
-                {{ metadata.title }}
+
+                {% if metadata.description.value|length == 0 %}
+                    <meta name="description" content="{% block page_description %}{% endblock %}" />
+                {% else %}
+                    {{ metadata.description }}
+                {% endif %}
+
+                {% if metadata.keywords.value|length == 0 %}
+                    <meta name="keywords" content="{% block page_keywords %}{% endblock %}" />
+                {% else %}
+                    {{ metadata.keywords }}
+                {% endif %}
+            {% endblock page_metadata %}
+
+            {% block page_head %}{% endblock %}
+
+            <meta name="viewport" content="width=device-width">
+
+            <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+            {% block page_styles %} {% endblock %}
+
+            <script src="{{ STATIC_URL }}js/modernizr-2.6.2.min.js"></script>
+
+            {% if user.is_staff %}
+                <link rel="stylesheet" href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" />
+                <link rel="stylesheet" href="{{ STATIC_URL }}flatblocks/flatblocks.css" />
             {% endif %}
-
-            {% if metadata.description.value|length == 0 %}
-                <meta name="description" content="{% block page_description %}{% endblock %}" />
-            {% else %}
-                {{ metadata.description }}
-            {% endif %}
-
-            {% if metadata.keywords.value|length == 0 %}
-                <meta name="keywords" content="{% block page_keywords %}{% endblock %}" />
-            {% else %}
-                {{ metadata.keywords }}
-            {% endif %}
-        {% endblock page_metadata %}
-
-        {% block page_head %}{% endblock %}
-
-        <meta name="viewport" content="width=device-width">
-
-        <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
-        {% block page_styles %} {% endblock %}
-
-        <script src="{{ STATIC_URL }}js/modernizr-2.6.2.min.js"></script>
-
-        {% if user.is_staff %}
-            <link rel="stylesheet" href="{{ STATIC_URL }}bootstrap/css/bootstrap.min.css" />
-            <link rel="stylesheet" href="{{ STATIC_URL }}flatblocks/flatblocks.css" />
-        {% endif %}
+        {% endspaceless %}
     </head>
     <body class="b-page b-page__body {% block bodyclass %}{% endblock %}">
         {% comment %}
@@ -73,13 +75,17 @@
             {% block page_body %}{% endblock %}
         {% endspaceless %}
 
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
-        <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}markup/js/jquery-1.9.0.min.js"><\/script>')</script>
-        {% block page_scripts %}
-            <script src="{{ STATIC_URL }}js/plugins.js"></script>
-        {% endblock %}
+        <div class="b-scripts">
+            {% spaceless %}
+                <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.0/jquery.min.js"></script>
+                <script>window.jQuery || document.write('<script src="{{ STATIC_URL }}markup/js/jquery-1.9.0.min.js"><\/script>')</script>
+                {% block page_scripts %}
+                    <script src="{{ STATIC_URL }}js/plugins.js"></script>
+                {% endblock %}
 
-        {% flatblock "seo.google_counter" 3600 using "counters/google-counter.html" %}
-        {% flatblock "seo.yandex_counter" 3600 using "counters/yandex-counter.html" %}
+                {% flatblock "seo.google_counter" 3600 using "counters/google-counter.html" %}
+                {% flatblock "seo.yandex_counter" 3600 using "counters/yandex-counter.html" %}
+            {% endspaceless %}
+        </div>
     </body>
 </html>
