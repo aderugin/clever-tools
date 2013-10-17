@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.validators import validate_email
 from django import forms
 from django.contrib.auth import get_user_model
+from django.core.validators import email_re
 
 User = get_user_model()
 
@@ -32,6 +33,13 @@ def replace_email_variables(template, variables):
         'ADMIN_EMAILS':        admin_emails,
         'ADMINS_EMAIL':        admin_emails,
     })
+
+    email = settings.DEFAULT_EMAIL_FROM,
+    if not variables.has_key('DEFAULT_EMAIL_FROM'):
+        if email_re.match(email):
+            variables['DEFAULT_EMAIL_FROM'] = email
+        else:
+            raise u"Проверить настройки email"
 
     for var, value in variables.iteritems():
         if not value:
