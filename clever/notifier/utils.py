@@ -29,7 +29,7 @@ def replace_email_variables(template, variables):
             variables['DEFAULT_EMAIL_FROM'] = email
         else:
             raise RuntimeError("Проверить настройки email сейчас установлен email - \"%s\"" %
-                    settings.DEFAULT_EMAIL_FROM)
+                    email)
 
 
     current_site = Site.objects.get_current()
