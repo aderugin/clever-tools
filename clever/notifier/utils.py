@@ -22,6 +22,16 @@ def get_admin_emails():
 
 def replace_email_variables(template, variables):
     """ Replace variables on email template"""
+
+    email = getattr(settings, 'DEFAULT_EMAIL_FROM', '')
+    if not variables.has_key('DEFAULT_EMAIL_FROM'):
+        if email_re.match(email):
+            variables['DEFAULT_EMAIL_FROM'] = email
+        else:
+            raise RuntimeError("Проверить настройки email сейчас установлен email - \"%s\"" %
+                    settings.DEFAULT_EMAIL_FROM)
+
+
     current_site = Site.objects.get_current()
     admin_emails = get_admin_emails()
 
@@ -33,14 +43,6 @@ def replace_email_variables(template, variables):
         'ADMIN_EMAILS':        admin_emails,
         'ADMINS_EMAIL':        admin_emails,
     })
-
-    email = settings.DEFAULT_EMAIL_FROM,
-    if not variables.has_key('DEFAULT_EMAIL_FROM'):
-        if email_re.match(email):
-            variables['DEFAULT_EMAIL_FROM'] = email
-        else:
-            raise u"Проверить настройки email"
-
     for var, value in variables.iteritems():
         if not value:
             value = ''
