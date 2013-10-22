@@ -46,6 +46,7 @@ setup(
         "django-fsm >= 1.4.1",
         "templated-emails == 0.6.9",
         "django-eml-email-backend == 0.1",
+        'DjangoSEO == 1.0',
 
         #'git+git://github.com/alurin/django-whatever.git',
         #'git+git://github.com/django-mptt/django-mptt.git',
