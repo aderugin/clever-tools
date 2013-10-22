@@ -4,6 +4,8 @@ from django.db.models.base import ModelBase
 from django.db.models.base import Model
 from django.contrib.sites.models import Site
 from django.core.exceptions import ObjectDoesNotExist
+from caching import base as cache_machine
+
 
 _models = {}
 _options = {}
@@ -36,7 +38,7 @@ class SettingsMetaclass(ModelBase):
         return model
 
 
-class SettingsModel(Model):
+class SettingsModel(cache_machine.CachingMixin, Model):
     class Meta:
         abstract = True
     __metaclass__ = SettingsMetaclass
@@ -53,8 +55,10 @@ def get_option(name, default=None):
     if model is not None:
         try:
             site = Site.objects.get_current()
-            object = model.objects.get(_site=site)
+            object = model.objects.filter(_site=site)[0]
             return getattr(object, name, default)
+        except IndexError:
+            pass
         except ObjectDoesNotExist:
             pass
     return default

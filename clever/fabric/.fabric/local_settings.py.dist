@@ -1,0 +1,71 @@
+# -*- coding: utf-8 -*-
+LOCAL_SETTINGS = True
+
+DEBUG = False
+
+from settings import *
+
+DATABASES = {
+    'default': {
+        'ENGINE':   'django.db.backends.mysql',
+        'NAME':     '%(dbname)s',
+        'USER':     '%(dbuser)s',
+        'PASSWORD': '%(dbpass)s',
+        'HOST':     '',
+        'PORT':     '',
+        'OPTIONS': {
+            "init_command": "SET storage_engine=INNODB",
+        }
+    }
+}
+
+COMPRESS_ENABLED = True
+
+COMPRESS_OUTPUT_DIR = 'comporess'
+
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '%(hostname)s']
+
+INTERNAL_IPS = ('127.0.0.1', '46.160.150.198',)
+
+# Make this unique, and don't share it with anybody.
+SECRET_KEY = '%(secret_key)s'
+
+STATIC_ROOT = '%(static_path)s'
+
+MEDIA_ROOT = '%(media_path)s'
+
+CKEDITOR_UPLOAD_PATH = MEDIA_ROOT
+
+# Добавьте ваш DSN:
+RAVEN_CONFIG = {
+    'dsn': '%(dsn)s',
+}
+
+# CACHES = {
+#     'default': {
+#         'BACKEND': 'redis_cache.cache.RedisCache',
+#         'LOCATION': '127.0.0.1:6379',
+#         'OPTIONS': {
+#             'DB': 2,
+#             'PARSER_CLASS': 'redis.connection.HiredisParser'
+#         },
+#     },
+#     'cache_machine': {
+#         'BACKEND': 'redis_cache.cache.RedisCache',
+#         'LOCATION': '127.0.0.1:6379',
+#             'OPTIONS': {
+#             'DB': 2,
+#             'PARSER_CLASS': 'redis.connection.HiredisParser'
+#         },
+#     }
+# }
+
+CACHE_MACHINE_USE_REDIS = True
+
+CACHE_BACKEND = 'redis_cache.cache://127.0.0.1:6379/?timeout=1500'
+
+REDIS_BACKEND = 'redis_cache.cache://127.0.0.1:6379/?timeout=1500'
+
+CACHE_EMPTY_QUERYSETS = False
+
+CACHE_COUNT_TIMEOUT = 100
