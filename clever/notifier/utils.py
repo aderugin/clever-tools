@@ -43,15 +43,16 @@ def replace_email_variables(template, variables):
         'ADMIN_EMAILS':        admin_emails,
         'ADMINS_EMAIL':        admin_emails,
     })
+
     for var, value in variables.iteritems():
         if not value:
             value = ''
 
-        template.message = template.message.replace('#%s#' % var, value)
-        template.subject = template.subject.replace('#%s#' % var, value)
-        template.email_from = template.email_from.replace('#%s#' % var, value)
-        template.email_to = template.email_to.replace('#%s#' % var, value)
-        template.to = template.email_to.replace('#%s#' % var, value)
+        template.message = template.message.replace(u'#%s#' % var, unicode(value))
+        template.subject = template.subject.replace(u'#%s#' % var, unicode(value))
+        template.email_from = template.email_from.replace(u'#%s#' % var, unicode(value))
+        template.email_to = template.email_to.replace(u'#%s#' % var, unicode(value))
+        template.to = template.email_to.replace(u'#%s#' % var, unicode(value))
 
     return template
 
@@ -70,8 +71,8 @@ def replace_sms_variables(template, variables):
         if not value:
             value = ''
 
-        template.message = template.message.replace('#%s#' % var, value)
-        template.to = template.to.replace('#%s#' % var, value)
-        template.sender = template.sender.replace('#%s#' % var, value)
+        template.message = template.message.replace(u'#%s#' % var, unicode(value))
+        template.to = template.to.replace(u'#%s#' % var, unicode(value))
+        template.sender = template.sender.replace(u'#%s#' % var, unicode(value))
 
     return template

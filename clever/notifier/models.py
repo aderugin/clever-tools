@@ -41,6 +41,7 @@ class Notification(models.Model):
                     template = replace_email_variables(template, variables)
                     DefaultEmailBackend(template).send_message()
 
+
                 # Send sms notification
                 if (sms_notice):
                     for template in notification.sms_templates.filter(active=True):
