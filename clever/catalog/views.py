@@ -65,6 +65,7 @@ class SectionView(DetailView):
         # TODO: Добавить сортировку по идентификатору
     }
     default_order = None
+    default_sort = 'asc'
 
     def get_queryset(self):
         return self.model.objects.filter(active=True)
@@ -169,18 +170,22 @@ class SectionView(DetailView):
 
     def get_order_by(self, queryset):
         order = self.request.GET.get('order_by', '')
-        sort_by = self.request.GET.get('sort_by', 'asc')
+        sort_by = self.request.GET.get('sort_by', self.default_sort)
+
         if not order in self.order_by:
             order = self.default_order
+
         if order in self.order_by and order is not None:
             order_by = self.order_by[order]
-            result_order = order_by['fields']
-            for field in range(len(result_order)):
+            result_order = []
+            for field in order_by['fields']:
                 if sort_by == 'desc':
-                    if result_order[field][0] != '-':
-                        result_order[field] = '-' + result_order[field]
-                if sort_by == 'asc' and result_order[field][0] == '-':
-                    result_order[field] = result_order[field][1:]
+                    if field[0] == '-':
+                        field = field[1:]
+                    else:
+                        field = '-' + field
+                result_order.append(field)
+            print(sort_by, result_order)
             queryset = queryset.order_by(*result_order)
         return order, sort_by, queryset
 
