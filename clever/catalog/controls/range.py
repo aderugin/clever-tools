@@ -47,11 +47,11 @@ class RangeControl(AttributeControl):
     def create_query_part(self, attribute, values):
         type = attribute.type_object
         if len(values) > 0:
-            max_value = max([type.filter_value(values[0])])
-            min_value = min([type.filter_value(values[1])])
+            min_value = min([type.filter_value(values[0])])
+            max_value = max([type.filter_value(values[1])])
         else:
-            max_value = None
             min_value = None
+            max_value = None
         query = None
         if not min_value and max_value:
             query = {attribute.query_name + '__lte': max_value}
