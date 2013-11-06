@@ -62,7 +62,7 @@ class RangeControl(AttributeControl):
 
         if query:
             return models.Q(**query)
-        return models
+        return None
 
     def create_form_value(self, values):
         return values
