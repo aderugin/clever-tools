@@ -19,11 +19,7 @@ class Brand(base.BrandBase):
 
 # ------------------------------------------------------------------------------
 class Product(base.ProductBase):
-    class Meta:
-        section_model = Section
-        brand_model = Brand
-
-    price = models.DecimalField("dfdf", decimal_places=2, max_digits=20)
+    pass
 
 
 # ------------------------------------------------------------------------------
@@ -185,7 +181,6 @@ class OrderTestCase(unittest.TestCase):
 
     def test_items_count(self):
         ''' Вычисление количества продуктов в корзине'''
-        '''Поиск товара не добавленного в корзину'''
         cart = Cart()
         self.add_products_to_cart(cart, 6)
 

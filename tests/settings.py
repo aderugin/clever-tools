@@ -43,6 +43,8 @@ MEDIA_ROOT = os.path.join(PROJECT_ROOT, 'media')
 
 SECRET_KEY = 'keepitsecretkeepitsafe'
 
+CLEVER_SEO_CLASS = 'tests.seo.SeoMetadata'
+
 if __name__ == "__main__":
     import sys, test_runner as settings
     from django.core.management import execute_manager

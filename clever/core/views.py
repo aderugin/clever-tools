@@ -97,3 +97,18 @@ class AjaxFormMixin(object):
         if self.request.is_ajax():
             return self.json_response(self.get_ajax_valid(form))
         return result
+
+
+class AjaxListMixin(ListView, AjaxDataMixin):
+    '''
+    Миксин, формирующий JSON ответ для GET запроса. Достаточно переопределить
+    get_ajax_data и вернуть в нем словарь
+    '''
+
+    def get(self, request, *args, **kwargs):
+        response = super(AjaxListMixin, self).get(request, request, *args, **kwargs)
+        if request.is_ajax():
+            data = self.get_ajax_data(object_list=self.object_list, **kwargs)
+            return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), mimetype='application/json')
+        else:
+            return response

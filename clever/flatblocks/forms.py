@@ -9,3 +9,8 @@ class FlatBlockForm(FlatBlockFormBase):
         widget=CKEditorWidget(config_name='default'),
         required=False
     )
+
+class JustFlatBlockForm(FlatBlockFormBase):
+    def __init__(self, *args, **kwargs):
+        super(JustFlatBlockForm, self).__init__(*args, **kwargs)
+        self.fields['content'].widget.attrs['class'] = 'b-flatblock-textarea'

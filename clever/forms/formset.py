@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.forms.formsets import formset_factory
+from django.forms.models import inlineformset_factory
 
 
 class FormsetMixin(object):
@@ -16,6 +16,20 @@ class FormsetMixin(object):
                 'images_4': [ImageForm, 'product'],
             }
 
+    Использование: унаследовать класс от FromserMixin, создать поле formsets
+    типа dict (словарь), ключом этого словаря будет поле по которому потом
+    будет доступен formset из объекта формы. В значенем данного элемента будет
+    объект типа tuple (кортэж). В этом кортеже должны быть следующие элементы:
+    1) Класс ФОРМЫ модели, объекты которой связаны по Foreignkey с текущим
+    объектом
+    2) Название поля типа Foregnkey дочерней модели (та, что привязывается по 
+    данному полю)
+    3) Объект типа dict, значения которого будут переданы как дополнительные
+    аргументы при создании formset'a (**kwargs)
+    Пример:
+    formsets = {
+        'included_files': (AttachedPhotosForm, 'offer', {'can_delete': True, 'extra': 0})
+    }
     '''
     formsets = {}
 
@@ -38,19 +52,16 @@ class FormsetMixin(object):
 
             # Базовые параметры
             form_kwargs.setdefault('extra', 0)
-            model = form_kwargs.get('form', None)
+            meta = getattr(form_class, 'Meta', None)
+            model = getattr(meta, 'model', None)
             if not model:
-                meta = getattr(form_class, 'Meta', None)
-                model = getattr(meta, 'model', None)
-                if not model:
-                    raise RuntimeError(u'Незадана модель для formset\'а')
+                raise RuntimeError(u'Незадана модель для formset\'а')
 
             # Создаем
-            formset = formset_factory(form_class, **form_kwargs)
-            if 'data' in kwargs:
-                form = formset(kwargs.get('data'), kwargs.get('files'))
-            else:
-                form = formset()
+            form_kwargs['form'] = form_class
+            formset = inlineformset_factory(self.Meta.model, model, **form_kwargs)
+            kwargs['instance'] = self.instance
+            form = formset(**kwargs)
             self.formsets[name] = (form, fk_name, model)
 
     def __getattr__(self, name):
@@ -65,12 +76,5 @@ class FormsetMixin(object):
         instance = super(FormsetMixin, self).save(commit=commit)
         for name, formset_option in self.formsets.items():
             formset, fk_name, formset_model = formset_option
-            for formset_form in formset.cleaned_data:
-                if len(formset_form):
-                    formset_form[fk_name] = instance
-                    formset_instance = formset_model(**formset_form)
-                    save_handler = getattr(self, 'save_' + name, None)
-                    if save_handler:
-                        save_handler(formset, formset_instance, formset_form, commit)
-                    formset_instance.save()
+            formset.save()
         return instance

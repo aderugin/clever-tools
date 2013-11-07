@@ -14,4 +14,4 @@ from django.conf import settings
 # Настройка опция по умолчанию для списка разрешенных элементов управления аттрибутов
 CLEVER_SEO_CLASS = getattr(settings, 'CLEVER_SEO_CLASS', None)
 if not CLEVER_SEO_CLASS:
-    raise RuntimeError(u'Не задана модель для хранения SEO данных')
+    raise RuntimeError('Не задана модель для хранения SEO данных')
