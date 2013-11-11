@@ -40,10 +40,10 @@ def make_queryset(
             queryset_part = filter_phrase(queryset_class(), qp)
 
             if len(qp) > 2:
-                suggestion = SearchQuerySet().filter(text__startswith=qp) \
-                                             .spelling_suggestion()
-                if suggestion:
-                    queryset_part &= filter_phrase(queryset_part, suggestion)
+            #    suggestion = SearchQuerySet().filter(text__startswith=qp) \
+            #                                 .spelling_suggestion()
+            #    if suggestion:
+            #        queryset_part &= filter_phrase(queryset_part, suggestion)
                 queryset &= queryset_part
         return queryset
     else:
