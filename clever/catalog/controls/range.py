@@ -45,8 +45,24 @@ class RangeControl(AttributeControl):
         )
 
     def create_query_part(self, attribute, values):
-        query = {attribute.query_name + '__range': values}
-        return models.Q(**query)
+        type = attribute.type_object
+        if len(values) > 0:
+            min_value = min([type.filter_value(values[0])])
+            max_value = max([type.filter_value(values[1])])
+        else:
+            min_value = None
+            max_value = None
+        query = None
+        if not min_value and max_value:
+            query = {attribute.query_name + '__lte': max_value}
+        elif not max_value and min_value:
+            query = {attribute.query_name + '__gte': min_value}
+        elif max_value and min_value:
+            query = {attribute.query_name + '__range': values}
+
+        if query:
+            return models.Q(**query)
+        return None
 
     def create_form_value(self, values):
         return values
