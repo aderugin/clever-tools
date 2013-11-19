@@ -4,6 +4,7 @@ from django.views.generic.base import View
 from django.views.generic.list import ListView
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
+from django.http import HttpResponseNotFound
 import json
 
 
@@ -112,3 +113,15 @@ class AjaxListMixin(ListView, AjaxDataMixin):
             return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), mimetype='application/json')
         else:
             return response
+
+
+class SharedView(View):
+    views = []
+
+    def dispatch(self, request, *args, **kwargs):
+        for v in self.views:
+            if v.model.objects.filter(**kwargs).count() > 0:
+                if v.menu_path:
+                    request.menu_path = v.menu_path
+                return v.as_view()(request, *args, **kwargs)
+        return HttpResponseNotFound()
