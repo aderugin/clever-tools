@@ -4,7 +4,7 @@ from django.views.generic.base import View
 from django.views.generic.list import ListView
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
-from django.http import HttpResponseNotFound
+from django.http import Http404
 import json
 
 
@@ -124,4 +124,4 @@ class SharedView(View):
                 if v.menu_path:
                     request.menu_path = v.menu_path
                 return v.as_view()(request, *args, **kwargs)
-        return HttpResponseNotFound()
+        raise Http404()
