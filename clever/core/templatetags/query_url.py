@@ -1,33 +1,26 @@
 # -*- coding: utf-8 -*-
 from django.utils.safestring import mark_safe
 from django import template
+from urlparse import parse_qs
+from urllib import urlencode
 from urlparse import urlparse
 
 register = template.Library()
 
 
-def get_query(p, new_params=None, remove=None):
+def get_query(url, new_params=None, remove_params=None):
     """
     Add and remove query parameters. From `django.contrib.admin`.
     """
-    if new_params is None:
-        new_params = {}
-    if remove is None:
-        remove = []
-    for r in remove:
-        for k in p.keys():
-            if k.startswith(r):
-                del p[k]
-    for k, v in new_params.items():
-        if k in p and v is None:
-            del p[k]
-        elif v is not None:
-            p[k] = v
-    return mark_safe(
-        '&amp;' +
-        '&amp;'.join([u'%s=%s' % (k, v) for k, v in p.items()])
-               .replace(' ', '%20')
-    )
+    new_params    = new_params               if new_params    is not None else {}
+    remove_params = remove_params.split(',') if remove_params is not None else []
+    params = parse_qs(url, keep_blank_values=True)
+
+    for key in remove_params:
+        if key in params:
+            del params[key]
+
+    return urlencode(params, doseq=True)
 
 
 def string_to_dict(string, separator=','):
@@ -74,19 +67,23 @@ def string_to_list(string):
 
 
 @register.filter
-def add_query(var, add):
-    add = string_to_dict(add)
-    params = string_to_dict(var, '&')
-    return get_query(params, add, None)
-
+def add_query(url, add):
+    # add = string_to_dict(add)
+    # params = string_to_dict(var, '&')
+    # return get_query(params, add, None)
+    raise NotImplementedError()
 
 @register.filter
-def remove_query(var, remove):
-    remove = string_to_list(remove)
-    params = string_to_dict(var, '&')
+def remove_query(url, remove):
+    # remove = string_to_list(remove)
+    # params = string_to_dict(var, '&')
     # import pdb; pdb.set_trace()
-    return get_query(params, None, remove)
+    return get_query(url, None, remove)
 
+@register.filter
+def normalize_query(url):
+    params = parse_qs(url, keep_blank_values=False)
+    return urlencode(params, doseq=True)
 
 @register.filter
 def get_path(url):

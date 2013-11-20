@@ -185,7 +185,6 @@ class SectionView(DetailView):
                     else:
                         field = '-' + field
                 result_order.append(field)
-            print(sort_by, result_order)
             queryset = queryset.order_by(*result_order)
         return order, sort_by, queryset
 
@@ -236,13 +235,17 @@ class SectionView(DetailView):
 
         # Получаем продукты для текущего раздела каталога
         products_queryset = self.get_products_queryset()
+        # print 'Product queryset:', products_queryset.count()
         products_queryset = self.get_filter_queryset(products_queryset)
+        # print 'Product queryset after filter:', products_queryset.count()
 
         # сортируем queryset перед выдачей
         order_by, sort_by, products_queryset = self.get_order_by(products_queryset)
+        # print 'Product queryset after ordering:', products_queryset.count()
         page_size = self.get_paginate_by(products_queryset)
         if page_size:
             paginator, page, products_queryset, is_paginated = self.paginate_queryset(products_queryset, page_size)
+            # print 'Product queryset after pagination:', products_queryset.count()
             context.update({
                 'paginator': paginator,
                 'page_obj': page,
@@ -286,6 +289,21 @@ class SectionView(DetailView):
 
         # Возвращаем все
         return context
+
+    def dispatch(self, request, *args, **kwargs):
+        from urllib import urlencode
+        from urlparse import parse_qs
+        from django.shortcuts import redirect
+
+        query_dict = parse_qs(request.META['QUERY_STRING'], keep_blank_values=True)
+        query_params = parse_qs(request.META['QUERY_STRING'], keep_blank_values=False)
+
+        if query_dict != query_params:
+            query_normalized = urlencode(query_params, doseq=True)
+            path = request.path + "?" + query_normalized
+            return redirect(path)
+        return super(SectionView, self).dispatch(request, *args, **kwargs)
+
 
 
 # ------------------------------------------------------------------------------

@@ -53,6 +53,22 @@ class FilterForm(forms.Form):
             for name, message in self.errors.items():
                 print name, message
 
+        # def dump_filter_arg(filter_arg):
+        #     from django.db.models import Q
+        #     if isinstance(filter_arg, Q):
+        #         val = []
+        #         for item in filter_arg.children:
+        #             val.append(u"%s = %s" % (unicode(item[0]), unicode(item[1])))
+        #         print (u" %s " % filter_arg.default).join(val)
+
+        #     else:
+        #         print filter_arg
+
+        # print 'Product filter params:'
+        # for filter_arg in filter_args:
+        #     dump_filter_arg(filter_arg)
+        #     # print '    -', filter_arg
+
         product_indexes = None
         for filter_arg in filter_args:
             current_indexes = set(Product.objects.filter(filter_arg, section=self.section).values_list('id'))
