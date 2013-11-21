@@ -38,6 +38,39 @@ def generate_upload_name(instance, filename, prefix=None, unique=False):
     return os.path.join(basedir, filename[:2], filename[2:4], filename)
 
 
+class StringWithTitle(str):
+    def __new__(cls, value, title):
+        instance = str.__new__(cls, value)
+        instance._title = title
+        return instance
+
+    def title(self):
+        return self._title
+
+    __copy__ = lambda self: self
+    __deepcopy__ = lambda self, memodict: self
+
+
+class SortableMixin(models.Model):
+    """
+    Миксин для сортировки
+    """
+    class Meta:
+        abstract = True
+
+    sort = models.PositiveIntegerField(blank=True)
+
+    @staticmethod
+    def pre_save(sender, instance, **kwargs):
+        if (not instance.sort):
+            last_qs = sender.objects.reverse()
+            if (last_qs.count() > 0 and last_qs[0].sort):
+                instance.sort = int(last_qs[0].sort) + 100
+            else:
+                instance.sort = 1000
+        return instance
+
+
 class TimestableMixin(models.Model):
     """
     Миксин для добавления данных об дате создания и изменения
