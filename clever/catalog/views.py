@@ -290,22 +290,22 @@ class SectionView(DetailView):
         # Возвращаем все
         return context
 
-    def dispatch(self, request, *args, **kwargs):
-        from urllib import urlencode
-        from urlparse import parse_qs
-        from django.shortcuts import redirect
+    # def dispatch(self, request, *args, **kwargs):
+    #     from urllib import urlencode
+    #     from urlparse import parse_qs
+    #     from django.shortcuts import redirect
 
-        query_dict = parse_qs(request.META['QUERY_STRING'], keep_blank_values=True)
-        query_params = parse_qs(request.META['QUERY_STRING'], keep_blank_values=False)
+    #     query_dict = parse_qs(request.META['QUERY_STRING'], keep_blank_values=True)
+    #     query_params = parse_qs(request.META['QUERY_STRING'], keep_blank_values=False)
 
-        # import pdb; pdb.set_trace()
-        if query_dict != query_params:
-            from clever.core.templatetags.query_url import urlencode_utf8
-            query_normalized = urlencode_utf8(request.META['QUERY_STRING'], doseq=True)
-            path = request.path + "?" + query_normalized
-            return redirect(path)
-        return super(SectionView, self).dispatch(request, *args, **kwargs)
-
+    #     # import pdb; pdb.set_trace()
+    #     if query_dict != query_params:
+    #         from clever.core.templatetags.query_url import urlencode_utf8
+    #         # import pdb; pdb.set_trace()
+    #         query_normalized = urlencode_utf8(query_params, doseq=True)
+    #         path = request.path + "?" + query_normalized
+    #         return redirect(path)
+    #     return super(SectionView, self).dispatch(request, *args, **kwargs)
 
 
 # ------------------------------------------------------------------------------
