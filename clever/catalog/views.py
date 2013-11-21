@@ -298,8 +298,10 @@ class SectionView(DetailView):
         query_dict = parse_qs(request.META['QUERY_STRING'], keep_blank_values=True)
         query_params = parse_qs(request.META['QUERY_STRING'], keep_blank_values=False)
 
+        # import pdb; pdb.set_trace()
         if query_dict != query_params:
-            query_normalized = urlencode(query_params, doseq=True)
+            from clever.core.templatetags.query_url import urlencode_utf8
+            query_normalized = urlencode_utf8(request.META['QUERY_STRING'], doseq=True)
             path = request.path + "?" + query_normalized
             return redirect(path)
         return super(SectionView, self).dispatch(request, *args, **kwargs)
