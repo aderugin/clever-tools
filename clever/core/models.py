@@ -60,15 +60,14 @@ class SortableMixin(models.Model):
 
     sort = models.PositiveIntegerField(blank=True)
 
-    @staticmethod
-    def pre_save(sender, instance, **kwargs):
-        if (not instance.sort):
-            last_qs = sender.objects.reverse()
+    def save(self, *args, **kwargs):
+        if (not self.sort):
+            last_qs = self.__class__.objects.reverse()
             if (last_qs.count() > 0 and last_qs[0].sort):
-                instance.sort = int(last_qs[0].sort) + 100
+                self.sort = int(last_qs[0].sort) + 100
             else:
-                instance.sort = 1000
-        return instance
+                self.sort = 1000
+        return super(SortableMixin, self).save(*args, **kwargs)
 
 
 class TimestableMixin(models.Model):
