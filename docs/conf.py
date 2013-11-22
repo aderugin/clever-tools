@@ -22,10 +22,11 @@ PROJECT_DIR = os.path.realpath(
 sys.path.append(PROJECT_DIR) # The directory that contains settings.py
 
 # Set up the Django settings/environment
-from django.core.management import setup_environ
-from tests import settings
+# from django.core.management import setup_environ
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tests.settings')
+# from tests import settings
 
-setup_environ(settings)
+# setup_environ(settings)
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
