@@ -131,6 +131,10 @@ class FilterForm(forms.Form):
                 final_result.append(FilterAttribute(section, attrib, values, params))
         return final_result
 
+    @property
+    def attributes(self):
+        return ((filter_attribute, self[filter_attribute.uid]) for filter_attribute in self.attributes_params)
+
 
 class FilterAttribute(object):
     def __init__(self, section, attrib, values, params=None):
@@ -148,3 +152,6 @@ class FilterAttribute(object):
 
     def __unicode__(self):
         return unicode(self.attribute)
+
+    def __repl__(self):
+        return unicode(self.attribute).encode('utf-8')

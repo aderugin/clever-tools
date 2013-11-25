@@ -4,6 +4,7 @@ from django import forms
 from django.db import models
 from clever.catalog.attributes import AttributeControl
 from clever.catalog.attributes import AttributeManager
+from clever.catalog import settings
 
 
 # ------------------------------------------------------------------------------
@@ -21,6 +22,7 @@ class RadioFilterField(forms.MultipleChoiceField):
 # ------------------------------------------------------------------------------
 @AttributeManager.register_control(tag='radio', verbose_name=u'Переключатели', allowed_only=True)
 class RadioControl(AttributeControl):
+    template_name = settings.CLEVER_FILTER_RADIO_TEMPLATE
     empty_label = u"----"
 
     def create_form_field(self, attribute, values):

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#
+
 from django.contrib import admin
 from feincms.admin import editor
 from django import forms

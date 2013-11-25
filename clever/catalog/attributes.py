@@ -50,6 +50,10 @@ class AttributeControl(object):
     '''
     Базовый класс для представлений(элементов управления) свойств в фильтре
     '''
+
+    template_name = None
+    is_template = True
+
     def __init__(self, tag, verbose_name):
         self.tag = tag
         self.verbose_name = verbose_name

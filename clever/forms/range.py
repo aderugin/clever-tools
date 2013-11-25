@@ -21,7 +21,10 @@ class RangeWidget(forms.MultiWidget):
         return value
 
     def format_output(self, rendered_widgets):
-        widget_context = {'min': rendered_widgets[0], 'max': rendered_widgets[1]}
+        widget_context = {
+            'min': rendered_widgets[0],
+            'max': rendered_widgets[1]
+        }
         return render_to_string(self.template_name, widget_context)
 
 

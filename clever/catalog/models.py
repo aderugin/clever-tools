@@ -422,7 +422,7 @@ class SectionAttributeBase(cache_machine.CachingMixin, models.Model):
         extend_meta(
             verbose_name=u'Параметры для свойства в разделе',
             verbose_name_plural=u'Параметры для свойств в разделе',
-            ordering = ['order', 'attribute__main_title', 'id']
+            ordering=['order', 'attribute__main_title', 'id']
         )
     )
 

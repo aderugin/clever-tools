@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from django import template
+from django.template.loader import render_to_string
 from clever.catalog.settings import CLEVER_RECENTLY_VIEWED
 from clever.magic import load_class
 from clever.catalog.models import Product
@@ -23,3 +24,18 @@ def show_recently_viewed(context, template_name='catalog/blocks/recent-viewed.ht
     })
     t = template.loader.get_template(template_name)
     return t.render(context)
+
+
+@register.simple_tag(takes_context=True)
+def render_filter_attribute(context, attr, widget):
+    attribute = attr.attribute
+    control = attribute.control_object
+    if control.is_template and control.template_name:
+        context = context.__copy__()
+        context.update({
+            'attribute': attribute,
+            'field': widget.field,
+            'widget': widget
+        })
+        return render_to_string(control.template_name, context)
+    return widget

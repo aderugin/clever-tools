@@ -12,7 +12,8 @@ from clever.catalog.controls import CheckboxControl
 class BrandAttribute(PseudoAttribute):
     ''' Псевдо аттрибут для брэнда '''
 
-    control_object = CheckboxControl('brand-checkbox', u'Производитель')#AttributeManager.get_control('checkbox')
+    # AttributeManager.get_control('checkbox')
+    control_object = CheckboxControl('brand-checkbox', u'Производитель')
     query_name = 'brand'
 
     def get_values(self, section):
