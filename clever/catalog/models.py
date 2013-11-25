@@ -62,10 +62,15 @@ from clever.catalog.attributes import ImportProductAttributeValuesMetaclass
 from clever.catalog.attributes import ImportPseudoAttributeValuesMetaclass
 from decimal import Decimal
 
+
 # ------------------------------------------------------------------------------
 # Разделы каталога
 class SectionQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQuerySet):
-    """Базовый запрос для получения продуктов из каталога"""
+    """
+        Базовый запрос для получения продуктов из каталога
+
+        .. versionadded:: 0.1
+    """
 
     def with_products(self):
         return self.filter(products__active=True).annotate(products_count=models.Count('products')).filter(products_count__gt=0)
@@ -73,7 +78,15 @@ class SectionQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQue
 
 # ------------------------------------------------------------------------------
 class SectionBase(cache_machine.CachingMixin, mptt.MPTTModel, TimestableMixin, ActivableMixin, TitleMixin, PageMixin):
-    """Базовая модель для раздела в каталоге"""
+    """
+        Базовая модель для раздела в каталоге
+
+        .. note::
+            Название url'а для обработки ``catalog:section`` с параметром ``slug``
+            (ЧПУ раздела)
+
+        .. versionadded:: 0.1
+    """
     class Meta:
         abstract = True
 
@@ -101,8 +114,21 @@ class SectionBase(cache_machine.CachingMixin, mptt.MPTTModel, TimestableMixin, A
 
     @property
     def descendant_sections(self):
-        ''' Получить queryset для подкатегорий '''
+        '''
+            Получить queryset для подкатегорий
+
+            .. versionadded:: 0.1
+        '''
         return self.__class__.objects.filter(section=self, active=True)
+
+    @models.permalink
+    def get_absolute_url(self):
+        '''
+        Получение URL'а для просмотра экземпляра модели
+
+        .. versionadded:: 0.2
+        '''
+        return ('catalog:section', (), {'slug': self.slug})
 
 
 # ------------------------------------------------------------------------------
@@ -115,7 +141,15 @@ class BrandQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQuery
 
 # ------------------------------------------------------------------------------
 class BrandBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, TitleMixin, PageMixin):
-    """Базовая модель для производителя в каталоге"""
+    """
+        Базовая модель для производителя в каталоге
+
+        .. note::
+            Название url'а для обработки ``catalog:brand`` с параметром ``slug``
+            (ЧПУ производителя)
+
+        .. versionadded:: 0.1
+    """
     class Meta:
         abstract = True
 
@@ -140,6 +174,14 @@ class BrandBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, Tit
         ''' Получить queryset для категорий в которых есть продукт данного производителя '''
         return Section.objects.filter(products__brand=self, active=True).distinct()
 
+    @models.permalink
+    def get_absolute_url(self):
+        '''
+        Получение URL'а для просмотра экземпляра модели
+
+        .. versionadded:: 0.2
+        '''
+        return ('catalog:brand', (), {'slug': self.slug})
 
 # ------------------------------------------------------------------------------
 class SectionBrandBase(cache_machine.CachingMixin, models.Model):
@@ -178,7 +220,15 @@ class ProductFrontendManager(CachingPassThroughManager):
 
 # ------------------------------------------------------------------------------
 class ProductBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, TitleMixin, PageMixin):
-    """Базовая модель для продукта в каталоге"""
+    """
+        Базовая модель для продукта в каталоге
+
+        .. note::
+            Название url'а для обработки ``catalog:product`` с параметром ``slug``
+            (ЧПУ из продукта)
+
+        .. versionadded:: 0.1
+    """
     class Meta:
         abstract = True
 
@@ -203,10 +253,23 @@ class ProductBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, T
     def __unicode__(self):
         return self.title
 
+    @models.permalink
+    def get_absolute_url(self):
+        '''
+        Получение URL'а для просмотра экземпляра модели
+
+        .. versionadded:: 0.2
+        '''
+        return ('catalog:product', (), {'slug': self.slug})
+
 
 # ------------------------------------------------------------------------------
 class AttributeBase(cache_machine.CachingMixin, models.Model, AbstractAttribute):
-    """Базовая модель для свойства"""
+    """
+        Базовая модель для свойства
+
+        .. versionadded:: 0.1
+    """
     class Meta:
         abstract = True
 
@@ -234,7 +297,11 @@ class AttributeBase(cache_machine.CachingMixin, models.Model, AbstractAttribute)
 
     @property
     def title(self):
-        """Получение заголовка"""
+        """
+            Получение заголовка
+
+            .. versionadded:: 0.1
+        """
         if self.additional_title:
             return self.additional_title
         return self.main_title
@@ -252,20 +319,32 @@ class AttributeBase(cache_machine.CachingMixin, models.Model, AbstractAttribute)
 
     @property
     def control_object(self):
-        ''' Получение стратегии для работы с элементом для отображения свойства в фильтре '''
+        '''
+            Получение стратегии для работы с элементом для отображения свойства в фильтре
+
+            .. versionadded:: 0.1
+        '''
         if getattr(self, '_control_object', None) is None:
             self._control_object = AttributeManager.get_control(self.control)
         return self._control_object
 
     @property
     def type_object(self):
-        ''' Получение стратегии для работы с типом значений для свойства '''
+        '''
+            Получение стратегии для работы с типом значений для свойства
+
+            .. versionadded:: 0.1
+        '''
         if getattr(self, '_type_object', None) is None:
             self._type_object = AttributeManager.get_type(self.type)
         return self._type_object
 
     def save(self, *args, **kwargs):
-        ''' При изменении типа надо поменять тип у всех существующих значений '''
+        '''
+            При изменении типа надо поменять тип у всех существующих значений
+
+            .. versionadded:: 0.1
+        '''
         # Проверка на изменение типа
         is_changed = False
         if self.pk is not None:
@@ -371,7 +450,15 @@ class PseudoSectionFrontendManager(CachingPassThroughManager):
 
 # ------------------------------------------------------------------------------
 class PseudoSectionBase(cache_machine.CachingMixin, TitleMixin, TimestableMixin, ActivableMixin, PageMixin):
-    """ Псевдо раздел каталога """
+    """
+        Базовая модель для псевдо раздела в каталоге
+
+        .. note::
+            Название url'а для обработки ``catalog:pseudo_section`` с параметрами
+            ``slug`` (ЧПУ из раздела) и ``pseudo_slug`` (ЧПУ из псевдо-категории)
+
+        .. versionadded:: 0.1
+    """
     class Meta:
         abstract = True
 
@@ -394,10 +481,23 @@ class PseudoSectionBase(cache_machine.CachingMixin, TitleMixin, TimestableMixin,
     def __unicode__(self):
         return ' '.join([self.section.title, ' > ', self.title])
 
+    @models.permalink
+    def get_absolute_url(self):
+        '''
+        Получение URL'а для просмотра экземпляра модели
+
+        .. versionadded:: 0.2
+        '''
+        return ('catalog:pseudo_section', (), {'slug': self.section.slug, 'pseudo_slug': self.slug})
+
 
 # ------------------------------------------------------------------------------
 class PseudoSectionValueBase(models.Model):
-    """ Значение для фильтра псевдо-категории """
+    """
+        Значение для фильтра псевдо-категории
+
+        .. versionadded:: 0.1
+    """
     __metaclass__ = DeferredModelMetaclass.for_point(
         PseudoSectionValue,
         ImportPseudoAttributeValuesMetaclass,
@@ -438,6 +538,8 @@ class PseudoSectionValueBase(models.Model):
     def value(self):
         '''
         Получение типизированного значения свойства для продукта
+
+        .. versionadded:: 0.1
         '''
         type = self.attribute.type_object
         field_name = type.range_names[0] if type.is_range else type.field_name
@@ -447,6 +549,8 @@ class PseudoSectionValueBase(models.Model):
     def value_to(self):
         '''
         Получение типизированного значения свойства для продукта
+
+        .. versionadded:: 0.1
         '''
         type = self.attribute.type_object
         field_name = type.range_names[1] if type.is_range else type.field_name
@@ -455,7 +559,11 @@ class PseudoSectionValueBase(models.Model):
 
 # ------------------------------------------------------------------------------
 class PseudoSectionBrandBase(models.Model):
-    """ Брэнды для фильтра псевдо-категории """
+    """
+        Брэнды для фильтра псевдо-категории
+
+        .. versionadded:: 0.1
+    """
     __metaclass__ = DeferredModelMetaclass.for_point(
         PseudoSectionBrand,
         extend_meta(

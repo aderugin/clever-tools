@@ -54,7 +54,38 @@ class BrandView(DetailView):
 
 # ------------------------------------------------------------------------------
 class SectionView(DetailView):
-    """Страница для просмотра отдельного раздела"""
+    """
+        Страница для просмотра отдельного раздела
+
+        Настройки:
+
+        :param product_model: Класс модели продукции
+        :type  product_model: ProductBase
+        :param has_pseudo_section: В разделах есть псевдоразделы?
+        :type  has_pseudo_section: bool
+        :param filter_form: Класс формы для фильтра
+        :type  filter_form: FormBase
+        :param is_subsection: Учитывать продукты из дочерних разделов?
+        :type  is_subsection: bool
+        :param page_kwarg: Параметр GET для получения текущей страницы
+        :type  page_kwarg: str
+        :param count_kwarg: Параметр GET для получения количества товаров на странице
+        :type  count_kwarg: str
+        :param order_by:
+        :type  order_by: dict
+        :param default_order: Направление сортировки ('asc', 'desc')
+        :type  default_order: str
+        :param default_sort: Идентификатор сортировки по умолчанию
+        :type  default_sort: str
+
+        .. seealso::
+
+        Документацию ListView для следующих параметров:
+
+        :param allow_empty:
+        :param paginate_by:
+        :param paginator_class:
+    """
     has_pseudo_section = False
     pseudo_section = None
     filter_form = None
