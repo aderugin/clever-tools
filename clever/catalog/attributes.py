@@ -54,9 +54,10 @@ class AttributeControl(object):
     template_name = None
     is_template = True
 
-    def __init__(self, tag, verbose_name):
+    def __init__(self, tag, verbose_name, template_name=None):
         self.tag = tag
         self.verbose_name = verbose_name
+        self.template_name = template_name or self.template_name
 
     def create_form_field(self, attribute, values):
         '''
