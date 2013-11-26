@@ -20,6 +20,7 @@ from clever.catalog import models
 from clever.catalog.models import Product
 from clever.catalog.settings import CLEVER_RECENTLY_VIEWED
 from clever.magic import load_class
+from django.db.models.sql import datastructures
 
 
 # ------------------------------------------------------------------------------
@@ -149,6 +150,13 @@ class SectionView(DetailView):
         """
         Return an instance of the paginator for this view.
         """
+        try:
+            if queryset.count():
+                return self.paginator_class(queryset, per_page, orphans=orphans, allow_empty_first_page=allow_empty_first_page)
+        except datastructures.EmptyResultSet:
+            pass
+
+        queryset = self.get_products_queryset().extra(where=["1=0"])
         return self.paginator_class(queryset, per_page, orphans=orphans, allow_empty_first_page=allow_empty_first_page)
 
     def get_allow_empty(self):
