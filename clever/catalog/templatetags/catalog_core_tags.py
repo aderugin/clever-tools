@@ -26,6 +26,26 @@ def show_recently_viewed(context, template_name='catalog/blocks/recent-viewed.ht
     return t.render(context)
 
 
+@register.filter()
+def format_price(value):
+    from decimal import getcontext
+    getcontext().prec = 2
+    price_str = ""
+    counter = 0
+    remain = value - value.to_integral()
+    digits = value.to_integral().as_tuple().digits[::-1]
+    for v in digits:
+        price_str += str(v)
+        counter += 1
+        if counter >= 3:
+            price_str += " "
+            counter = 0
+    price_str = price_str[::-1]
+    if remain != 0:
+        price_str += str(remain)[1:]
+    return price_str
+
+
 @register.simple_tag(takes_context=True)
 def render_filter_attribute(context, attr, widget):
     attribute = attr.attribute

@@ -121,7 +121,7 @@ class SharedView(View):
     def dispatch(self, request, *args, **kwargs):
         for v in self.views:
             if v.model.objects.filter(**kwargs).count() > 0:
-                if v.menu_path:
+                if hasattr(v, 'menu_path') and v.menu_path:
                     request.menu_path = v.menu_path
                 return v.as_view()(request, *args, **kwargs)
         raise Http404()
