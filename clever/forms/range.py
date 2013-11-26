@@ -15,6 +15,7 @@ class RangeWidget(forms.MultiWidget):
         if template_name:
             self.template_name = template_name
 
+        self.range = ['', '']
         super(RangeWidget, self).__init__(widgets=widgets, *args, **kwargs)
 
     def decompress(self, value):
@@ -23,7 +24,9 @@ class RangeWidget(forms.MultiWidget):
     def format_output(self, rendered_widgets):
         widget_context = {
             'min': rendered_widgets[0],
-            'max': rendered_widgets[1]
+            'max': rendered_widgets[1],
+            'min_value': self.range[0],
+            'max_value': self.range[1],
         }
         return render_to_string(self.template_name, widget_context)
 
@@ -48,6 +51,9 @@ class RangeField(forms.MultiValueField):
             widget=widget(fields[0].widget, fields[1].widget, template_name=kwargs.pop('template_name', None)),
             *args, **kwargs
         )
+
+        # Hack для получения максимальноого и минимального значений в widget'е
+        self.widget.range = self.range
 
     def compress(self, data_list):
         if data_list:
