@@ -4,7 +4,7 @@ register = template.Library()
 
 
 @register.filter
-def nearby(lst, obj, count=9):
+def nearby(lst, obj, count=3):
     '''
     Поиску элементов находящихся около объекта obj в списке lst
     Source: http://lethain.com/a-filter-to-display-neighbors-in-a-list/
