@@ -9,14 +9,25 @@ from urlparse import urlparse
 register = template.Library()
 
 
+def quote_utf8(string, safe='/'):
+      # reserved    = gen-delims / sub-delims
+
+      # gen-delims  = ":" / "/" / "?" / "#" / "[" / "]" / "@"
+
+      # sub-delims  = "!" / "$" / "&" / "'" / "(" / ")"
+      #             / "*" / "+" / "," / ";" / "="
+
+    # string = string.encode(encoding, errors)
+    return unicode(quote(string.encode('utf-8')))
+
+
 def urlencode_utf8(params, doseq=True):
     string = []
     for key, value in params.items():
-        if isinstance(value, (list, set)):
-            for simple in value:
-                string.append(u"=".join([key, simple]))
-        else:
-            string.append(u"=".join([key, value]))
+        if not isinstance(value, (list, set)):
+            value = (value,)
+        for simple in value:
+                string.append(u"=".join([quote_utf8(key), quote_utf8(simple)]))
     query = u"&".join(string)
     # import pdb; pdb.set_trace()
     return query
@@ -26,7 +37,7 @@ def get_query(query, new_params=None, remove_params=None):
     """
     Add and remove query parameters. From `django.contrib.admin`.
     """
-    new_params    = new_params               if new_params    is not None else {}
+    new_params = new_params if new_params is not None else {}
     remove_params = remove_params.split(',') if remove_params is not None else []
     # import pdb; pdb.set_trace()
     if not isinstance(query, dict):
@@ -39,7 +50,7 @@ def get_query(query, new_params=None, remove_params=None):
         if key in params:
             del params[key]
 
-    return urlencode_utf8(params);
+    return urlencode_utf8(params)
 
 
 @register.filter
