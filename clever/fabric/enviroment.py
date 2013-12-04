@@ -2,7 +2,7 @@
 
 from UserDict import UserDict
 
-class Enviroment(UserDict):
+class Enviroment(object):
     def __init__(self):
         # Расположение зависимостей для проекта
         self.REQUIREMENTS_NAME = 'requirements.pip'
@@ -20,10 +20,10 @@ class Enviroment(UserDict):
         self.DJANGO_SETTINGS = None
 
         # Окружение тестового сервера
-        self.STAGING_ENVIRONMENT = { }
+        self.STAGING_ENVIRONMENT = {}
 
         # Окружение рабочего сервера
-        self.PRODUCTION_ENVIRONMENT = { }
+        self.PRODUCTION_ENVIRONMENT = {}
 
         # Текущий репозиторий
         self.CLEVER_REVISION = 'master'

@@ -51,6 +51,7 @@ __all__ = [
     'deploy',
 
     'help',
+    'active_env',
 ]
 
 
@@ -99,6 +100,9 @@ def active_env(name, environ_name):
 
     # Имя окружения
     env.name = environ_name
+
+    # Параметры окружения
+    env.params = env_params
 
 
 @task
