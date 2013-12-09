@@ -164,7 +164,6 @@ class CompareView(generic.TemplateView):
     def mark_strategy(self, attributes):
         strategies = self.get_strategies()
         for temp_name, strategy in strategies.items():
-            print temp_name
             for attribute in attributes:
                 is_compare =strategy.compare(attribute, attribute.compared_values)
                 compare_name = 'is_compare_' + temp_name
