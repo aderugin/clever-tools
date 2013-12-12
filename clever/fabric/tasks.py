@@ -482,9 +482,9 @@ def init():
                 config.write(f)
 
         def run(self):
-            idx       = 1
-            count     = len(self.steps)
-            steps     = []
+            idx = 1
+            count = len(self.steps)
+            steps = []
             variables = []
 
             # Collect steps
