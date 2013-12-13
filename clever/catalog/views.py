@@ -241,7 +241,6 @@ class SectionView(DetailView):
                     else:
                         field = '-' + field
                 result_order.append(field)
-            print(sort_by, result_order)
             queryset = queryset.order_by(*result_order)
         return order, sort_by, queryset
 

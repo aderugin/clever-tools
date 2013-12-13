@@ -74,7 +74,6 @@ class RemoveView(AjaxMixin, NextView):
 class ClearView(AjaxMixin, NextView):
     def proccess(self, request, comparer):
         group_id = self.kwargs.get('id', None)
-        print group_id
         if group_id:
             comparer.clear_group(group_id)
         else:
