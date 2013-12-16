@@ -48,3 +48,6 @@ CLEVER_FILTER_RADIO_TEMPLATE = getattr(settings, 'CLEVER_FILTER_RADIO_TEMPLATE',
 CLEVER_FILTER_RANGE_TEMPLATE = getattr(settings, 'CLEVER_FILTER_RANGE_TEMPLATE', 'catalog/blocks/input/range.html')
 CLEVER_FILTER_PRICE_TEMPLATE = getattr(settings, 'CLEVER_FILTER_PRICE_TEMPLATE', 'catalog/blocks/input/price.html')
 CLEVER_FILTER_BRAND_TEMPLATE = getattr(settings, 'CLEVER_FILTER_BRAND_TEMPLATE', 'catalog/blocks/input/brand.html')
+
+# # Настройки для checkbox
+CLEVER_BREADCRUMBS_CATALOG_TITLE = getattr(settings, 'CLEVER_BREADCRUMBS_CATALOG_TITLE', u'Каталог')

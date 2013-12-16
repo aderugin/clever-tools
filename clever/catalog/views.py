@@ -16,29 +16,41 @@ from django.core.paginator import Paginator
 from django.core.paginator import InvalidPage
 from django.http import Http404
 from django.utils.translation import ugettext as _
+from clever.core.views import BreadcrumbsMixin
 from clever.catalog import models
 from clever.catalog.models import Product
 from clever.catalog.settings import CLEVER_RECENTLY_VIEWED
+from clever.catalog.settings import CLEVER_BREADCRUMBS_CATALOG_TITLE
 from clever.magic import load_class
 from django.db.models.sql import datastructures
+from django.core.urlresolvers import reverse
+
 
 
 # ------------------------------------------------------------------------------
-class IndexView(ListView):
+class IndexView(BreadcrumbsMixin, ListView):
     """Главная страница каталога"""
+
+    def prepare_breadcrumbs(self, breadcrumbs, context):
+        breadcrumbs(CLEVER_BREADCRUMBS_CATALOG_TITLE, reverse('catalog:index'))
+
     def get_queryset(self):
         return self.model.sections.get_query_set()
 
 
 # ------------------------------------------------------------------------------
-class BrandIndexView(ListView):
+class BrandIndexView(BreadcrumbsMixin, ListView):
     """Главная страница каталога"""
+
     def get_queryset(self):
         return self.model.brands.get_query_set()
 
+    def prepare_breadcrumbs(self, breadcrumbs, context):
+        breadcrumbs(CLEVER_BREADCRUMBS_CATALOG_TITLE, reverse('catalog:index'))
+
 
 # ------------------------------------------------------------------------------
-class BrandView(DetailView):
+class BrandView(BreadcrumbsMixin, DetailView):
     """Страница для просмотра отдельного бренда"""
 
     def get_queryset(self):
@@ -54,7 +66,7 @@ class BrandView(DetailView):
 
 
 # ------------------------------------------------------------------------------
-class SectionView(DetailView):
+class SectionView(BreadcrumbsMixin, DetailView):
     """
         Страница для просмотра отдельного раздела
 
@@ -278,6 +290,15 @@ class SectionView(DetailView):
             })
         return filter_data
 
+    def prepare_breadcrumbs(self, breadcrumbs, context):
+        breadcrumbs(CLEVER_BREADCRUMBS_CATALOG_TITLE, reverse('catalog:index'))
+        for parent in self.object.get_ancestors(include_self=True):
+            breadcrumbs(parent.title, parent.get_absolute_url())
+
+        if context['active_pseudo_section']:
+            pseudo_section = context['active_pseudo_section']
+            breadcrumbs(pseudo_section.title, pseudo_section.get_absolute_url())
+
     def get_context_data(self, **kwargs):
         context = super(SectionView, self).get_context_data(**kwargs)
 
@@ -344,7 +365,7 @@ class SectionView(DetailView):
 
 
 # ------------------------------------------------------------------------------
-class ProductView(DetailView):
+class ProductView(BreadcrumbsMixin, DetailView):
     """Страница для просмотра отдельного продукта"""
 
     def get_queryset(self):
@@ -352,6 +373,12 @@ class ProductView(DetailView):
 
     def get_attributes(self):
         return models.ProductAttribute.objects.filter(product=self.object).order_by('sort')
+
+    def prepare_breadcrumbs(self, breadcrumbs, context):
+        breadcrumbs(CLEVER_BREADCRUMBS_CATALOG_TITLE, reverse('catalog:index'))
+        for parent in self.object.section.get_ancestors(include_self=True):
+            breadcrumbs(parent.title, parent.get_absolute_url())
+        breadcrumbs(self.object.title, self.object.get_absolute_url())
 
     def get_context_data(self, **kwargs):
         context = super(ProductView, self).get_context_data(**kwargs)

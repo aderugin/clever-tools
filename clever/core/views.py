@@ -2,6 +2,7 @@
 
 from django.views.generic.base import View
 from django.views.generic.list import ListView
+from django.views.generic import TemplateView
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 from django.http import Http404
@@ -100,6 +101,7 @@ class AjaxFormMixin(object):
         return result
 
 
+#-------------------------------------------------------------------------------
 class AjaxListMixin(ListView, AjaxDataMixin):
     '''
     Миксин, формирующий JSON ответ для GET запроса. Достаточно переопределить
@@ -115,6 +117,7 @@ class AjaxListMixin(ListView, AjaxDataMixin):
             return response
 
 
+#-------------------------------------------------------------------------------
 class SharedView(View):
     views = []
 
@@ -134,3 +137,14 @@ class SharedView(View):
                     request.menu_path = menu_path
                 return v.as_view()(request, *args, **kwargs)
         raise Http404()
+
+
+#-------------------------------------------------------------------------------
+class BreadcrumbsMixin(object):
+    def prepare_breadcrumbs(self, breadcrumbs, context):
+        ''' Подготовка хлебных крошек '''
+        pass
+
+    def render_to_response(self, context, **response_kwargs):
+        self.prepare_breadcrumbs(self.request.breadcrumbs, context)
+        return super(BreadcrumbsMixin, self).render_to_response(context, **response_kwargs)

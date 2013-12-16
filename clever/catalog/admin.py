@@ -10,6 +10,7 @@ from clever.catalog import models
 from clever.catalog.forms import FilterForm
 from clever.catalog.attributes import AttributeManager
 from clever.magic.classmaker import classmaker
+from clever.seo.admin import inject_seo_inline
 
 
 # ------------------------------------------------------------------------------
@@ -70,8 +71,14 @@ class SectionForm(forms.ModelForm):
             'text': CKEditorWidget(config_name='default')
         }
 
+# ------------------------------------------------------------------------------
+@inject_seo_inline()
+class BrandAdmin(admin.ModelAdmin):
+    pass
+
 
 # ------------------------------------------------------------------------------
+@inject_seo_inline()
 class SectionAdmin(AdminMixin, editor.TreeEditor):
     """
     ..todo: Протестировать все!
@@ -165,6 +172,7 @@ class ProductForm(forms.ModelForm):
 
 
 # ------------------------------------------------------------------------------
+@inject_seo_inline()
 class ProductAdmin(AdminMixin, admin.ModelAdmin):
     """
     ..todo: Протестировать все!
@@ -252,6 +260,7 @@ class PseudoSectionForm(forms.ModelForm):
 
 
 # ------------------------------------------------------------------------------
+@inject_seo_inline()
 class PseudoSectionAdmin(AdminMixin, admin.ModelAdmin):
     form = PseudoSectionForm
 
