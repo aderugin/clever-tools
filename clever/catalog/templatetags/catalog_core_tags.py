@@ -29,6 +29,7 @@ def show_recently_viewed(context, template_name='catalog/blocks/recent-viewed.ht
 @register.filter()
 def format_price(value):
     from decimal import getcontext
+    backup_prec = getcontext().prec
     getcontext().prec = 2
     price_str = ""
     counter = 0
@@ -43,6 +44,7 @@ def format_price(value):
     price_str = price_str[::-1]
     if remain != 0:
         price_str += str(remain)[1:]
+    getcontext().prec = backup_prec
     return price_str
 
 
