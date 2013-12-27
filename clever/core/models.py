@@ -16,6 +16,7 @@ from model_utils import fields
 from caching import base as cache_machine
 import autoslug
 import os
+import random
 
 
 def generate_upload_name(instance, filename, prefix=None, unique=False):
@@ -147,6 +148,17 @@ class CachingPassThroughManager(managers.PassThroughManager, cache_machine.Cachi
 class TreeCachingPassThroughManager(mptt_managers.TreeManager, CachingPassThroughManager):
     pass
 
+
+#------------------------------------------------------------------------------
+class RandomQuerySet(models.query.QuerySet):
+    def random(self, length=1):
+        ''' Получение случайных продуктов '''
+        count = self.count()
+        if count > 0:
+            indexes = random.sample(self.values_list('id', flat=True), length)
+            return self.filter(id__in=indexes)
+        else:
+            return self.extra(where=["1=0"])
 
 def extend_meta(**kwargs):
     ''' Расширение класса Meta для Django '''
