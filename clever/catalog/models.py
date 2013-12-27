@@ -183,6 +183,7 @@ class BrandBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, Tit
         '''
         return ('catalog:brand', (), {'slug': self.slug})
 
+
 # ------------------------------------------------------------------------------
 class SectionBrandBase(cache_machine.CachingMixin, models.Model):
     """Базовая модель для настройки бренда в отдельном разделе"""

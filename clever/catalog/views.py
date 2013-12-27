@@ -21,6 +21,7 @@ from clever.catalog import models
 from clever.catalog.models import Product
 from clever.catalog.settings import CLEVER_RECENTLY_VIEWED
 from clever.catalog.settings import CLEVER_BREADCRUMBS_CATALOG_TITLE
+from clever.catalog.settings import CLEVER_BREADCRUMBS_BRANDS_TITLE
 from clever.magic import load_class
 from django.db.models.sql import datastructures
 from django.core.urlresolvers import reverse
@@ -46,7 +47,7 @@ class BrandIndexView(BreadcrumbsMixin, ListView):
         return self.model.brands.get_query_set()
 
     def prepare_breadcrumbs(self, breadcrumbs, context):
-        breadcrumbs(CLEVER_BREADCRUMBS_CATALOG_TITLE, reverse('catalog:index'))
+        breadcrumbs(CLEVER_BREADCRUMBS_BRANDS_TITLE, reverse('catalog:brands'))
 
 
 # ------------------------------------------------------------------------------
@@ -63,6 +64,10 @@ class BrandView(BreadcrumbsMixin, DetailView):
         context = super(BrandView, self).get_context_data(**kwargs)
         context['section_list'] = self.get_sections_queryset(self.object)
         return context
+
+    def prepare_breadcrumbs(self, breadcrumbs, context):
+        breadcrumbs(CLEVER_BREADCRUMBS_BRANDS_TITLE, reverse('catalog:brands'))
+        breadcrumbs(self.object.title, self.object.get_absolute_url())
 
 
 # ------------------------------------------------------------------------------
