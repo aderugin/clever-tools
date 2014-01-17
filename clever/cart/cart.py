@@ -119,7 +119,7 @@ class CartWithOptions(Cart):
         self.option_list = []
         self.option_prices = {}
         if len(options_pks) > 0:
-            self.option_list = option_model.objects.filter(pk__in=options_pks)
+            self.option_list = self.option_model.objects.filter(pk__in=options_pks)
             self.option_prices = {x['id']: x['price'] for x in self.option_list.values('id', 'price')}
 
     def get_item_price(self, item):
