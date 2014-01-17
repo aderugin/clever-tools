@@ -42,8 +42,8 @@ class RoboSuccessView(TemplateView):
     model = None
 
     def get(self, request, *args, **kwargs):
-        InvId = request.GET.get('InvId', None)
-        OutSum = request.GET.get('OutSum', None)
+        InvId = request.GET.get('InvId')
+        OutSum = request.GET.get('OutSum')
         remote_crc = request.GET.get('SignatureValue', '').upper()
         order_obj = self.model.objects.get(id=InvId)
         md5 = hashlib.md5()
