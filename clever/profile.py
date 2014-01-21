@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import time
+import os
 import hotshot
 
 def profile(prefix):
@@ -9,10 +10,10 @@ def profile(prefix):
             pid = os.getpid()
             timestr = time.strftime("%Y-%m-%d-%H-%M-%S")
             return prefix + '.' + str(timestr) + '.' + str(pid) + '.prof'
-        def generate_profile():
+        def generate_profile(*args, **kwargs):
             prof = hotshot.Profile(gen_name())
             prof.start()
-            callback()
+            callback(*args, **kwargs)
             prof.stop()
         return generate_profile
     return wrapper
