@@ -4,7 +4,6 @@ from django.conf import settings
 from django.core.validators import validate_email
 from django import forms
 from django.contrib.auth import get_user_model
-from django.core.validators import email_re
 
 User = get_user_model()
 
@@ -25,9 +24,10 @@ def replace_email_variables(template, variables):
 
     email = getattr(settings, 'DEFAULT_EMAIL_FROM', '')
     if not variables.has_key('DEFAULT_EMAIL_FROM'):
-        if email_re.match(email):
+        try:
+            validate_email(email)
             variables['DEFAULT_EMAIL_FROM'] = email
-        else:
+        except forms.ValidationError:
             raise RuntimeError("Проверить настройки email сейчас установлен email - \"%s\"" %
                     email)
 
