@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 import decimal
+import json
+import urllib2
 
 
 class Cart(object):
@@ -12,6 +14,14 @@ class Cart(object):
         self.request = request
         if not self.session_key in self.request.session:
             self.request.session[self.session_key] = {}
+
+    @property
+    def data(self):
+        return self.request.session[self.session_key]
+
+    @data.setter
+    def data(self, value):
+        self.request.session[self.session_key] = value
 
     def get_key(self, item):
         key = str(item['id'])
@@ -29,6 +39,9 @@ class Cart(object):
         else:
             self.request.session[self.session_key][key] = item
         self.request.session.modified = True
+
+    def add_from_key(self, key):
+        self.add(key)
 
     def update(self, key, count=None, **kwargs):
         if count:
@@ -49,6 +62,12 @@ class Cart(object):
 
     def count(self):
         return sum([x[1]['count'] for x in self.request.session[self.session_key].iteritems()])
+
+    def batch_add(self, keys_str):
+        self.data = json.loads(urllib2.unquote(keys_str))
+
+    def batch_str(self):
+        return urllib2.quote(json.dumps(self.data))
 
     def prepare_data(self):
         if hasattr(self, 'product_list'):
