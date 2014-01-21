@@ -42,7 +42,7 @@ class SettingsModel(cache_machine.CachingMixin, Model):
     class Meta:
         abstract = True
     __metaclass__ = SettingsMetaclass
-    _site = models.ForeignKey(Site, unique=True)
+    _site = models.ForeignKey(Site, unique=True, blank=True, editable=False)
 
     def save(self, *args, **kwargs):
         if self._site is None:
