@@ -13,7 +13,8 @@ def profile(prefix):
         def generate_profile(*args, **kwargs):
             prof = hotshot.Profile(gen_name())
             prof.start()
-            callback(*args, **kwargs)
+            result = callback(*args, **kwargs)
             prof.stop()
+            return result
         return generate_profile
     return wrapper
