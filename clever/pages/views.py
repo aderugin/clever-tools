@@ -9,7 +9,7 @@ from django.http import Http404
 class PageView(DetailView):
     model = Page
     context_object_name = 'page'
-    template_name = 'page/default.html'
+    template_name = None
 
     def get_object(self):
         page = get_object_or_404(Page, path=self.request.path, active=1)
@@ -18,10 +18,12 @@ class PageView(DetailView):
 
     def get_template_names(self):
         return [
+            self.template_name,
             "pages/%s.html" % self.page.slug,
             "pages/%s_view.html" % self.page.slug,
             "layouts/%s.html" % self.page.template,
             "templates/%s.html" % self.page.template,
+            'page/default.html'
         ]
 
 
