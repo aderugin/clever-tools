@@ -4,12 +4,16 @@ from django.shortcuts import get_object_or_404
 from django.views.generic.detail import DetailView
 from .models import Page
 from django.http import Http404
+from clever.core import views
 
-
-class PageView(DetailView):
+class PageView(views.BreadcrumbsMixin, DetailView):
     model = Page
     context_object_name = 'page'
     template_name = 'page/default.html'
+
+    def prepare_breadcrumbs(self, breadcrumbs, context):
+        for parent in self.page.get_ancestors(include_self=True):
+            breadcrumbs(parent.title, parent.get_absolute_url())
 
     def get_object(self):
         page = get_object_or_404(Page, path=self.request.path, active=1)
@@ -39,7 +43,7 @@ class PageMixin(object):
                 if not self.page.active:
                     raise Http404()
             except Page.DoesNotExist:
-               self.page = None
+                self.page = None
         return self.page
 
     def get_context_data(self, **kwargs):
@@ -50,5 +54,5 @@ class PageMixin(object):
         if not isinstance(self, DetailView):
             context.update({
                 'object': self.get_page()
-            });
+            })
         return context
