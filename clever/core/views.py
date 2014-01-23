@@ -60,6 +60,8 @@ class AjaxProcessMixin(View, AjaxDataMixin):
 
 #-------------------------------------------------------------------------------
 class AjaxFormMixin(object):
+    success_url = '#'
+
     def json_response(self, response):
         return HttpResponse(json.dumps(response, cls=DjangoJSONEncoder), mimetype='application/json')
 
@@ -85,6 +87,8 @@ class AjaxFormMixin(object):
         response = {
             'status': True
         }
+        if hasattr(self, 'success_message'):
+            response['message'] = self.success_message
         return response
 
     def form_invalid(self, form):
