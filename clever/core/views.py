@@ -84,7 +84,7 @@ class AjaxFormMixin(object):
 
     def get_ajax_valid(self, form):
         response = {
-            'status': True
+            'status': True,
         }
         return response
 

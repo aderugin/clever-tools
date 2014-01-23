@@ -9,7 +9,7 @@ from clever.core import views
 class PageView(views.BreadcrumbsMixin, DetailView):
     model = Page
     context_object_name = 'page'
-    template_name = 'page/default.html'
+    template_name = None
 
     def prepare_breadcrumbs(self, breadcrumbs, context):
         for parent in self.page.get_ancestors(include_self=True):
@@ -22,10 +22,12 @@ class PageView(views.BreadcrumbsMixin, DetailView):
 
     def get_template_names(self):
         return [
+            self.template_name,
             "pages/%s.html" % self.page.slug,
             "pages/%s_view.html" % self.page.slug,
             "layouts/%s.html" % self.page.template,
             "templates/%s.html" % self.page.template,
+            'page/default.html'
         ]
 
 
