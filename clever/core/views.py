@@ -86,7 +86,7 @@ class AjaxFormMixin(object):
 
     def get_ajax_valid(self, form):
         response = {
-            'status': True
+            'status': True,
         }
         if hasattr(self, 'success_message'):
             response['message'] = self.success_message
