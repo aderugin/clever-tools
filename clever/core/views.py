@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from django.views.generic.base import View
-from django.views.generic.list import ListView
+from django.views.generic import View
+from django.views.generic import ListView
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse
 from django.http import Http404
@@ -60,7 +60,7 @@ class AjaxProcessMixin(View, AjaxDataMixin):
 
 #-------------------------------------------------------------------------------
 class AjaxFormMixin(object):
-    success_url = '#'
+    success_url = ''
 
     def json_response(self, response):
         return HttpResponse(json.dumps(response, cls=DjangoJSONEncoder), mimetype='application/json')
@@ -131,3 +131,4 @@ class SharedView(View):
                     request.menu_path = v.menu_path
                 return v.as_view()(request, *args, **kwargs)
         raise Http404()
+
