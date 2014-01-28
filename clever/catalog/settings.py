@@ -11,21 +11,24 @@
 """
 from django.conf import settings
 
-# Настройка опция по умолчанию для списка разрешенных аттрибутов
+# Настройка по умолчанию для списка разрешенных аттрибутов
 CLEVER_ATTRIBUTES = getattr(settings, 'CLEVER_ATTRIBUTES', [
     'price'
 ])
 
-# Настройка опция по умолчанию для списка разрешенных типов аттрибутов
+# Настройка по умолчанию для списка разрешенных типов аттрибутов
 CLEVER_ATTRIBUTES_TYPES = getattr(settings, 'CLEVER_ATTRIBUTES_TYPES', [
     'string'
 ])
 
-# Настройка опция по умолчанию для списка разрешенных элементов управления аттрибутов
+# Настройка по умолчанию для списка разрешенных элементов управления аттрибутов
 CLEVER_ATTRIBUTES_CONTROLS = getattr(settings, 'CLEVER_ATTRIBUTES_CONTROLS', [
     'checkbox',
     'select'
 ])
 
-# Настройка опция по умолчанию для списка отсуствующих параметров
+# Настройка по умолчанию для списка отсуствующих параметров
 CLEVER_EMPTY_LABEL = getattr(settings, 'CLEVER_EMPTY_LABEL', u"----")
+
+# Настройка по умолчанию для таймаута кэша в фильтре
+CLEVER_FILTER_TIMEOUT = getattr(settings, 'CLEVER_FILTER_TIMEOUT', 60*10)
