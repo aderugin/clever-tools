@@ -60,7 +60,7 @@ class AjaxProcessMixin(View, AjaxDataMixin):
 
 #-------------------------------------------------------------------------------
 class AjaxFormMixin(object):
-    success_url = ''
+    success_url = '#'
 
     def json_response(self, response):
         return HttpResponse(json.dumps(response, cls=DjangoJSONEncoder), mimetype='application/json')
