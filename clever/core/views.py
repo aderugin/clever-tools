@@ -100,6 +100,7 @@ class AjaxFormMixin(object):
         return result
 
 
+#-------------------------------------------------------------------------------
 class AjaxListMixin(ListView, AjaxDataMixin):
     '''
     Миксин, формирующий JSON ответ для GET запроса. Достаточно переопределить
@@ -115,6 +116,7 @@ class AjaxListMixin(ListView, AjaxDataMixin):
             return response
 
 
+#-------------------------------------------------------------------------------
 class SharedView(View):
     views = []
 
