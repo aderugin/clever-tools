@@ -23,11 +23,11 @@ setup(
     test_suite='clever.tests.runtests.runtests',
     install_requires=[
         # Concrete version
-        'Django >= 1.4',
+        # 'Django >= 1.4',
         'django-cache-machine == 0.6',
 
         # Latest version
-        'FeinCMS >= 1.7.1',
+        # 'FeinCMS >= 1.7.1',
         'Pillow == 1.7.8',
         'South >= 0.7.6',
         'Unidecode >= 0.04.12',
