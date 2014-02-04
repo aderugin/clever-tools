@@ -35,7 +35,7 @@ class RoboResultView(View):
                 return HttpResponse('ERROR: CRC NOT VALID')
         except Exception, e:
             import traceback
-            return HttpResponse('ERROR: %s' % traceback.format_ex())
+            return HttpResponse('ERROR: %s' % traceback.format_exc())
 
 
 class RoboSuccessView(TemplateView):
