@@ -25,7 +25,7 @@ class RoboResultView(View):
 
         try:
             filter_kwargs = {
-                self.models.robokassa_field: self.models.robokassa_status
+                self.model.robokassa_field: self.model.robokassa_status
             }
             order_obj = self.model.objects.get(id=InvId, **filter_kwargs)
             md5 = hashlib.md5()
