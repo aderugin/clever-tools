@@ -33,6 +33,7 @@ class RoboResultView(View):
             local_crc = md5.hexdigest().upper()
             if (local_crc == remote_crc):
                 order_obj.set_status_paid()
+                order_obj.save()
                 return HttpResponse('OK' + str(InvId))
             else:
                 return HttpResponse('ERROR: CRC NOT VALID')
