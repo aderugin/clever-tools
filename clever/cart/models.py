@@ -5,8 +5,8 @@ from django.conf import settings
 
 
 class RobokassaMixin(object):
-    class Meta:
-        abstract = True
+    robokassa_field = 'status'
+    robokassa_status = 1
 
     def set_status_paid(self):
         pass

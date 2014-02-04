@@ -24,7 +24,10 @@ class RoboResultView(View):
             return HttpResponse('ERROR: NOT SET SignatureValue')
 
         try:
-            order_obj = self.model.objects.get(id=InvId, status=1)
+            filter_kwargs = {
+                self.models.robokassa_field: self.models.robokassa_status
+            }
+            order_obj = self.model.objects.get(id=InvId, **filter_kwargs)
             md5 = hashlib.md5()
             md5.update(str(OutSum) + ':' + str(InvId) + ':' + order_obj.mrchpass2)
             local_crc = md5.hexdigest().upper()
