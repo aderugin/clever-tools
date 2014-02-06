@@ -19,3 +19,7 @@ def format_intspace(value):
         return new
     else:
         return format_intspace(new)
+
+@register.filter()
+def to_str(value):
+    return str(value)
