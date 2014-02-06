@@ -41,6 +41,8 @@ def send_message_when_created(template_name, admin=True, staff=True):
                 fields = {x.name: None for x in instance._meta.fields}
                 for field in fields:
                     fields[field] = getattr(instance, field)
+                if hasattr(instance, 'get_notifier_context'):
+                    fields = instance.get_notifier_context(fields)
                 users = get_user_model().objects.filter(querypart)
                 for user in users:
                     fields['email'] = user.email
