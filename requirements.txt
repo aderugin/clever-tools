@@ -1,4 +1,4 @@
--r tests/requirements.pip
+-r tests/requirements.txt
 
 docutils
 sphinx

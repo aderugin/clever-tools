@@ -104,13 +104,49 @@ class AjaxFormMixin(object):
         return result
 
 
+class AjaxListMixin(ListView, AjaxDataMixin):
+    '''
+    Миксин, формирующий JSON ответ для GET запроса. Достаточно переопределить
+    get_ajax_data и вернуть в нем словарь
+    '''
+
+    def get(self, request, *args, **kwargs):
+        response = super(AjaxListMixin, self).get(request, request, *args, **kwargs)
+        if request.is_ajax():
+            data = self.get_ajax_data(object_list=self.object_list, **kwargs)
+            return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), mimetype='application/json')
+        else:
+            return response
+
+
+#-------------------------------------------------------------------------------
 class SharedView(View):
     views = []
 
     def dispatch(self, request, *args, **kwargs):
         for v in self.views:
-            if v.model.objects.filter(**kwargs).count() > 0:
-                if v.menu_path:
-                    request.menu_path = v.menu_path
+            # Получение queryset'а для поиска объекта
+            view = v()
+            if hasattr(view, 'get_shared_queryset'):
+                shared_queryset = view.get_shared_queryset()
+            else:
+                shared_queryset = view.get_queryset()
+
+            # Ищем объект
+            if shared_queryset.filter(**kwargs).count() > 0:
+                menu_path = getattr(v, 'menu_path', None)
+                if menu_path:
+                    request.menu_path = menu_path
                 return v.as_view()(request, *args, **kwargs)
         raise Http404()
+
+
+#-------------------------------------------------------------------------------
+class BreadcrumbsMixin(object):
+    def prepare_breadcrumbs(self, breadcrumbs, context):
+        ''' Подготовка хлебных крошек '''
+        pass
+
+    def render_to_response(self, context, **response_kwargs):
+        self.prepare_breadcrumbs(self.request.breadcrumbs, context)
+        return super(BreadcrumbsMixin, self).render_to_response(context, **response_kwargs)

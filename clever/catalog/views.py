@@ -16,28 +16,42 @@ from django.core.paginator import Paginator
 from django.core.paginator import InvalidPage
 from django.http import Http404
 from django.utils.translation import ugettext as _
+from clever.core.views import BreadcrumbsMixin
 from clever.catalog import models
 from clever.catalog.models import Product
 from clever.catalog.settings import CLEVER_RECENTLY_VIEWED
+from clever.catalog.settings import CLEVER_BREADCRUMBS_CATALOG_TITLE
+from clever.catalog.settings import CLEVER_BREADCRUMBS_BRANDS_TITLE
 from clever.magic import load_class
+from django.db.models.sql import datastructures
+from django.core.urlresolvers import reverse
+
 
 
 # ------------------------------------------------------------------------------
-class IndexView(ListView):
+class IndexView(BreadcrumbsMixin, ListView):
     """Главная страница каталога"""
+
+    def prepare_breadcrumbs(self, breadcrumbs, context):
+        breadcrumbs(CLEVER_BREADCRUMBS_CATALOG_TITLE, reverse('catalog:index'))
+
     def get_queryset(self):
         return self.model.sections.get_query_set()
 
 
 # ------------------------------------------------------------------------------
-class BrandIndexView(ListView):
+class BrandIndexView(BreadcrumbsMixin, ListView):
     """Главная страница каталога"""
+
     def get_queryset(self):
         return self.model.brands.get_query_set()
 
+    def prepare_breadcrumbs(self, breadcrumbs, context):
+        breadcrumbs(CLEVER_BREADCRUMBS_BRANDS_TITLE, reverse('catalog:brands'))
+
 
 # ------------------------------------------------------------------------------
-class BrandView(DetailView):
+class BrandView(BreadcrumbsMixin, DetailView):
     """Страница для просмотра отдельного бренда"""
 
     def get_queryset(self):
@@ -51,10 +65,45 @@ class BrandView(DetailView):
         context['section_list'] = self.get_sections_queryset(self.object)
         return context
 
+    def prepare_breadcrumbs(self, breadcrumbs, context):
+        breadcrumbs(CLEVER_BREADCRUMBS_BRANDS_TITLE, reverse('catalog:brands'))
+        breadcrumbs(self.object.title, self.object.get_absolute_url())
+
 
 # ------------------------------------------------------------------------------
-class SectionView(DetailView):
-    """Страница для просмотра отдельного раздела"""
+class SectionView(BreadcrumbsMixin, DetailView):
+    """
+        Страница для просмотра отдельного раздела
+
+        Настройки:
+
+        :param product_model: Класс модели продукции
+        :type  product_model: ProductBase
+        :param has_pseudo_section: В разделах есть псевдоразделы?
+        :type  has_pseudo_section: bool
+        :param filter_form: Класс формы для фильтра
+        :type  filter_form: FormBase
+        :param is_subsection: Учитывать продукты из дочерних разделов?
+        :type  is_subsection: bool
+        :param page_kwarg: Параметр GET для получения текущей страницы
+        :type  page_kwarg: str
+        :param count_kwarg: Параметр GET для получения количества товаров на странице
+        :type  count_kwarg: str
+        :param order_by:
+        :type  order_by: dict
+        :param default_order: Направление сортировки ('asc', 'desc')
+        :type  default_order: str
+        :param default_sort: Идентификатор сортировки по умолчанию
+        :type  default_sort: str
+
+        .. seealso::
+
+        Документацию ListView для следующих параметров:
+
+        :param allow_empty:
+        :param paginate_by:
+        :param paginator_class:
+    """
     has_pseudo_section = False
     pseudo_section = None
     filter_form = None
@@ -118,6 +167,13 @@ class SectionView(DetailView):
         """
         Return an instance of the paginator for this view.
         """
+        try:
+            if queryset.count():
+                return self.paginator_class(queryset, per_page, orphans=orphans, allow_empty_first_page=allow_empty_first_page)
+        except datastructures.EmptyResultSet:
+            pass
+
+        queryset = self.get_products_queryset().extra(where=["1=0"])
         return self.paginator_class(queryset, per_page, orphans=orphans, allow_empty_first_page=allow_empty_first_page)
 
     def get_allow_empty(self):
@@ -202,7 +258,6 @@ class SectionView(DetailView):
                     else:
                         field = '-' + field
                 result_order.append(field)
-            print(sort_by, result_order)
             queryset = queryset.order_by(*result_order)
         return order, sort_by, queryset
 
@@ -239,6 +294,15 @@ class SectionView(DetailView):
                 'price_1': pseudo_category.price_to
             })
         return filter_data
+
+    def prepare_breadcrumbs(self, breadcrumbs, context):
+        breadcrumbs(CLEVER_BREADCRUMBS_CATALOG_TITLE, reverse('catalog:index'))
+        for parent in self.object.get_ancestors(include_self=True):
+            breadcrumbs(parent.title, parent.get_absolute_url())
+
+        if context['active_pseudo_section']:
+            pseudo_section = context['active_pseudo_section']
+            breadcrumbs(pseudo_section.title, pseudo_section.get_absolute_url())
 
     def get_context_data(self, **kwargs):
         context = super(SectionView, self).get_context_data(**kwargs)
@@ -306,7 +370,7 @@ class SectionView(DetailView):
 
 
 # ------------------------------------------------------------------------------
-class ProductView(DetailView):
+class ProductView(BreadcrumbsMixin, DetailView):
     """Страница для просмотра отдельного продукта"""
 
     def get_queryset(self):
@@ -314,6 +378,12 @@ class ProductView(DetailView):
 
     def get_attributes(self):
         return models.ProductAttribute.objects.filter(product=self.object).order_by('sort')
+
+    def prepare_breadcrumbs(self, breadcrumbs, context):
+        breadcrumbs(CLEVER_BREADCRUMBS_CATALOG_TITLE, reverse('catalog:index'))
+        for parent in self.object.section.get_ancestors(include_self=True):
+            breadcrumbs(parent.title, parent.get_absolute_url())
+        breadcrumbs(self.object.title, self.object.get_absolute_url())
 
     def get_context_data(self, **kwargs):
         context = super(ProductView, self).get_context_data(**kwargs)

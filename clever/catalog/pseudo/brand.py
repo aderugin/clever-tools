@@ -5,6 +5,7 @@ from clever.catalog.models import Brand
 from clever.catalog.models import SectionBrand
 import sys
 from clever.catalog.controls import CheckboxControl
+from clever.catalog import settings
 
 
 # ------------------------------------------------------------------------------
@@ -12,7 +13,8 @@ from clever.catalog.controls import CheckboxControl
 class BrandAttribute(PseudoAttribute):
     ''' Псевдо аттрибут для брэнда '''
 
-    control_object = CheckboxControl('brand-checkbox', u'Производитель')#AttributeManager.get_control('checkbox')
+    # AttributeManager.get_control('checkbox')
+    control_object = CheckboxControl('brand-checkbox', u'Производитель', template_name=settings.CLEVER_FILTER_BRAND_TEMPLATE)
     query_name = 'brand'
 
     def get_values(self, section):

@@ -16,6 +16,7 @@ from model_utils import fields
 from caching import base as cache_machine
 import autoslug
 import os
+import random
 
 
 def generate_upload_name(instance, filename, prefix=None, unique=False):
@@ -60,15 +61,14 @@ class SortableMixin(models.Model):
 
     sort = models.PositiveIntegerField(blank=True)
 
-    @staticmethod
-    def pre_save(sender, instance, **kwargs):
-        if (not instance.sort):
-            last_qs = sender.objects.reverse()
+    def save(self, *args, **kwargs):
+        if (not self.sort):
+            last_qs = self.__class__.objects.reverse()
             if (last_qs.count() > 0 and last_qs[0].sort):
-                instance.sort = int(last_qs[0].sort) + 100
+                self.sort = int(last_qs[0].sort) + 100
             else:
-                instance.sort = 1000
-        return instance
+                self.sort = 1000
+        return super(SortableMixin, self).save(*args, **kwargs)
 
 
 class TimestableMixin(models.Model):
@@ -148,6 +148,17 @@ class CachingPassThroughManager(managers.PassThroughManager, cache_machine.Cachi
 class TreeCachingPassThroughManager(mptt_managers.TreeManager, CachingPassThroughManager):
     pass
 
+
+#------------------------------------------------------------------------------
+class RandomQuerySet(models.query.QuerySet):
+    def random(self, length=1):
+        ''' Получение случайных продуктов '''
+        count = self.count()
+        if count > 0:
+            indexes = random.sample(self.values_list('id', flat=True), length)
+            return self.filter(id__in=indexes)
+        else:
+            return self.extra(where=["1=0"])
 
 def extend_meta(**kwargs):
     ''' Расширение класса Meta для Django '''
