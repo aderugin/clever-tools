@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from django.db.models.signals import post_save
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from templated_emails.utils import send_templated_email
 from django.db.models import Q
 from django.core.urlresolvers import reverse
@@ -41,7 +41,9 @@ def send_message_when_created(template_name, admin=True, staff=True):
                 fields = {x.name: None for x in instance._meta.fields}
                 for field in fields:
                     fields[field] = getattr(instance, field)
-                users = User.objects.filter(querypart)
+                if hasattr(instance, 'get_notifier_context'):
+                    fields = instance.get_notifier_context(fields)
+                users = get_user_model().objects.filter(querypart)
                 for user in users:
                     fields['email'] = user.email
                     send_message(template_name, fields)
@@ -66,7 +68,7 @@ def send_create_email_to_managers(template_name, var_name='instance', admin=True
                     querypart = Q(is_staff=True)
 
             if querypart and created:
-                users = User.objects.filter(querypart)
+                users = get_user_model().objects.filter(querypart)
                 email_lists = [user.email for user in users]
                 email_lists = filter(lambda email: email is not None and len(email) > 0, email_lists)
                 send_templated_email(email_lists, "emails/" + template_name, {
