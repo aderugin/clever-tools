@@ -1,0 +1,20 @@
+{% load i18n %}
+
+<table>
+    <thead>
+        <tr>
+            <th>{% trans "Name" %}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for page in pages %}
+            <tr class="{% cycle 'djDebugOdd' 'djDebugEven' %}">
+                <td>
+                    <a href="/markup/{{ page.output_name }}">
+                        {{ page.title }}
+                    </a>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

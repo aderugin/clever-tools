@@ -40,6 +40,7 @@ setup(
         "django-fsm >= 1.4.1",
         "templated-emails == 0.6.9",
         "django-eml-email-backend == 0.1",
+        "PyYAML == 3.10",
     ],
     scripts=[
         'bin/clever-install-python',

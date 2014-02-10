@@ -18,9 +18,13 @@ class PageView(DetailView):
 
     def get_template_names(self):
         return [
+            "pages/%s.jhtml" % self.page.slug,
             "pages/%s.html" % self.page.slug,
+            "pages/%s_view.jhtml" % self.page.slug,
             "pages/%s_view.html" % self.page.slug,
+            "layouts/%s.jhtml" % self.page.template,
             "layouts/%s.html" % self.page.template,
+            "templates/%s.jhtml" % self.page.template,
             "templates/%s.html" % self.page.template,
         ]
 
