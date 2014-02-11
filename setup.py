@@ -42,6 +42,7 @@ setup(
         "django-eml-email-backend == 0.1",
         "Coffin == 0.3.8",
         "PyYAML == 3.10",
+        "Jinja2 == 2.7.1",
     ],
     scripts=[
         'bin/clever-install-python',
