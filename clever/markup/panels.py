@@ -5,7 +5,8 @@ from clever.markup import pages
 
 
 class MarkupPanel(Panel):
-    title = u'Верстка'
+    nav_title = u'Верстка'
+    title = u'Список страниц верстки'
     template = 'markup/panel.html'
 
     def get_stats(self):

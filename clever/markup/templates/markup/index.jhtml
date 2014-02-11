@@ -4,7 +4,7 @@
         <ul>
             {% for id, page in pages.items() %}
                 <li>
-                    <a href="/markup/{{ page.output_name }}">
+                    <a href="./{{ page.output_name }}">
                         {{ page.title }}
                     </a>
                 </li>

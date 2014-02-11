@@ -4,16 +4,22 @@
     <thead>
         <tr>
             <th>{% trans "Name" %}</th>
+            <th>{% trans "Файл даннызх" %}</th>
+            <th>{% trans "Файл шаблона" %}</th>
+            <th>{% trans "Файл верстки" %}</th>
         </tr>
     </thead>
     <tbody>
-        {% for page in pages %}
+        {% for id, page in pages.items %}
             <tr class="{% cycle 'djDebugOdd' 'djDebugEven' %}">
                 <td>
                     <a href="/markup/{{ page.output_name }}">
                         {{ page.title }}
                     </a>
                 </td>
+                <td> {{ page.template_name}} </td>
+                <td> {{ page.fixture_name}} </td>
+                <td> {{ page.output_name}} </td>
             </tr>
         {% endfor %}
     </tbody>
