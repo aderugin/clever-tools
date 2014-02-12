@@ -1,0 +1,23 @@
+@import '../components/normalize-css/normalize.css';
+
+html, body {
+    padding: 0;
+    height: 100%;
+}
+
+.page-wrapper {
+    width: @pageWidth;
+    margin: 0 auto -@footerWidth;
+    min-height: 100%;
+    height:auto !important;
+    height:100%;
+}
+
+.footer {
+    height: @footerWidth;
+
+    &__inner{
+        width: @pageWidth;
+        margin: 0 auto;
+    }
+}
