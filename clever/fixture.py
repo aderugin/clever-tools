@@ -45,6 +45,7 @@ class FixtureLoader(object):
 
         raise FixtureNotFound('Fixture %s not found in project' % (filename))
 
+
 loader = FixtureLoader()
 def load_fixture(filename, encoding='utf-8'):
     ''' Load fixture data from file '''
