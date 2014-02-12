@@ -15,5 +15,3 @@ class PageView(generic.View):
         manager = pages.Manager()
         page = manager.pages[id]
         return HttpResponse(manager.render_page(page))
-
-    # get_template_names

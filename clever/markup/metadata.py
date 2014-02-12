@@ -87,6 +87,7 @@ class FixtureFactory:
         return self.manager.get_model_by_metadata(metadata)
 
     def convert(self, value):
+        return value
         metadata = None
 
         # tuple or list
