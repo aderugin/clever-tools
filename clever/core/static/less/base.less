@@ -1,5 +1,38 @@
 @import '../components/normalize-css/normalize.css';
 
+.absolute() {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+}
+.gradient(@top, @bottom) {
+    background: @top;
+        filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=@top, endColorstr=@bottom);
+        background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,@top), color-stop(100%,@bottom));
+        background: -webkit-linear-gradient(top, bottom, @top, @bottom);
+        background: -moz-linear-gradient(top,  @top,  @bottom);
+        background: -o-linear-gradient(top,  @top,  @bottom);
+        background: -ms-linear-gradient(top,  @top,  @bottom);
+        background: linear-gradient(top, @top, @bottom);
+}
+.radius(@size){
+    -webkit-border-radius: @size;
+       -moz-border-radius: @size;
+         -o-border-radius: @size;
+            border-radius: @size;
+}
+.skew(@angle){
+    -webkit-transform: skewX(@angle);
+       -moz-transform: skewX(@angle);
+        -ms-transform: skewX(@angle);
+         -o-transform: skewX(@angle);
+            transform: skewX(@angle);
+}
+
+
+
 html, body {
     padding: 0;
     height: 100%;
@@ -7,17 +40,25 @@ html, body {
 
 .page-wrapper {
     width: @pageWidth;
-    margin: 0 auto -@footerWidth;
+    min-width: @pageWidth;
+    margin: 0 auto -@footerHeight;
     min-height: 100%;
     height:auto !important;
     height:100%;
+
+    &__footer{
+        position: relative;
+        z-index: -1;
+        height: @footerHeight;
+    }
 }
 
 .footer {
-    height: @footerWidth;
+    height: @footerHeight;
 
     &__inner{
         width: @pageWidth;
+        min-width: @pageWidth;
         margin: 0 auto;
     }
 }
