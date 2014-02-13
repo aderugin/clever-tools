@@ -8,6 +8,8 @@
 """
 from django.db import models
 from django.db.models import query
+from django.db.models import signals
+from django.core import exceptions
 from hashlib import md5
 from time import time
 from mptt import managers as mptt_managers
@@ -164,3 +166,21 @@ def extend_meta(**kwargs):
             return super(MetaExtendMetaclass, cls).__new__(cls, name, bases, attribs)
 
     return MetaExtendMetaclass
+
+
+def save_default_image(image_item_attr, image_file_attr='image', item_image_attr='image', images_related_name='images'):
+    def decorator(cls):
+        def save_default_image_handler(instance, created, **kwargs):
+            try:
+                item = getattr(instance, image_item_attr)
+                images = getattr(item, images_related_name).order_by('-id')
+                if len(images):
+                    setattr(item, item_image_attr, getattr(images[0], image_file_attr))
+                    item.save()
+            except exceptions.ObjectDoesNotExist:
+                pass
+
+        signals.post_save.connect(save_default_image_handler, sender=cls, weak=False)
+        return cls
+
+    return decorator

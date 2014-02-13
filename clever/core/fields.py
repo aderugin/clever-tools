@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-#author: Semen Pupkov (semen.pupkov@gmail.com)
 from __future__ import absolute_import
 import urlparse
 import re
@@ -57,6 +56,52 @@ class YoutubeUrlField(models.URLField):
 
     def get_prep_value(self, value):
         return unicode(value)
+
+
+class FileSizeField(models.IntegerField):
+    __metaclass__ = models.SubfieldBase
+
+    validators = []
+    units = ('b', 'kb', 'mb', 'gb', 'tb',)
+    help_text = u'Возможные единицы измерения: b,kb,mb,gb,tb пример: 10mb'
+
+    @staticmethod
+    def parse(value):
+        import re
+        match = re.match(r'(\d+)(\w+)', value)
+        if match:
+            return {
+                'value': match.groups()[0],
+                'units': match.groups()[1],
+            }
+        else:
+            return None
+
+    class PythonConverted(int):
+        def __unicode__(self):
+            import decimal
+            value = decimal.Decimal(self)
+            for unit in FileSizeField.units:
+                if value / 1024 > 1:
+                    value /= 1024
+                else:
+                    return unicode(value) + unit
+
+        def __int__(self):
+            import decimal
+            match = FileSizeField.parse(self)
+            if not match:
+                return self
+            return int(decimal.Decimal(match['value']) * (1024 ** FileSizeField.units.index(match['units'])))
+
+    def to_python(self, value):
+        value = super(FileSizeField, self).to_python(value)
+        return self.PythonConverted(value)
+
+    def get_db_prep_value(self, value, connection, prepared=False):
+        match = FileSizeField.parse(value)
+        return int(value) if match else value
+
 
 # Import info for south
 try:
