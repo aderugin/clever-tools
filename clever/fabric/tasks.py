@@ -97,6 +97,9 @@ def active_env(name, environ_name):
     # Путь до virtualenv директории на серверах
     env.supervisor = env_params.get('supervisor', None)
 
+
+    env.is_supervisor_with_sudo = env_params.get('supervisor-with-sudo', False)
+
     # Имя окружения
     env.name = environ_name
 
@@ -296,7 +299,10 @@ def restart():
     with cd(env.root):
         with prefix(env.activate):
             if env.supervisor:
-                run('supervisorctl restart %s' % ' '.join(env.supervisor))
+                if env.is_supervisor_with_sudo:
+                    run('sudo supervisorctl restart %s' % ' '.join(env.supervisor))
+                else:
+                    run('supervisorctl restart %s' % ' '.join(env.supervisor))
             else:
                 # Перезапуск приложения Django
                 run('killall -u ' + env.user + ' ' + local_env.DJANGO_WSGI_NAME)

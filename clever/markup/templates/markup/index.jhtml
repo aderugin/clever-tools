@@ -1,0 +1,14 @@
+<html>
+    <head></head>
+    <body>
+        <ul>
+            {% for id, page in pages.items() %}
+                <li>
+                    <a href="./{{ page.output_name }}">
+                        {{ page.title }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    </body>
+</html>

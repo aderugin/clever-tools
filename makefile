@@ -55,3 +55,10 @@ singlehtml:
 	@echo
 	@echo "The HTML page is in $(BUILD_DIR)/singlehtml."
 	@echo "Documentation updated                                 ${CHECK} Done"
+
+rundoc: dirhtml
+	@echo
+	@echo "Start simple http server"
+
+	gnome-open http://localhost:9000
+	cd $(BUILD_DIR)/dirhtml/ && python -m SimpleHTTPServer 9000

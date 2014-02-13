@@ -1,0 +1,9 @@
+@import "haiku.css";
+
+.class > dt {
+    margin-top: 15px;
+    font-size: 1.1em;
+    font-weight: normal;
+    color: #0c3762;
+    border-bottom: dotted thin #e0e0e0;
+}

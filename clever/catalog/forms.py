@@ -15,6 +15,7 @@ class FilterForm(forms.Form):
     def __init__(self, instance=None, sections=None, *args, **kwargs):
         super(FilterForm, self).__init__(*args, **kwargs)
 
+        self.attributes = {}
         self.section = instance
         self.sections = sections if not sections is None else [self.section]
 
@@ -25,6 +26,7 @@ class FilterForm(forms.Form):
         # Формируем поля для фильтра
         for filter_attribute in self.attributes_params:
             self.fields[filter_attribute.uid] = filter_attribute.field
+            self.attributes[filter_attribute.uid] = filter_attribute
 
     def sort_attributes_params(self, attributes_params):
         return sorted(attributes_params, key=lambda x: x.params.order if x.params is not None else sys.maxint)
@@ -131,6 +133,10 @@ class FilterForm(forms.Form):
                 final_result.append(FilterAttribute(section, attrib, values, params))
         return final_result
 
+    @property
+    def attributes_list(self):
+        return ((filter_attribute, self[filter_attribute.uid]) for filter_attribute in self.attributes_params)
+
 
 class FilterAttribute(object):
     def __init__(self, section, attrib, values, params=None):
@@ -148,3 +154,6 @@ class FilterAttribute(object):
 
     def __unicode__(self):
         return unicode(self.attribute)
+
+    def __repl__(self):
+        return unicode(self.attribute).encode('utf-8')

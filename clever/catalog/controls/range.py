@@ -8,7 +8,7 @@ from clever.forms import RangeWidget
 from clever.forms import RangeField
 from clever.catalog.attributes import AttributeControl
 from clever.catalog.attributes import AttributeManager
-
+from clever.catalog import settings
 
 # ------------------------------------------------------------------------------
 class Range(RangeWidget):
@@ -18,10 +18,16 @@ class Range(RangeWidget):
 # ------------------------------------------------------------------------------
 @AttributeManager.register_control(tag='range', verbose_name=u'Диапазон значений', allowed_only=True)
 class RangeControl(AttributeControl):
-    template_name = 'blocks/input/range.html'
+    is_template = False
+    template_name = settings.CLEVER_FILTER_RANGE_TEMPLATE
+    max_args = settings.CLEVER_FILTER_RANGE_MAX_ARGS
+    min_args = settings.CLEVER_FILTER_RANGE_MIN_ARGS
 
     def __init__(self, *args, **kwargs):
         self.template_name = kwargs.pop('template_name', self.template_name)
+        self.min_args = kwargs.pop('min_args', self.min_args)
+        self.max_args = kwargs.pop('max_args', self.max_args)
+
         super(self.__class__, self).__init__(*args, **kwargs)
 
     def create_form_field(self, attribute, values):
@@ -34,10 +40,11 @@ class RangeControl(AttributeControl):
             min_value = 0
 
         return RangeField(
+            template_name=self.template_name,
             widget=Range,
             fields=[
-                forms.CharField(widget=forms.TextInput(attrs={'class': "b-filter__input", 'placeholder': "от"})),
-                forms.CharField(widget=forms.TextInput(attrs={'class': "b-filter__input", 'placeholder': "до"}))
+                forms.CharField(widget=forms.TextInput(attrs=self.min_args)),
+                forms.CharField(widget=forms.TextInput(attrs=self.max_args))
             ],
             required=False,
             range=[min_value, max_value],

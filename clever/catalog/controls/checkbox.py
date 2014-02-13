@@ -4,6 +4,7 @@ from django import forms
 from django.db import models
 from clever.catalog.attributes import AttributeControl
 from clever.catalog.attributes import AttributeManager
+from clever.catalog import settings
 
 
 # ------------------------------------------------------------------------------
@@ -22,6 +23,7 @@ class CheckboxField(forms.MultipleChoiceField):
 # ------------------------------------------------------------------------------
 @AttributeManager.register_control(tag='checkbox', verbose_name=u'Флажки', allowed_only=True)
 class CheckboxControl(AttributeControl):
+    template_name = settings.CLEVER_FILTER_CHECKBOX_TEMPLATE
     empty_label = u"----"
 
     def create_form_field(self, attribute, values):
