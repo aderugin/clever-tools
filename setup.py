@@ -44,6 +44,8 @@ setup(
         'pytils >= 0.2.3',
         'sorl-thumbnail >= 11.12',
         "django-fsm >= 1.4.1",
+        'cache-tagging == 0.7.7.1',
+        'requests == 2.2.1',
 
         #'git+git://github.com/alurin/django-whatever.git',
         #'git+git://github.com/django-mptt/django-mptt.git',

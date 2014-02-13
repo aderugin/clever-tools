@@ -7,6 +7,7 @@ from django_importer.importers.xml_importer import XMLImporter as BaseXMLImporte
 from lxml import etree
 import gc
 import datetime
+from django.db import transaction
 
 
 IMPORT_DIRECTORY = 'exchange_1c/import'
@@ -73,6 +74,14 @@ class XMLImporter(BaseXMLImporter):
     def delete_item(self, item, data, instance):
         if instance.pk:
             instance.delete()
+
+    def save_item(self, item, data, instance, commit=True):
+        """
+        Saves a model instance to the database.
+        """
+        if commit:
+            instance.save()
+        return instance
 
     def process_item(self, item, parent):
         data = None
@@ -256,7 +265,8 @@ class ImportFactory(object):
 
             # Импортируем экземпляры модели
             print text_color(u'[', unicode(index), u'/', unicode(count), u"] Импорт элементов: ", unicode(model_verbose_name), color='green')
-            parser.progress_parse(tree)
+            with transaction.commit_on_success():
+                parser.progress_parse(tree)
 
             # Обновляем сатистику
             self.errors += parser.errors

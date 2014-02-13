@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from django import forms
 from django.db import models
-from django.core.cache import get_cache
+from cache_tagging.django_cache_tagging import get_cache
 from clever.catalog.models import AttributeManager
 from clever.catalog.models import Attribute
 from clever.catalog.models import SectionAttribute
@@ -30,12 +30,13 @@ def filter_section_cached(func):
     @wraps(func)
     def with_cache(self, section):
         cache_id = 'filter.section.%s.%d' % (func.__name__, section.id)
+        cache_tag = 'section.%d' % section.id
         cached_result = cache.get(cache_id)
         if not cached_result:
             log.info('Cache miss for filter: %s', cache_id)
             result = func(self, section)
             cached_result = pickle.dumps(result)
-            cache.set(cache_id, cached_result, CLEVER_FILTER_TIMEOUT)
+            cache.set(cache_id, cached_result, timeout=CLEVER_FILTER_TIMEOUT, tags=[cache_tag])
         else:
             log.info('Cache found for filter: %s', cache_id)
             result = pickle.loads(cached_result)
@@ -51,6 +52,7 @@ def filter_queryset_cached(func):
     @wraps(func)
     def with_cache(self, section, queryset):
         cache_id = 'filter.section.%s.%d' % (func.__name__, section.id)
+        cache_tag = 'section.%d' % section.id
         if self.is_valid():
             cache_id = cache_id + '-' + md5(self.cleaned_data)
             log.info('Filter is valid: %s', cache_id)
@@ -59,12 +61,11 @@ def filter_queryset_cached(func):
                 log.info('Cache miss for filter: %s', cache_id)
                 product_indexes = func(self, section, queryset)
                 cached_result = pickle.dumps(product_indexes)
-                cache.set(cache_id, cached_result, CLEVER_FILTER_TIMEOUT)
+                cache.set(cache_id, cached_result, timeout=CLEVER_FILTER_TIMEOUT, tags=[cache_tag])
             else:
                 log.info('Cache found for filter: %s', cache_id)
                 product_indexes = pickle.loads(cached_result)
 
-            # import pdb; pdb.set_trace()
             if product_indexes is not None:
                 log.info('Products filtered by indexes')
                 if len(product_indexes) > 0:

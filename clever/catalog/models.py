@@ -62,6 +62,7 @@ from clever.catalog.attributes import ImportProductAttributeValuesMetaclass
 from clever.catalog.attributes import ImportPseudoAttributeValuesMetaclass
 from decimal import Decimal
 
+
 # ------------------------------------------------------------------------------
 # Разделы каталога
 class SectionQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQuerySet):
@@ -343,7 +344,7 @@ class SectionAttributeBase(cache_machine.CachingMixin, models.Model):
         extend_meta(
             verbose_name=u'Параметры для свойства в разделе',
             verbose_name_plural=u'Параметры для свойств в разделе',
-            ordering = ['order', 'attribute__main_title', 'id']
+            ordering=['order', 'attribute__main_title', 'id']
         )
     )
 
@@ -469,3 +470,7 @@ class PseudoSectionBrandBase(models.Model):
 
     pseudo_section = DeferredForeignKey(PseudoSection, verbose_name=u'Псевдо раздел')
     brand = DeferredForeignKey(Brand, verbose_name=u'Производитель', related_name='pseudo_section_brands')
+
+
+# ------------------------------------------------------------------------------
+from . import receivers

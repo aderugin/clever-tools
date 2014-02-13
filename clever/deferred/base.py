@@ -123,3 +123,11 @@ def deferred_object(point):
         point.resolve_deferred_point(cls)
         return cls
     return deferred_wrapper
+
+
+# ------------------------------------------------------------------------------
+def resolve_deferred_point(deffered_func):
+    class UnresolvedConsumer(DeferredConsumer):
+        def resolve_deferred_point(self, target_model):
+            func(target_model)
+    return func

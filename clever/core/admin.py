@@ -33,7 +33,7 @@ def thumbnail_column(size='106x80', **kwargs):
                 #try:
                 if image:
                     im = get_thumbnail(image, size, crop=crop, quality=quality)
-                    return u'<img src="%s%s" />' % (settings.MEDIA_URL, im)
+                    return u'<img src="%s%s" width="%d" height="%d" />' % (settings.MEDIA_URL, im, im.width, im.height)
                 #except Exception, e:
                 #    logger.debug(e)
             return u'(Картинки нет)'
