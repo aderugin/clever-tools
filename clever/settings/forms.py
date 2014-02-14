@@ -9,4 +9,5 @@ def create_form(model):
     class SettingsFormBase(forms.ModelForm):
         class Meta:
             model = modelName
+            exclude = ('_site',)
     return SettingsFormBase
