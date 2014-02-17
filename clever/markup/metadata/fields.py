@@ -58,7 +58,7 @@ class UrlConverter(FieldConverter):
 
 class DecimalConverter(FieldConverter):
     def create_field(self, factory, name, param):
-        return models.DecimalField(verbose_name=u'Цена')
+        return models.DecimalField(verbose_name=u'Цена', default=Decimal(0.00), decimal_places=2, max_digits=10)
 
     def convert(self, factory, instance, data, value):
         return Decimal(value)

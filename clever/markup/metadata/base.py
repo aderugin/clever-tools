@@ -175,4 +175,14 @@ class FixtureFactory(object):
                 return result
             elif isinstance(value, dict):
                 return metadata.convert(value)
+        elif isinstance(value, (list, tuple)):
+            result = []
+            for x in value:
+                result.append(self.convert(x))
+            return result
+        elif isinstance(value, dict):
+            result = {}
+            for k, x in value.items():
+                result[k] = self.convert(x)
+            return result
         return value
