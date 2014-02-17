@@ -3,7 +3,9 @@ from django.template import loader
 from django.template import Context
 from django.template import RequestContext
 from django.test.client import RequestFactory
-from clever.markup.metadata import FixtureFactory
+from django.core.urlresolvers import reverse
+from clever.markup.metadata import fixture_factory
+from clever.markup.metadata import MetadataError
 from clever.fixture import load_fixture
 from clever.fixture import FixtureNotFound
 import yaml
@@ -40,7 +42,7 @@ class Page:
     @property
     def url(self):
         ''' Получение URL для страницы '''
-        return self.params.get('url', '/' + self.id + '/')
+        return self.params.get('url', reverse('markup:page', kwargs={'id': self.id}))
 
     def load_template(self):
         ''' Load template '''
@@ -61,7 +63,7 @@ class Manager():
 
     def __init__(self, fixture_name='markup.yaml'):
         self.request_factory = RequestFactory()
-        self.fixture_factory = FixtureFactory()
+        self.fixture_factory = fixture_factory
         self.pages = {}
 
         # Load fixture from file
@@ -88,7 +90,14 @@ class Manager():
         log.info("Load fixture from '%s' for page %s [%s]", page.fixture_name, page.id, page.title)
         fixture = page.load_fixture()
         if fixture:
-            fixture = self.fixture_factory.convert(fixture)
+            try:
+                log.error("Convert fixture from '%s' for page %s [%s]", page.fixture_name, page.id, page.title)
+                fixture = self.fixture_factory.convert(fixture)
+            except MetadataError as e:
+                log.error("Convert fixture from '%s' for page %s [%s] is failed with error %s", page.fixture_name, page.id, page.title, e.message)
+                e.message = "%s in '%s'" % (e.message, page.fixture_name)
+                raise
+
 
         # Render template with fixture
         log.info("Rende page '%s' for page %s [%s]", page.fixture_name, page.id, page.title)
