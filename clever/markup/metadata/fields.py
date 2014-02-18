@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+import os
 from decimal import Decimal
 from django.db import models
+from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.core.files import File
 from django.core.files.images import ImageFile
-from django.contrib.staticfiles.finders import find
+# from django.contrib.staticfiles.finders import find
 
 
 class FieldConverter(object):
@@ -22,22 +24,30 @@ class FileConverter(FieldConverter):
     def create_field(self, factory, name, param):
         return models.FileField(verbose_name=u'Файл')
 
+    def open(self, filename):
+        fullname = os.path.join(settings.MEDIA_ROOT, filename)
+        try:
+            return open(fullname)
+        except IOError:
+            raise RuntimeError(u'Файл %s не найден в папке с media' % filename)
+
     def convert(self, factory, instance, data, filename):
-        return File(open(find(filename)), name=filename)
+        if filename:
+            return File(self.open(filename), name=filename)
+        return None
 
     def recreate(self, factory, base_metadata, field):
         return self
 
 
-class ImageConverter(FieldConverter):
+class ImageConverter(FileConverter):
     def create_field(self, factory, name, param):
         return models.ImageField(verbose_name=u'Изображение')
 
     def convert(self, factory, instance, data, filename):
-        return ImageFile(open(find(filename)), name=filename)
-
-    def recreate(self, factory, base_metadata, field):
-        return self
+        if filename:
+            return ImageFile(self.open(filename), name=filename)
+        return None
 
 
 class UrlConverter(FieldConverter):
