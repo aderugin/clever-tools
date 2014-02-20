@@ -11,6 +11,7 @@ from .models import BrandBase as Brand
 from .models import ProductBase as Product
 from .models import ProductAttributeBase as ProductAttribute
 from .models import SectionAttributeBase as SectionAttribute
+from .models import PseudoSectionBase as PseudoSection
 
 from .tasks import invalidate_section
 
@@ -38,3 +39,6 @@ def handle_section_invalidate(sender, instance, **kwargs):
         sections = instance.descendant_sections.values_list('id', flat=True)
         for section_id in sections:
             invalidate_section.delay(section_id)
+
+    elif issubclass(sender, PseudoSection):
+        invalidate_section(instance.section)
