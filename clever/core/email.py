@@ -25,6 +25,7 @@ def get_backend_edit_url(instance):
     return get_site_url(reverse('admin:%s_%s_change' % (instance._meta.app_label, instance._meta.module_name), args=[instance.id]))
 
 
+#-------------------------------------------------------------------------------
 def send_message_when_created(template_name, admin=True, staff=True):
     def decorator(cls):
         def send_message_handler(instance, created, **kwargs):
@@ -49,6 +50,7 @@ def send_message_when_created(template_name, admin=True, staff=True):
         return cls
 
     return decorator
+
 
 #-------------------------------------------------------------------------------
 def send_create_email_to_managers(template_name, var_name='instance', admin=True, staff=True):
