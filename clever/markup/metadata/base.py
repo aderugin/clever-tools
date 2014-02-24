@@ -1,150 +1,26 @@
-from . import fields
-from decimal import Decimal
-from django.db import models
-from clever.magic import load_class
-
-DEFAULT_FIELDS = {
-    # Simple fields
-    'url':          fields.UrlConverter(),
-    # File fields
-    'file':         fields.FileConverter(),
-    'image':        fields.ImageConverter(),
-
-    # Price fields
-    'price':        fields.DecimalConverter(),
-    'old_price':    fields.DecimalConverter(),
-    'new_price':    fields.DecimalConverter(),
-
-    # Foreign fields
-    'product':      fields.ForeignConverter('catalog.product'),
-    'section':      fields.ForeignConverter('catalog.section'),
-    'brand':        fields.ForeignConverter('catalog.brand'),
-}
-
-DEFAULT_PARENTS = {
-    'pages.page':       'clever.pages.models.Page',
-    'catalog.product':  'clever.catalog.models.ProductBase',
-    'catalog.section':  'clever.catalog.models.SectionBase',
-    'catalog.brand':    'clever.catalog.models.BrandBase',
-}
-
-INVERT_FIELDS = {
-    'django.db.models.fields.files.ImageField':     fields.ImageConverter(),
-    'django.db.models.fields.files.FileField':     fields.FileConverter(),
-
-    # Self converters
-    'mptt.fields.TreeForeignKey':                   fields.ForeignConverter(),
-    'django.db.models.fields.related.ForeignKey':   fields.ForeignConverter()
-}
-
-
-def get_type_fullname(o):
-    return o.__module__ + "." + o.__class__.__name__
-
-
-class MetadataError(Exception):
-    pass
-
-
-class Metadata(object):
-    app_name = None
-    model_name = None
-    model_class = None
-    fields = None
-    factory = None
-
-    def __init__(self, factory, app_name, model_name, model_class=None):
-        self.factory = factory
-        self.app_name = app_name
-        self.model_name = model_name
-        self.fields = {}
-
-        # create model metadata
-        class Meta(object):
-            app_label = None
-        Meta.app_label = app_name
-
-        # create bases for model class
-        name = '%s.%s' % (app_name, model_name)
-        bases = (models.Model,)
-        if name in DEFAULT_PARENTS:
-            bases= (load_class(DEFAULT_PARENTS[name]),)
-
-        # create model class
-        if not model_class:
-            model_class = type(model_name, bases, {'__module__': app_name, 'Meta': Meta})
-        self.model_class = model_class
-
-        # auto recreate existed members
-        for field in self.model_class._meta.fields:
-            type_name = get_type_fullname(field)
-            converter = INVERT_FIELDS.get(type_name, None)
-            if converter:
-                self.update_field(field.name, converter=converter.recreate(self.factory, self, field))
-
-    def update(self, descriptor):
-        for key, param in descriptor.items():
-            self.update_field(key, param)
-
-    def update_field(self, name, param=None, converter=None):
-        # if field exists in current metadata return
-        if self.fields.get(name, None):
-            return
-
-        # fill default params for field
-        if not converter:
-            if name in DEFAULT_FIELDS:
-                converter = DEFAULT_FIELDS[name]
-                field = converter.create_field(self.factory, name, param)
-            else:
-                field = models.CharField(max_length=255)
-
-        # push converter to dict
-        if converter:
-            self.fields[name] = converter
-
-        # if field exists
-        equal_fields = any(f.name == name for f in self.model_class._meta.fields)
-
-        # contribute to model if required
-        if not equal_fields and field:
-            field.contribute_to_class(self.model_class, name)
-
-    def convert(self, data):
-        # update model class
-        for name, value in data.items():
-            self.update_field(name)
-
-        # create instance of model class
-        instance = self.model_class()
-        for key, value in data.items():
-            if key in self.fields:
-                value = self.fields[key].convert(self.factory, instance, data, value)
-            setattr(instance, key, value)
-        return instance
+from clever.markup.extensions.forms import FormExtension
+from clever.markup.extensions.models import ModelExtension
 
 
 class FixtureFactory(object):
-    models = {}
+    extensions = None
 
     def __init__(self):
-        self.models = {}
+        self.extensions = {
+            '.model': ModelExtension(self),
+            '.form': FormExtension(self)
+        }
 
-    def get_metadata(self, name, model_class=None):
-        metadata = self.models.get(name, None)
-        if not metadata:
-            # Find model name
-            if not name:
-                raise MetadataError(u"Model name must be in form `app_name.model_name` [%s]" % name)
-            names = name.split('.')
-            if len(names) != 2:
-                raise MetadataError(u"Model name must be in form `app_name.model_name` [%s]" % name)
-            app_name, model_name = names
+    def __getattr__(self, name):
+        converter_id = '.' + name
+        if converter_id in self.extensions:
+            return self.extensions[converter_id]
+        raise AttributeError("Not found converter %s in factory" % name)
 
-            # Create metadata
-            metadata = Metadata(self, app_name, model_name, model_class)
-            self.models[name] = metadata
-        return metadata
+    def get_metadata(self, converter_id, converter_name):
+        if not converter_id in self.extensions:
+            raise MetadataError('Not found metadata converter for data')
+        return self.extensions[converter_id].get_metadata(converter_name)
 
     def find_metadata(self, value):
         ''' Find and create metadata '''
@@ -158,9 +34,12 @@ class FixtureFactory(object):
             descriptor = value.get('.metadata', None)
             if isinstance(descriptor, dict):
                 del value['.metadata']
-                model_name = descriptor.get('.model', None)
-                del descriptor['.model']
-                metadata = self.get_metadata(model_name)
+                for converter_id, converter_name in descriptor.items():
+                    if converter_id in self.extensions:
+                        metadata = self.get_metadata(converter_id, converter_name)
+
+                if not metadata:
+                    raise MetadataError('Not found metadata for data')
                 metadata.update(descriptor)
                 return metadata, value
         return None, value

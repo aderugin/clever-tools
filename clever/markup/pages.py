@@ -1,30 +1,35 @@
 # -*- coding: utf-8 -*-
 from django.conf import settings
+
 from django.template import loader
 from django.template import Context
 from django.template import RequestContext
+
 from django.test.client import RequestFactory
+
 from django.core.urlresolvers import reverse
-from django.core.paginator import Paginator
+
+from clever.markup.extensions.breadcrumbs import BreadcrumbsExtension
+from clever.markup.extensions.paginator import PaginatorExtension
+from clever.markup.extensions.cart import CartExtension
+from clever.markup.extensions.compare import CompareExtension
+
 from clever.markup.metadata import fixture_factory
 from clever.markup.metadata import MetadataError
+
 from clever.fixture import load_fixture
 from clever.fixture import FixtureNotFound
+
 from clever.magic import load_class
-from django.core.urlresolvers import reverse
-import yaml
-import os
-import codecs
+
 import logging
+import os
 
 
-class Page:
+class Page(object):
     id = None
     title = None
     params = None
-
-    is_paginator = False
-    breadcrumbs = ()
 
     def __init__(self, id, title, params):
         self.id = id
@@ -64,14 +69,24 @@ class Page:
         except FixtureNotFound:
            return None
 
+    def __getattr__(self, name, default=None):
+        return self.params.get(name, default)
 
-class Manager():
+
+class Manager(object):
+    extensions = None
     fixture_factory = None
     request_factory = None
     pages = None
 
     def __init__(self, fixture_name='markup.yaml'):
-        self.request_factory = RequestFactory()
+        self.extensions = [
+            BreadcrumbsExtension(),
+            PaginatorExtension(),
+            CartExtension(),
+            CompareExtension(),
+        ]
+        self.request_factory = RequestFactory(SERVER_NAME="localhost")
         self.fixture_factory = fixture_factory
         self.pages = {}
 
@@ -96,22 +111,9 @@ class Manager():
             if getattr(middleware, 'process_request', None):
                 middleware.process_request(request)
 
-        # if paginator add to context
-        if page.is_paginator:
-            paginator = Paginator([x for x in xrange(0, 1000)], request.GET.get('count', 20))
-            page_obj = paginator.page(request.GET.get('page', 1))
-            is_paginated = page_obj.has_other_pages()
-
-            context.update({
-                'paginator': paginator,
-                'page_obj': page_obj,
-                'is_paginated': is_paginated,
-            })
-
-        # add breadcrumbs to request
-        for page_id, page_title in page.breadcrumbs:
-            page_url = reverse('markup:page', kwargs={'id': page_id})
-            request.breadcrumbs(page_title, page_url)
+        # run page extensions
+        for extension in self.extensions:
+            extension.process_page(page, request, context)
 
 
     def render_page(self, page, base_request=None):

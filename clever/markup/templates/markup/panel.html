@@ -28,8 +28,7 @@
     </tbody>
 </table>
 
-
-{% for name, metadata in fixtures.models.items %}
+{% for name, metadata in fixtures.model %}
     <h4>{{ name }} - {{ metadata.model_class|model_verbose_name }}</h4>
     <table>
         <tbody>
