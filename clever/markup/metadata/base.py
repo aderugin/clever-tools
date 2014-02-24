@@ -2,6 +2,7 @@ from . import fields
 from decimal import Decimal
 from django.db import models
 from clever.magic import load_class
+from django.core.paginator import Paginator
 
 DEFAULT_FIELDS = {
     # Simple fields
@@ -185,4 +186,22 @@ class FixtureFactory(object):
             for k, x in value.items():
                 result[k] = self.convert(x)
             return result
+        return value
+
+    def convert_for_page(self, value):
+        value = self.convert(value)
+        if not isinstance(value, dict):
+            raise MetadataError('Data for page must be dictonary')
+
+        if value.get('is_paginator'):
+            paginator = Paginator([x for x in xrange(0, 1000)], )
+            page_obj = paginator.page(page_number)
+            is_paginated = page_obj.has_other_pages()
+
+            value.update({
+                'paginator': paginator,
+                'page_obj': page_obj,
+                'is_paginated': is_paginated,
+            })
+
         return value

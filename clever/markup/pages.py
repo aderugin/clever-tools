@@ -92,7 +92,7 @@ class Manager():
         if fixture:
             try:
                 log.error("Convert fixture from '%s' for page %s [%s]", page.fixture_name, page.id, page.title)
-                fixture = self.fixture_factory.convert(fixture)
+                fixture = self.fixture_factory.convert_for_page(fixture)
             except MetadataError as e:
                 log.error("Convert fixture from '%s' for page %s [%s] is failed with error %s", page.fixture_name, page.id, page.title, e.message)
                 e.message = "%s in '%s'" % (e.message, page.fixture_name)
