@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
+from django.conf import settings
 from django.template import loader
 from django.template import Context
 from django.template import RequestContext
 from django.test.client import RequestFactory
 from django.core.urlresolvers import reverse
+from django.core.paginator import Paginator
 from clever.markup.metadata import fixture_factory
 from clever.markup.metadata import MetadataError
 from clever.fixture import load_fixture
 from clever.fixture import FixtureNotFound
+from clever.magic import load_class
+from django.core.urlresolvers import reverse
 import yaml
 import os
 import codecs
@@ -19,10 +23,15 @@ class Page:
     title = None
     params = None
 
+    is_paginator = False
+    breadcrumbs = ()
+
     def __init__(self, id, title, params):
         self.id = id
         self.title = title
         self.params = params
+        self.is_paginator = params.get('is_paginator', False)
+        self.breadcrumbs = params.get('breadcrumbs', ())
 
     @property
     def template_name(self):
@@ -78,7 +87,34 @@ class Manager():
             page = Page(id, title, params)
             self.pages[id] = page
 
-    def render_page(self, page):
+    def prepare_page(self, page, request, context):
+        # prepare middlewares
+        middlewares = settings.MIDDLEWARE_CLASSES
+        for middleware_name in middlewares:
+            middleware_class = load_class(middleware_name)
+            middleware = middleware_class()
+            if getattr(middleware, 'process_request', None):
+                middleware.process_request(request)
+
+        # if paginator add to context
+        if page.is_paginator:
+            paginator = Paginator([x for x in xrange(0, 1000)], request.GET.get('count', 20))
+            page_obj = paginator.page(request.GET.get('page', 1))
+            is_paginated = page_obj.has_other_pages()
+
+            context.update({
+                'paginator': paginator,
+                'page_obj': page_obj,
+                'is_paginated': is_paginated,
+            })
+
+        # add breadcrumbs to request
+        for page_id, page_title in page.breadcrumbs:
+            page_url = reverse('markup:page', kwargs={'id': page_id})
+            request.breadcrumbs(page_title, page_url)
+
+
+    def render_page(self, page, base_request=None):
         ''' Рендеринг страницы '''
         log = logging.getLogger('clever.markup')
 
@@ -92,17 +128,20 @@ class Manager():
         if fixture:
             try:
                 log.error("Convert fixture from '%s' for page %s [%s]", page.fixture_name, page.id, page.title)
-                fixture = self.fixture_factory.convert_for_page(fixture)
+                fixture = self.fixture_factory.convert(fixture)
             except MetadataError as e:
                 log.error("Convert fixture from '%s' for page %s [%s] is failed with error %s", page.fixture_name, page.id, page.title, e.message)
                 e.message = "%s in '%s'" % (e.message, page.fixture_name)
                 raise
 
-
         # Render template with fixture
         log.info("Rende page '%s' for page %s [%s]", page.fixture_name, page.id, page.title)
         request = self.request_factory.get(page.url)
+        if base_request:
+            request.GET = base_request.GET
+            request.POST = base_request.POST
         context = RequestContext(request, fixture)
+        self.prepare_page(page, request, context)
         return template.render(context)
 
     def render_index(self):
