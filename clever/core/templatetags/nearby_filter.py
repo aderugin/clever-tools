@@ -9,10 +9,6 @@ def nearby(lst, obj, count=9):
     Поиску элементов находящихся около объекта obj в списке lst
     Source: http://lethain.com/a-filter-to-display-neighbors-in-a-list/
     '''
-    import pprint
-    pp = pprint.PrettyPrinter(indent=4, depth=6)
-    pp.pprint((lst))
-
     lst = list(lst)
     l = len(lst)
     try:

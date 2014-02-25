@@ -9,7 +9,6 @@ class SmsHostBackend(object):
         self.template = template
 
     def send_message(self):
-        print 'sms sending'
         to_phones = self.template.to
         text = self.template.message
 

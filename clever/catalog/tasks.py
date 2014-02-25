@@ -2,11 +2,13 @@
 from django.contrib.sites.models import Site
 from cache_tagging.django_cache_tagging import get_cache
 from djcelery_transactions import task
+from celery.decorators import periodic_task
+from .settings import CLEVER_FILTER_TIMEOUT
 from .models import Section
 from .models import PseudoSection
-import logging
 import requests
 import urlparse
+import datetime
 
 
 @task(ignore_result=True)
@@ -46,3 +48,8 @@ def invalidate_catalog():
     for section in Section.objects.all():
         invalidate_section(section.id)
     log.info('FInish invalidate cache for all sections')
+
+
+@periodic_task(run_every=datetime.timedelta(seconds=CLEVER_FILTER_TIMEOUT))
+def periodic_invalidate_catalog():
+    invalidate_catalog()
