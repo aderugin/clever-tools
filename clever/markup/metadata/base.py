@@ -37,6 +37,8 @@ class FixtureFactory(object):
                 for converter_id, converter_name in descriptor.items():
                     if converter_id in self.extensions:
                         metadata = self.get_metadata(converter_id, converter_name)
+                        del descriptor[converter_id]
+                        break
 
                 if not metadata:
                     raise MetadataError('Not found metadata for data')

@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.urlresolvers import reverse
 from django.core.files import File
 from django.core.files.images import ImageFile
-# from django.contrib.staticfiles.finders import find
+from clever.magic import load_class
 
 
 class FieldConverter(object):
@@ -16,7 +16,7 @@ class FieldConverter(object):
     def convert(self, factory, instance, data, value):
         return value
 
-    def recreate(self, factory, base_metadata, field):
+    def recreate(self, factory, base_metadata, field, defaults=None):
         raise NotImplementedError()
 
 
@@ -36,7 +36,7 @@ class FileConverter(FieldConverter):
             return File(self.open(filename), name=filename)
         return None
 
-    def recreate(self, factory, base_metadata, field):
+    def recreate(self, factory, base_metadata, field, defaults=None):
         return self
 
 
@@ -62,7 +62,7 @@ class UrlConverter(FieldConverter):
             return reverse('markup:page', kwargs={'id': value[self.PREFIX_SIZE:]})
         return value
 
-    def recreate(self, factory, base_metadata, field):
+    def recreate(self, factory, base_metadata, field, defaults=None):
         return self
 
 
@@ -73,7 +73,7 @@ class DecimalConverter(FieldConverter):
     def convert(self, factory, instance, data, value):
         return Decimal(value)
 
-    def recreate(self, factory, base_metadata, field):
+    def recreate(self, factory, base_metadata, field, defaults=None):
         return self
 
 
@@ -98,7 +98,7 @@ class ForeignConverter(FieldConverter):
             return metadata.convert(value)
         return None
 
-    def recreate(self, factory, base_metadata, field):
+    def recreate(self, factory, base_metadata, field, defaults=None):
         rel_model = field.rel.to
         if base_metadata.model_class == rel_model:
             return ForeignConverter("%s.%s" % (base_metadata.app_name, base_metadata.model_name))
@@ -106,5 +106,11 @@ class ForeignConverter(FieldConverter):
         for name, metadata in factory.models.items():
             if metadata.model_class == rel_model:
                 return ForeignConverter(name)
+
+        if defaults:
+            for model_name, class_name in defaults.items():
+                model = load_class(class_name)
+                if issubclass(rel_model, model):
+                    return ForeignConverter(model_name)
 
         raise RuntimeError('Not found metadata for model in foreign key %s' % rel_model.__class__)

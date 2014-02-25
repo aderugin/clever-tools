@@ -15,5 +15,9 @@ class FixtureExtension(object):
     def get_metadata(self, model_name):
         raise NotImplementedError()
 
+class FixtureMetadata(object):
     def update(self, descriptor):
+        raise NotImplementedError()
+
+    def convert(self, data):
         raise NotImplementedError()

@@ -6,6 +6,7 @@ from clever.magic import load_class
 from clever.markup.metadata import fields
 from clever.markup.metadata import MetadataError
 from clever.markup.extensions import FixtureExtension
+from clever.markup.extensions import FixtureMetadata
 
 
 DEFAULT_FIELDS = {
@@ -35,7 +36,7 @@ DEFAULT_PARENTS = {
 
 INVERT_FIELDS = {
     'django.db.models.fields.files.ImageField':     fields.ImageConverter(),
-    'django.db.models.fields.files.FileField':     fields.FileConverter(),
+    'django.db.models.fields.files.FileField':      fields.FileConverter(),
 
     # Self converters
     'mptt.fields.TreeForeignKey':                   fields.ForeignConverter(),
@@ -73,7 +74,7 @@ class ModelExtension(FixtureExtension):
         return iter(self.models.items())
 
 
-class ModelMetadata(object):
+class ModelMetadata(FixtureMetadata):
     app_name = None
     model_name = None
     model_class = None
@@ -107,7 +108,7 @@ class ModelMetadata(object):
             type_name = get_type_fullname(field)
             converter = INVERT_FIELDS.get(type_name, None)
             if converter:
-                self.update_field(field.name, converter=converter.recreate(self.factory, self, field))
+                self.update_field(field.name, converter=converter.recreate(self.factory, self, field, defaults=DEFAULT_PARENTS))
 
     def update(self, descriptor):
         for key, param in descriptor.items():
