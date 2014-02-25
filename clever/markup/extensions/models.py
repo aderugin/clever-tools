@@ -125,7 +125,8 @@ class ModelMetadata(FixtureMetadata):
                 converter = DEFAULT_FIELDS[name]
                 field = converter.create_field(self.factory, name, param)
             else:
-                field = models.CharField(max_length=255)
+                # field = models.CharField(max_length=255)
+                return
 
         # push converter to dict
         if converter:
@@ -148,5 +149,7 @@ class ModelMetadata(FixtureMetadata):
         for key, value in data.items():
             if key in self.fields:
                 value = self.fields[key].convert(self.factory, instance, data, value)
+            else:
+                value = self.factory.factory.convert(value)
             setattr(instance, key, value)
         return instance

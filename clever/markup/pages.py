@@ -22,6 +22,8 @@ from clever.fixture import FixtureNotFound
 
 from clever.magic import load_class
 
+from collections import OrderedDict
+
 import logging
 import os
 
@@ -88,7 +90,7 @@ class Manager(object):
         ]
         self.request_factory = RequestFactory(SERVER_NAME="localhost")
         self.fixture_factory = fixture_factory
-        self.pages = {}
+        self.pages = OrderedDict()
 
         # Load fixture from file
         data = load_fixture(fixture_name)
