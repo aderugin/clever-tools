@@ -15,8 +15,8 @@ def create_range(*args, **kwargs):
     return clever_range.RangeField(*args, **kwargs)
 
 FIELDS = {
-    'string': create_field(forms.CharField),
-    'text': create_field(forms.TextInput),
+    'text': create_field(forms.CharField),
+    'textarea': create_field(forms.CharField, widget=forms.Textarea),
     'checkbox': create_field(forms.ChoiceField, widget=forms.CheckboxInput),
     'select': create_field(forms.ChoiceField, widget=forms.Select),
     'radio': create_field(forms.ChoiceField, widget=forms.RadioSelect),
