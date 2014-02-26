@@ -38,38 +38,36 @@ class FormExtension(FixtureExtension):
 
     def get_metadata(self, model_name):
         if not model_name in self.forms:
-            self.forms[model_name] = FormMetadata()
+            self.forms[model_name] = FormMetadata(self, model_name)
         return self.forms[model_name]
 
-class Mist(object):
-    pass
 
 class FormMetadata(FixtureMetadata):
     form = None
+    factory = None
+    model_name = None
 
-    def __init__(self):
+    def __init__(self, factory, model_name):
+        self.factory = factory
+        self.model_name = model_name
         self.form = forms.Form()
 
     def convert(self, data):
         form = self.form
 
+        object_converter = self.factory.factory.object
+
         # Convert groups to fields and their params
         for name, params in data.items():
-            values = []
-            for field_args in params:
-                field_name = field_args[0]
-                field_args[0] = form[field_name]
+            converter = object_converter.get_metadata('%s-%s' % (self.model_name, name))
+            if isinstance(params, (list, set)):
+                value = []
+                for item in params:
+                    value.append(converter.convert(item))
+            elif isinstance(params, dict):
+                value = converter.convert(params)
 
-                # convert dict to object
-                if len(field_args) > 1:
-                    for i, field_arg in enumerate(field_args[1:], 1):
-                        field_value = Mist()
-                        field_value.__dict__ = field_arg
-                        field_args[i] = field_value
-                    values.append(field_args)
-                else:
-                    values.append(field_args[0])
-            setattr(form, name, values)
+            setattr(form, name, value)
         return form
 
     def update(self, descriptor):

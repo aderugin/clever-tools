@@ -1,5 +1,6 @@
 from clever.markup.extensions.forms import FormExtension
 from clever.markup.extensions.models import ModelExtension
+from clever.markup.extensions.objects import ObjectExtension
 
 
 class FixtureFactory(object):
@@ -8,7 +9,8 @@ class FixtureFactory(object):
     def __init__(self):
         self.extensions = {
             '.model': ModelExtension(self),
-            '.form': FormExtension(self)
+            '.form': FormExtension(self),
+            '.object': ObjectExtension(self),
         }
 
     def __getattr__(self, name):
