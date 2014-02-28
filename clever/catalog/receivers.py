@@ -41,4 +41,4 @@ def handle_section_invalidate(sender, instance, **kwargs):
             invalidate_section.delay(section_id)
 
     elif issubclass(sender, PseudoSection):
-        invalidate_section(instance.section_id)
+        invalidate_section.delay(instance.section_id)
