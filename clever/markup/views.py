@@ -14,4 +14,4 @@ class PageView(generic.View):
         id = kwargs.get('id')
         manager = pages.Manager()
         page = manager.pages[id]
-        return HttpResponse(manager.render_page(page))
+        return HttpResponse(manager.render_page(page, base_request=self.request))

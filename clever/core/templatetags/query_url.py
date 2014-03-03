@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from django.utils.safestring import mark_safe
-from django import template
+from coffin import template
 from urlparse import parse_qs
 from urllib import urlencode
 from urllib import quote
