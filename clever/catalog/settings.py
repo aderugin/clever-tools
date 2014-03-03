@@ -27,6 +27,9 @@ CLEVER_ATTRIBUTES_CONTROLS = getattr(settings, 'CLEVER_ATTRIBUTES_CONTROLS', [
     'select'
 ])
 
+# Настройки дополнительных полей для элемента управления в фильтре для производителей
+CLEVER_BRAND_FIELDS = getattr(settings, 'CLEVER_BRAND_FIELDS', [])
+
 # Настройка класса для недавно просмотренных товаров
 CLEVER_RECENTLY_VIEWED = getattr(settings, 'CLEVER_RECENTLY_VIEWED', 'clever.catalog.recently_viewed.RecentlyViewed')
 

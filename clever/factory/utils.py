@@ -80,6 +80,7 @@ def ranfom_attribute_value(instance):
         return u'Random'
     return None
 
+
 class BrandFactory(django.DjangoModelFactory):
     ''' Генератор для производителя '''
     title = factory.Sequence(lambda n: 'Brand {0}'.format(n))
@@ -102,6 +103,7 @@ class SectionFactory(django.DjangoModelFactory):
 
 class ProductFactory(django.DjangoModelFactory):
     title = factory.Sequence(lambda n: 'Product {0}'.format(n))
+    text = factory.Sequence(lambda n: 'Text {0}'.format(n))
     image = factory.LazyAttribute(random_image)
     price = factory.LazyAttribute(random_price)
 
@@ -111,7 +113,6 @@ class AttributeFactory(django.DjangoModelFactory):
 
     type = factory.LazyAttribute(random_attribute_type)
     control = factory.LazyAttribute(random_attribute_control)
-
 
 
 class AttributeValueFactory(django.DjangoModelFactory):
