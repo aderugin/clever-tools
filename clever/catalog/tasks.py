@@ -3,12 +3,11 @@ from django.contrib.sites.models import Site
 from cache_tagging.django_cache_tagging import get_cache
 from djcelery_transactions import task
 from celery.decorators import periodic_task
-from .settings import CLEVER_FILTER_TIMEOUT
+from celery.schedules import crontab
 from .models import Section
 from .models import PseudoSection
 import requests
 import urlparse
-import datetime
 
 
 @task(ignore_result=True)
@@ -36,7 +35,6 @@ def invalidate_section(section_id):
                 url = urlparse.urljoin('http://%s' % current_site.domain, pseudo_section.get_absolute_url())
                 requests.get(url)
 
-
     except Section.DoesNotExist:
         pass
 
@@ -50,6 +48,6 @@ def invalidate_catalog():
     log.info('FInish invalidate cache for all sections')
 
 
-@periodic_task(run_every=datetime.timedelta(seconds=CLEVER_FILTER_TIMEOUT))
+@periodic_task(run_every=crontab(hour=3, minute=0))
 def periodic_invalidate_catalog():
     invalidate_catalog()
