@@ -23,3 +23,8 @@ def format_intspace(value):
 @register.filter()
 def to_str(value):
     return str(value)
+
+
+@register.filter()
+def widget_name(field):
+    return field.field.widget.__class__.__name__
