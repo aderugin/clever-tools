@@ -14,6 +14,7 @@ class MarkupPanel(Panel):
         manager = pages.Manager()
         stats.update({
             'manager': manager,
+            'fixtures': manager.fixture_factory,
             'pages': manager.pages,
         })
         return stats

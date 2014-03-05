@@ -36,6 +36,7 @@ def compare_status_productview(context):
 
     return result
 
+
 @register.inclusion_tag('catalog/blocks/compare_status_productlist.html', takes_context=True)
 def compare_status_productlist(context):
     request = context.get('request', None)

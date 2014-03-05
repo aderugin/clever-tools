@@ -16,6 +16,9 @@ setup(
     long_description=read('README.md'),
     keywords='',
     packages=find_packages(),
+    namespace_packages=[
+        'clever',
+    ],
     author='Clever Promo',
     author_email='it@clever-site.ru',
     url="",

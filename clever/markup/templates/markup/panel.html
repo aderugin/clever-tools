@@ -1,11 +1,14 @@
 {% load i18n %}
+{% load panel_tags %}
+
+<h4>{% trans "Сверстаные страницы" %}</h4>
 
 <table>
     <thead>
         <tr>
             <th>{% trans "Name" %}</th>
-            <th>{% trans "Файл даннызх" %}</th>
             <th>{% trans "Файл шаблона" %}</th>
+            <th>{% trans "Файл с данными" %}</th>
             <th>{% trans "Файл верстки" %}</th>
         </tr>
     </thead>
@@ -24,3 +27,20 @@
         {% endfor %}
     </tbody>
 </table>
+
+{% for name, metadata in fixtures.model %}
+    <h4>{{ name }} - {{ metadata.model_class|model_verbose_name }}</h4>
+    <table>
+        <tbody>
+            {% for field in metadata.model_class|model_fields %}
+                <tr class="{% cycle 'djDebugOdd' 'djDebugEven' %}">
+                    <td>&nbsp;</td>
+                    <td>{{ field.name }}</td>
+                    <td>{{ field.verbose_name }}</td>
+                    <td>{{ field.help_text }}</td>
+                    <td>{{ field }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endfor %}
