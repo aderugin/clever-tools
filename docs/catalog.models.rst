@@ -1,3 +1,4 @@
+.. clever.catalog:
 Каталог
 =======
 
@@ -5,12 +6,6 @@
 
 .. toctree::
    :maxdepth: 2
-
-.. automodule:: clever.core.models
-    :members:
-
-.. automodule:: clever.bem.render
-    :members:
 
 .. automodule:: clever.catalog.models
     :members:
