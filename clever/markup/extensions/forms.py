@@ -24,9 +24,6 @@ FIELDS = {
     'range': create_range
 }
 
-def create_range():
-    pass
-
 
 class FormExtension(FixtureExtension):
     forms = None
