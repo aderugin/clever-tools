@@ -59,11 +59,46 @@ def thesaurus(input_list, field):
         'dictonary': ordered,
     }
 
-
-
 @register.object
-def thesaurus_columns(thesaurus_dict, size):
-    letters_list = thesaurus_dict['dictonary']
-    import ipdb; ipdb.set_trace()
-    # height = sum(map(lambda x: 2 + len(x), letters_list))
+def thesaurus_columns(thesaurus_dict, columns_count):
+    letters_dict = thesaurus_dict['dictonary']
+    if not len(letters_dict):
+        return []
 
+    letters_size = map(lambda x: 2 + len(x[1]), letters_dict.items())
+    letters_size1, letters_size2 = itertools.tee(letters_size)
+    letters_height = sum(letters_size1)
+    letters_count = letters_height // columns_count + (1 if letters_height % columns_count else 0)
+
+    columns = []
+
+    current_iter = iter(letters_dict)
+    current_letter = next(current_iter)
+    current_list = iter(letters_dict[current_letter])
+    is_first = True
+
+    def create_letter(is_first):
+        return {
+            'is_first': is_first,
+            'items': []
+        }
+
+    for i in xrange(0, columns_count):
+        column = OrderedDict()
+        column[current_letter] = create_letter(is_first)
+
+        for j in xrange(0, letters_count):
+            try:
+                item = next(current_list)
+            except StopIteration:
+                try:
+                    current_letter = next(current_iter)
+                    is_first = True
+                except StopIteration:
+                    break
+                column[current_letter] = create_letter(is_first)
+                current_list = iter(letters_dict[current_letter])
+            column[current_letter]['items'].append(item)
+        is_first = False
+        columns.append(column)
+    return columns
