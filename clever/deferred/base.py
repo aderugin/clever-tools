@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-
 # ------------------------------------------------------------------------------
 class DeferredPoint(object):
     '''
@@ -13,6 +12,8 @@ class DeferredPoint(object):
         self.__dict__['__name'] = name
 
     def resolve_deferred_point(self, target_model):
+        # if self.__dict__['__instance']:
+        #     raise RuntimeError('Deffered point already is resolved')
         self.__dict__['__instance'] = target_model
 
         # Обновляем потребителей данной точки

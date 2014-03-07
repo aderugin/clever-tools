@@ -73,8 +73,19 @@ class SectionForm(forms.ModelForm):
 
 # ------------------------------------------------------------------------------
 @inject_seo_inline()
-class BrandAdmin(admin.ModelAdmin):
-    pass
+class BrandAdmin(AdminMixin, admin.ModelAdmin):
+    def __init__(self, model, *args, **kwargs):
+        super(BrandAdmin, self).__init__(model, *args, **kwargs)
+
+        self.insert_list_display(['admin_thumbnail', 'active'], before=True)
+        self.insert_list_display(['slug'])
+
+        self.insert_list_display_links(['admin_thumbnail', '__unicode__', '__str__'])
+
+    @thumbnail_column(size='106x80')
+    def admin_thumbnail(self, inst):
+        """ Выводит картинку а админке """
+        return [inst.image]
 
 
 # ------------------------------------------------------------------------------

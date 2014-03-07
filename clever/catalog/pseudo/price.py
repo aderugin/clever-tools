@@ -12,7 +12,7 @@ from clever.catalog import settings
 @AttributeManager.register_attribute(tag='price', verbose_name=u'Цена', allowed_only=True)
 class PriceAttribute(PseudoAttribute):
     ''' Псевдо аттрибут для брэнда '''
-    title = 'Производитель'
+    title = u'Цена'
     control_object = RangeControl(
         'range-price', u'Диапазон цен',
         template_name=settings.CLEVER_FILTER_PRICE_TEMPLATE,
