@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#author: Semen Pupkov (semen.pupkov@gmail.com)
 from __future__ import absolute_import
 import urlparse
 import re

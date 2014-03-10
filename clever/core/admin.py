@@ -48,7 +48,7 @@ def thumbnail_column(size='106x80', **kwargs):
     return real_decorator
 
 
-class AdminMixin:
+class AdminMixin(object):
     """Данный класс упрощает работу с AdminModel"""
 
     def _insert_list(self, name, values, before=False):
@@ -93,3 +93,25 @@ class AdminMixin:
     def insert_dict(self, dict):
         for key, list in dict.items():
             self._insert_list(key, list)
+
+
+class AdminFieldsetsMixin(object):
+    primary_fieldsets = None
+
+    def get_primary_fieldsets(self, request, obj=None):
+        return self.primary_fieldsets
+
+    def get_fieldsets(self, request, obj=None):
+        primary_fieldsets = self.get_primary_fieldsets(request, obj)
+        if primary_fieldsets:
+            form = self.get_form(request, obj, fields=None)
+            fields = list(form.base_fields) + list(self.get_readonly_fields(request, obj))
+
+            for fieldset_name, fieldset_params in primary_fieldsets:
+                for field in fieldset_params.get('fields', []):
+                    fields.remove(field)
+
+            return list(primary_fieldsets) + [
+                (None, {'fields': fields})
+            ]
+        return super(AdminFieldsetsMixin, self).get_fieldsets(self, request, obj)
