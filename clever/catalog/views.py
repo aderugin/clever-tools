@@ -35,16 +35,10 @@ class IndexView(BreadcrumbsMixin, ListView):
     def prepare_breadcrumbs(self, breadcrumbs, context):
         breadcrumbs(CLEVER_BREADCRUMBS_CATALOG_TITLE, reverse('catalog:index'))
 
-    def get_queryset(self):
-        return self.model.sections.get_query_set()
-
 
 # ------------------------------------------------------------------------------
 class BrandIndexView(BreadcrumbsMixin, ListView):
     """Главная страница каталога"""
-
-    def get_queryset(self):
-        return self.model.brands.get_query_set()
 
     def prepare_breadcrumbs(self, breadcrumbs, context):
         breadcrumbs(CLEVER_BREADCRUMBS_BRANDS_TITLE, reverse('catalog:brands'))
@@ -53,9 +47,6 @@ class BrandIndexView(BreadcrumbsMixin, ListView):
 # ------------------------------------------------------------------------------
 class BrandView(BreadcrumbsMixin, DetailView):
     """Страница для просмотра отдельного бренда"""
-
-    def get_queryset(self):
-        return self.model.brands.get_query_set()
 
     def get_sections_queryset(self, brand):
         return brand.descendant_sections
@@ -233,7 +224,7 @@ class SectionView(BreadcrumbsMixin, DetailView):
 
     def get_products_queryset(self):
         """Создание запроса для получения продуктов из раздела"""
-        return Product.products.filter(section__in=self.get_products_sections(), active=True)
+        return Product.objects.filter(section__in=self.get_products_sections(), active=True)
 
     def get_filter_queryset(self, queryset):
         filter_form = self.get_filter_form()
@@ -372,9 +363,6 @@ class SectionView(BreadcrumbsMixin, DetailView):
 # ------------------------------------------------------------------------------
 class ProductView(BreadcrumbsMixin, DetailView):
     """Страница для просмотра отдельного продукта"""
-
-    def get_queryset(self):
-        return self.model.products.get_query_set()
 
     def get_attributes(self):
         return models.ProductAttribute.objects.filter(product=self.object).order_by('sort')

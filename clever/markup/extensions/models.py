@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from decimal import Decimal
 from django.db import models
+from django.db.models.loading import get_model
 from django.core.urlresolvers import reverse
 from clever.magic import load_class
 from clever.markup.metadata import fields
@@ -87,20 +88,26 @@ class ModelMetadata(FixtureMetadata):
         self.model_name = model_name
         self.fields = {}
 
+        fix_name = 'fix-' + app_name
+
         # create model metadata
         class Meta(object):
             app_label = None
-        Meta.app_label = app_name
+        Meta.app_label = fix_name
 
         # create bases for model class
         name = '%s.%s' % (app_name, model_name)
         bases = (models.Model,)
-        if name in DEFAULT_PARENTS:
-            bases= (load_class(DEFAULT_PARENTS[name]),)
+
+        parent_model = get_model(app_name, model_name)
+        if parent_model:
+            bases = (parent_model, )
+        elif name in DEFAULT_PARENTS:
+            bases = (load_class(DEFAULT_PARENTS[name]),)
 
         # create model class
         if not model_class:
-            model_class = type(model_name, bases, {'__module__': app_name, 'Meta': Meta})
+            model_class = type(model_name, bases, {'__module__': fix_name, 'Meta': Meta})
         self.model_class = model_class
 
         # auto recreate existed members
@@ -145,7 +152,11 @@ class ModelMetadata(FixtureMetadata):
             self.update_field(name)
 
         # create instance of model class
-        instance = self.model_class()
+        try:
+            instance = self.model_class()
+        except Exception, e:
+            import ipdb; ipdb.set_trace()
+
         for key, value in data.items():
             if key in self.fields:
                 value = self.fields[key].convert(self.factory, instance, data, value)

@@ -107,7 +107,6 @@ class SectionBase(cache_machine.CachingMixin, mptt.MPTTModel, TimestableMixin, A
     code = models.CharField(verbose_name=u'Внутренний код', help_text=u'Код для связи с внешними сервисами, например 1C', max_length=50, blank=True)
 
     objects = TreeCachingPassThroughManager(SectionQuerySet)
-    sections = TreeCachingPassThroughManager(SectionQuerySet)
 
     def __unicode__(self):
         return self.title
@@ -164,7 +163,6 @@ class BrandBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, Tit
     code = models.CharField(verbose_name=u'Внутренний код', help_text=u'Код для связи с внешними сервисами, например 1C', max_length=50, blank=True)
 
     objects = CachingPassThroughManager(BrandQuerySet)
-    brands = CachingPassThroughManager(BrandQuerySet)
 
     def __unicode__(self):
         return self.title
@@ -250,7 +248,6 @@ class ProductBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, T
     price = models.DecimalField(verbose_name=u"Цена", default=Decimal(0.00), decimal_places=2, max_digits=10)
 
     objects = CachingPassThroughManager(ProductQuerySet)
-    products = ProductFrontendManager(ProductQuerySet)
 
     def __unicode__(self):
         return self.title
@@ -263,6 +260,7 @@ class ProductBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, T
         .. versionadded:: 0.2
         '''
         return ('catalog:product', (), {'slug': self.slug})
+    # url = property(get_absolute_url)
 
 
 # ------------------------------------------------------------------------------
