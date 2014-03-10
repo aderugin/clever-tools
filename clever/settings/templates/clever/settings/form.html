@@ -5,6 +5,19 @@
 {% load admin_static i18n admin_modify grp_tags %}
 {% load widget_tweaks %}
 
+{% block stylesheets %}
+    {{ block.super }}
+    {% for form, title in forms %}
+        {{ form.media.css }}
+    {% endfor %}
+{% endblock %}
+{% block javascripts %}
+    {{ block.super }}
+    {% for form, title in forms %}
+        {{ form.media.js }}
+    {% endfor %}
+{% endblock %}
+
 <!-- BREADCRUMBS -->
 {% block breadcrumbs %}
     {% if not is_popup %}
