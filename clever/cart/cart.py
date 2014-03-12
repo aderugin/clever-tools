@@ -146,7 +146,7 @@ class CartWithOptions(Cart):
         for opt in item['extra'].items():
             if opt[0] in self.option_prices:
                 price += self.option_prices[opt[0]]
-        return (price  * item['count']) + super(CartWithOptions, self).get_item_price(item)
+        return (price * item['count']) + super(CartWithOptions, self).get_item_price(item)
 
     def get_with_products(self):
         item_list = super(CartWithOptions, self).get_with_products()

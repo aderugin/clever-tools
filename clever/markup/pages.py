@@ -69,7 +69,7 @@ class Page(object):
         try:
             return load_fixture(self.fixture_name)
         except FixtureNotFound:
-           return None
+            return None
 
     def __getattr__(self, name, default=None):
         return self.params.get(name, default)
@@ -82,21 +82,25 @@ class Manager(object):
     pages = None
 
     def __init__(self, fixture_name='markup.yaml'):
+        self.fixture_factory = fixture_factory
         self.extensions = [
-            BreadcrumbsExtension(),
-            PaginatorExtension(),
-            CartExtension(),
-            CompareExtension(),
+            BreadcrumbsExtension(self.fixture_factory),
+            PaginatorExtension(self.fixture_factory),
+            CartExtension(self.fixture_factory),
+            CompareExtension(self.fixture_factory),
         ]
         self.request_factory = RequestFactory(SERVER_NAME="localhost")
-        self.fixture_factory = fixture_factory
         self.pages = OrderedDict()
 
         # Load fixture from file
         data = load_fixture(fixture_name)
 
+        # Populate extensions
+        for ext in self.extensions:
+            ext.process_data(data)
+
         # Populate pages
-        for id, params in data.items():
+        for id, params in data.get('pages', {}).items():
             id = str(id)
             title = params.get('title', '').strip()
             if not title:

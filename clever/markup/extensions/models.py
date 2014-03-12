@@ -152,10 +152,10 @@ class ModelMetadata(FixtureMetadata):
             self.update_field(name)
 
         # create instance of model class
-        try:
-            instance = self.model_class()
-        except Exception, e:
-            import ipdb; ipdb.set_trace()
+        # try:
+        instance = self.model_class()
+        # except Exception, e:
+        #     import ipdb; ipdb.set_trace()
 
         for key, value in data.items():
             if key in self.fields:
