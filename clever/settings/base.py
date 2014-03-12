@@ -42,12 +42,11 @@ class SettingsModel(cache_machine.CachingMixin, Model):
     class Meta:
         abstract = True
     __metaclass__ = SettingsMetaclass
-    _site = models.ForeignKey(Site, unique=True)
+    _site = models.ForeignKey(Site, unique=True, blank=True, editable=False)
 
-    def save(self, *args, **kwargs):
+    def clean(self):
         if self._site is None:
             self._site = Site.objects.get_current()
-        return super(SettingsModel, self).save(*args, **kwargs)
 
 
 def get_option(name, default=None):

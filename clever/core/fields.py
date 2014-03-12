@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+#author: Semen Pupkov (semen.pupkov@gmail.com)
 from __future__ import absolute_import
 import urlparse
 import re
 from django.db import models
 from django import forms
 from django.utils.translation import ugettext_lazy as _
+from clever.forms.phone import PhoneWidget
 
 
 def validate_youtube_url(value):
@@ -103,6 +105,24 @@ class FileSizeField(models.IntegerField):
         return int(value) if match else value
 
 
+class PhoneField(models.CharField):
+    phone_format = '+7 (999) 999-99-99'
+
+    def __init__(self, *args, **kwargs):
+        kwargs['max_length'] = kwargs.pop('max_length', len(self.phone_format))
+
+        super(PhoneField, self).__init__(*args, **kwargs)
+
+    def formfield(self, **kwargs):
+        # This is a fairly standard way to set up some defaults
+        # while letting the caller override them.
+        defaults = {
+            'widget': PhoneWidget
+        }
+        defaults.update(kwargs)
+        return super(PhoneField, self).formfield(**defaults)
+
+
 # Import info for south
 try:
     from south.modelsinspector import add_introspection_rules
@@ -110,3 +130,4 @@ except ImportError:
     pass
 else:
     add_introspection_rules([],  ["^clever\.core\.fields\.YoutubeUrlField",])
+    add_introspection_rules([],  ["^clever\.core\.fields\.PhoneField",])

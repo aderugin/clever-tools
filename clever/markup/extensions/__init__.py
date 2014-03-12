@@ -2,6 +2,12 @@
 
 
 class PageExtension(object):
+    def __init__(self, factory):
+        self.factory = factory
+
+    def process_data(self, data):
+        pass
+
     def process_page(self, page, request, context):
         raise NotImplementedError()
 

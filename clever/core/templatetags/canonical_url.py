@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from django import template
 from django.template.base import TemplateSyntaxError
-from django.template.base import TemplateSyntaxError
 from django.template.base import VariableDoesNotExist
 from django.template.base import Node
 from urlparse import urlparse, parse_qs
@@ -52,7 +51,6 @@ def canonical_url(parser, token):
     if len(bits) == 4:
         paginator_var = template.Variable(bits[2])
         page_var = template.Variable(bits[3])
-        return CanonicalUrlNode(canonical_url, paginator_var, page_var);
+        return CanonicalUrlNode(canonical_url, paginator_var, page_var)
     else:
-        return CanonicalUrlNode(canonical_url);
-
+        return CanonicalUrlNode(canonical_url)

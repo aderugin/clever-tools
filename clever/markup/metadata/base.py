@@ -1,7 +1,7 @@
+from .errors import MetadataError
 from clever.markup.extensions.forms import FormExtension
 from clever.markup.extensions.models import ModelExtension
 from clever.markup.extensions.objects import ObjectExtension
-
 
 class FixtureFactory(object):
     extensions = None

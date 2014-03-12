@@ -46,6 +46,7 @@ setup(
         "Coffin == 0.3.8",
         "PyYAML == 3.10",
         "Jinja2 == 2.7.1",
+        "factory_boy == 2.3.1",
     ],
     scripts=[
         'bin/clever-install-python',
