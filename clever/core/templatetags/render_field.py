@@ -17,50 +17,6 @@ else:
     field_type = django_filter_to_jinja2(widget_tweaks.field_type)
     widget_type = django_filter_to_jinja2(widget_tweaks.widget_type)
 
-# class RenderFieldExtension(Extension):
-#     tags = set(['render_field'])
-
-#     def parse(self, parser):
-#         lineno = parser.stream.next().lineno
-#         kindarg = parser.parse_expression()
-
-#         # # Allow kind to be defined as jinja2 name node
-#         # if isinstance(kindarg, nodes.Name):
-#         #     kindarg = nodes.Const(kindarg.name)
-#         args = [kindarg]
-#         # if args[0].value not in self.compressors:
-#         #     raise TemplateSyntaxError('compress kind may be one of: %s' %
-#         #                               (', '.join(self.compressors.keys())),
-#         #                               lineno)
-#         # if parser.stream.skip_if('comma'):
-#         #     modearg = parser.parse_expression()
-#         #     # Allow mode to be defined as jinja2 name node
-#         #     if isinstance(modearg, nodes.Name):
-#         #         modearg = nodes.Const(modearg.name)
-#         #         args.append(modearg)
-#         # else:
-#         #     args.append(nodes.Const('file'))
-#         # body = parser.parse_statements(['name:endcompress'], drop_needle=True)
-#         # parser.parse_statements([], drop_needle=True)
-#         return self.call_method('_compress', args).set_lineno(lineno)
-
-#     def _compress(self, kind, mode, caller):
-#         import ipdb; ipdb.set_trace()
-#         pass
-#     #     # This extension assumes that we won't force compression
-#     #     forced = False
-
-#     #     mode = mode or OUTPUT_FILE
-#     #     original_content = caller()
-#     #     context = {
-#     #         'original_content': original_content
-#     #     }
-#     #     return self.render_compressed(context, kind, mode, forced=forced)
-
-#     # def get_original_content(self, context):
-#     #     return context['original_content']
-
-# register.tag(RenderFieldExtension)
 
 def process_field_attributes(field, attr, process):
     # split attribute name and value from 'attr:value' string
@@ -90,10 +46,10 @@ def set_field_attribute(field, name, value):
     return process_field_attributes(field, name + ':' + value, process)
 
 @register.object
-def render_label(field, classes=[], **kwargs):
+def render_label(field, **kwargs):
     if field == None:
         return ''
-    return Markup(field.label_tag())
+    return Markup(field.label_tag(attrs=kwargs))
 
 @register.object
 def render_field(field, template=None, **kwargs):
