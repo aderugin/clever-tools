@@ -9,7 +9,7 @@ class Cart:
         return iter(self.products)
 
     def __len__(self):
-        return len(self.products)
+        return sum(map(lambda x: x['count'], self.products))
 
 
 class CartExtension(PageExtension):
