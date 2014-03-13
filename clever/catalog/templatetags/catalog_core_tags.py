@@ -42,8 +42,8 @@ def format_price(value):
             price_str += " "
             counter = 0
     price_str = price_str[::-1]
-    if remain != 0:
-        price_str += str(remain)[1:]
+    # if remain != 0:
+    #     price_str += str(remain)[1:]
     getcontext().prec = backup_prec
     return price_str
 

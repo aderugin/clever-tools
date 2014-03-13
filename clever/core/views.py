@@ -135,3 +135,68 @@ class BreadcrumbsMixin(object):
     def render_to_response(self, context, **response_kwargs):
         self.prepare_breadcrumbs(self.request.breadcrumbs, context)
         return super(BreadcrumbsMixin, self).render_to_response(context, **response_kwargs)
+
+
+#-------------------------------------------------------------------------------
+class SortableMixin(object):
+    order_by = {
+        # TODO: Добавить сортировку по идентификатору
+    }
+    default_order = None
+    default_sort = 'asc'
+
+    def get_order(self):
+        order = self.request.GET.get('order_by', None)
+        sort_by = self.request.GET.get('sort_by', self.default_sort)
+        order_by = None
+
+        if order and not order in self.order_by:
+            order = self.default_order
+        return order, sort_by
+
+    def get_sortable_query(self, queryset):
+        ''' Сортируем queryset перед выдачей '''
+        order, sort_by = self.get_order()
+        if order in self.order_by:
+            order_by = self.order_by[order]
+            result_order = []
+            for field in order_by['fields']:
+                if sort_by == 'desc':
+                    if field[0] == '-':
+                        field = field[1:]
+                    else:
+                        field = '-' + field
+                result_order.append(field)
+            queryset = queryset.order_by(*result_order)
+        return queryset
+
+    def get_order_params(self):
+        ''' Получем информацию для сортировки '''
+        order, sort_by = self.get_order()
+        sort_list = []
+        for key, params in self.order_by.items():
+            sort_name = params['title']
+            sort = 'asc'
+            if order == key:
+                sort = 'asc' if sort_by == 'desc' else 'desc'
+            sort_list.append([sort_name, key, sort])
+        return order, sort_by, sort_list
+
+    def update_context_data(self, context):
+        order, sort_by, sort_list = self.get_order_params()
+        context.update({
+            'order_by': order,
+            'sort_by': sort_by,
+            'sort_list': sort_list,
+        })
+        return context
+
+#-------------------------------------------------------------------------------
+class SortableListMixin(SortableMixin):
+    def get_queryset(self):
+        queryset = super(SortableListMixin, self).get_queryset()
+        return self.get_sortable_query(queryset)
+
+    def get_context_data(self, **kwargs):
+        context = super(SortableListMixin, self).get_context_data(**kwargs)
+        return self.update_context_data(context)
