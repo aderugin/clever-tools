@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from coffin import template
+from django import template
 from urlparse import parse_qs
 from urllib import urlencode
 from urllib import quote

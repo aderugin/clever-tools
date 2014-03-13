@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from coffin import template
+from django import template
 register = template.Library()
 
 
