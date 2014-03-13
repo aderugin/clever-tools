@@ -131,4 +131,3 @@ class SharedView(View):
                     request.menu_path = v.menu_path
                 return v.as_view()(request, *args, **kwargs)
         raise Http404()
-
