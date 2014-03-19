@@ -5,10 +5,8 @@ from django.core.validators import validate_email
 from django import forms
 from django.contrib.auth import get_user_model
 
-User = get_user_model()
-
 def get_admin_emails():
-    admins = User.objects.filter(is_superuser=True)
+    admins = get_user_model().objects.filter(is_superuser=True)
     admin_list = []
     for admin in admins:
         try:
