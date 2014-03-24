@@ -5,7 +5,7 @@ from templated_emails.utils import send_templated_email
 from django.db.models import Q
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
-from clever.notifier import send_message
+from clever.notifier import send_message, prepare_fields_from
 
 
 def get_site_url(url):
@@ -39,11 +39,7 @@ def send_message_when_created(template_name, admin=True, staff=True):
                     querypart = Q(is_staff=True)
 
             if querypart and created:
-                fields = {x.name: None for x in instance._meta.fields}
-                for field in fields:
-                    fields[field] = getattr(instance, field)
-                if hasattr(instance, 'get_notifier_context'):
-                    fields = instance.get_notifier_context(fields)
+                fields = prepare_fields_from(instance)
                 users = get_user_model().objects.filter(querypart)
                 for user in users:
                     fields['email'] = user.email

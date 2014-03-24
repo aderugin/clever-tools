@@ -3,6 +3,7 @@
 from django.views.generic import View
 from django.views.generic import ListView
 from django.core.serializers.json import DjangoJSONEncoder
+from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse
 from django.http import Http404
 import json
@@ -143,7 +144,6 @@ class SharedView(View):
         raise Http404()
 
 
-#-------------------------------------------------------------------------------
 class BreadcrumbsMixin(object):
     def prepare_breadcrumbs(self, breadcrumbs, context):
         ''' Подготовка хлебных крошек '''
@@ -152,3 +152,36 @@ class BreadcrumbsMixin(object):
     def render_to_response(self, context, **response_kwargs):
         self.prepare_breadcrumbs(self.request.breadcrumbs, context)
         return super(BreadcrumbsMixin, self).render_to_response(context, **response_kwargs)
+
+
+class DetailListView(ListView):
+    allow_empty = False
+    detail_model = None
+    filter_attr = None
+    
+    def __init__(self, **kwargs):
+        if not self.detail_model:
+            raise ImproperlyConfigured("%s is missing detail_model" % self.__class__.__name__)
+        if not self.filter_attr:
+            raise ImproperlyConfigured("%s is missing filter_attr" % self.__class__.__name__)
+        super(DetailListView, self).__init__(**kwargs)
+
+    def get_queryset(self):
+        kwargs = {}
+        if 'pk' in self.kwargs and self.kwargs['pk']:
+            kwargs['pk'] = self.kwargs['pk']
+        if 'slug' in self.kwargs and self.kwargs['slug']:
+            kwargs['slug'] = self.kwargs['slug']
+        if len(kwargs) < 1:
+            return []
+        detail = self.detail_model.objects.filter(**kwargs)
+        if detail.count() > 0:
+            self.detail = detail.get()
+            return super(DetailListView, self).get_queryset().filter(**{self.filter_attr: self.detail})
+        return []
+
+    def get_context_data(self, **kwargs):
+        context = super(DetailListView, self).get_context_data(**kwargs)
+        context['object'] = self.detail
+        context[self.detail.__class__.__name__] = self.detail
+        return context
