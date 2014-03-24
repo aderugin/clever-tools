@@ -18,6 +18,7 @@ from model_utils import fields
 from caching import base as cache_machine
 import autoslug
 import os
+import uuid
 
 
 def generate_upload_name(instance, filename, prefix=None, unique=False):

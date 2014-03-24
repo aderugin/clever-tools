@@ -139,7 +139,7 @@ class DetailListView(ListView):
     allow_empty = False
     detail_model = None
     filter_attr = None
-    
+
     def __init__(self, **kwargs):
         if not self.detail_model:
             raise ImproperlyConfigured("%s is missing detail_model" % self.__class__.__name__)
