@@ -90,20 +90,25 @@ class ModelMetadata(FixtureMetadata):
 
         fix_name = 'fix-' + app_name
 
-        # create model metadata
-        class Meta(object):
-            app_label = None
-        Meta.app_label = fix_name
-
         # create bases for model class
         name = '%s.%s' % (app_name, model_name)
         bases = (models.Model,)
 
+        is_proxy = False
         parent_model = get_model(app_name, model_name)
         if parent_model:
+            is_proxy = True
             bases = (parent_model, )
         elif name in DEFAULT_PARENTS:
+            is_proxy = True
             bases = (load_class(DEFAULT_PARENTS[name]),)
+
+        # create model metadata
+        class Meta(object):
+            app_label = None
+        Meta.proxy = is_proxy
+        Meta.app_label = fix_name
+
 
         # create model class
         if not model_class:

@@ -21,10 +21,12 @@ class Command(BaseCommand):
 
         # Change settings for output
         from django.conf import settings
-        settings.STATIC_URL = ''
+        settings.STATIC_URL = 'static/'
+        settings.MEDIA_URL = 'media/'
         settings.DEBUG = False
         settings.COMPRESS_ENABLED = True
         settings.COMPRESS_URL = ''
+        settings.COMPRESS_ROOT = settings.STATIC_ROOT
 
         # Create page manager
         manager = Manager()
