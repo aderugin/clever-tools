@@ -90,6 +90,9 @@ class AdminMixin(object):
     def insert_list_filter(self, list_filter, before=False):
         self._insert_list('list_filter', list_filter, before=before)
 
+    def insert_raw_id_fields(self, raw_id_fields, before=False):
+        self._insert_list('raw_id_fields', raw_id_fields, before=before)
+
     def insert_dict(self, dict):
         for key, list in dict.items():
             self._insert_list(key, list)
