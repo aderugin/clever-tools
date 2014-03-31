@@ -5,7 +5,6 @@ from django.views.generic import ListView
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse
-from django.http import Http404
 import json
 
 
@@ -123,27 +122,6 @@ class AjaxListMixin(ListView, AjaxDataMixin):
 
 
 #-------------------------------------------------------------------------------
-class SharedView(View):
-    views = []
-
-    def dispatch(self, request, *args, **kwargs):
-        for v in self.views:
-            # Получение queryset'а для поиска объекта
-            view = v()
-            if hasattr(view, 'get_shared_queryset'):
-                shared_queryset = view.get_shared_queryset()
-            else:
-                shared_queryset = view.get_queryset()
-
-            # Ищем объект
-            if shared_queryset.filter(**kwargs).count() > 0:
-                menu_path = getattr(v, 'menu_path', None)
-                if menu_path:
-                    request.menu_path = menu_path
-                return v.as_view()(request, *args, **kwargs)
-        raise Http404()
-
-
 class BreadcrumbsMixin(object):
     def prepare_breadcrumbs(self, breadcrumbs, context):
         ''' Подготовка хлебных крошек '''
