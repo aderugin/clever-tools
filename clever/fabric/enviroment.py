@@ -5,7 +5,7 @@ from UserDict import UserDict
 class Enviroment(UserDict):
     def __init__(self):
         # Расположение зависимостей для проекта
-        self.REQUIREMENTS_NAME = 'requirements.pip'
+        self.REQUIREMENTS_NAME = 'requirements.txt'
 
         # Расположение FastCGI скрипта для запуска и его перезапуска сервера
         self.DJANGO_WSGI_NAME = 'django-wrapper.fcgi'

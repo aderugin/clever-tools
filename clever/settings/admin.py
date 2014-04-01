@@ -30,10 +30,11 @@ def show_site_settings(request):
         form_collection.append((form_class, instance, name, model._meta.verbose_name))
 
     has_file_field = False
-    for item in form_collection[0][1]._meta.fields:
-        if type(item) == models.FileField or type(item) == models.ImageField:
-            has_file_field = True
-            break
+    for form_option in form_collection:
+        for item in form_option[1]._meta.fields:
+            if not has_file_field and (isinstance(item, (models.FileField, models.ImageField,))):
+                has_file_field = True
+                break
 
     # Initialise all the forms, in a dictionary that we can later use
     # as context
