@@ -101,18 +101,23 @@ class ModelMetadata(FixtureMetadata):
             bases = (parent_model, )
         elif name in DEFAULT_PARENTS:
             is_proxy = True
-            bases = (load_class(DEFAULT_PARENTS[name]),)
+            parent_model = load_class(DEFAULT_PARENTS[name])
+            bases = (parent_model,)
+
+        # if parent_model and not getattr(parent_model, '_base_manager', None):
+        #     manager = models.Manager()
+        #     manager.model = parent_model
+        #     setattr(parent_model, '_base_manager', manager)
 
         # create model metadata
         class Meta(object):
             app_label = None
-        Meta.proxy = is_proxy
+        # Meta.proxy = is_proxy
         Meta.app_label = fix_name
-
 
         # create model class
         if not model_class:
-            model_class = type(model_name, bases, {'__module__': fix_name, 'Meta': Meta})
+            model_class = type(model_name, bases, {'__module__': fix_name, 'Meta': Meta,})
         self.model_class = model_class
 
         # auto recreate existed members
