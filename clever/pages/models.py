@@ -52,9 +52,9 @@ class Page(MPTTModel):
         else:
             return '/'
 
-    def save(self):
+    def save(self, *args, **kwargs):
         self.path = self.generate_path()
-        super(Page, self).save()
+        super(Page, self).save(*args, **kwargs)
 
     def get_absolute_url(self):
         return self.path
