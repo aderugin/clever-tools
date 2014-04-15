@@ -1,0 +1,90 @@
+{% extends "admin/change_form.html" %}
+<!-- LOADING -->
+{% load admin_static i18n admin_modify admin_urls grp_tags %}
+
+<!-- STYLESHEETS -->
+{% block stylesheets %}
+    {{ block.super }}
+{% endblock %}
+
+<!-- JAVASCRIPTS -->
+{% block javascripts %}
+    {{ block.super }}
+    <script type="text/javascript" charset="utf-8">
+        (function($) {
+            $(document).ready(function() {
+                $('.clever-tabs').each(function() {
+                    var tab = $(this);
+                    var containers = tab.find('.clever-tabs-container');
+                    var items = tab.find('.clever-tabs-item');
+
+                    items.click(function(e) {
+                        e.preventDefault();
+
+                        var index = $('.clever-tabs-item', tab).index(this);
+
+                        items.removeClass('clever-tabs-item-active');
+                        items.eq(index).addClass('clever-tabs-item-active');
+
+                        containers.removeClass('clever-tabs-container-active');
+                        containers.eq(index).addClass('clever-tabs-container-active');
+                    });
+                });
+            });
+        })(grp.jQuery);
+    </script>
+    {{ media }}
+{% endblock %}
+
+
+{% block field_sets %}
+    <div class="clever-tabs">
+        {% spaceless %}
+            <ul class="clever-tabs-items grp-module">
+                {% for tab in admintabs %}
+                    <li id="change-tab-{{ tab.id }}" class="clever-tabs-item {% if tab.is_active %} clever-tabs-item-active {% endif %}">
+                        <h2>{{ tab.label }}</h2>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endspaceless %}
+
+        <div class="clever-tabs-containers">
+            {% for tab in admintabs %}
+                <div id="change-tab-{{ tab.id }}" class="clever-tabs-container {% if tab.is_active %} clever-tabs-container-active {% endif %}">
+                    {% for fieldset in tab.fieldsets %}
+                        {% include "admin/includes/fieldset.html" %}
+                    {% endfor %}
+
+                    {% for inline_admin_formset in tab.inlines %}
+                        {% include inline_admin_formset.opts.template %}
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% block after_field_sets %}{% endblock %}
+{% endblock %}
+
+{% block inline_field_sets %}{% endblock %}
+
+{% comment %}
+<!-- Fieldsets -->
+{% block field_sets %}
+    {% for fieldset in adminform %}
+        {% include "admin/includes/fieldset.html" %}
+    {% endfor %}
+{% endblock %}
+
+{% block after_field_sets %}{% endblock %}
+
+<!-- Inlines -->
+{% block inline_field_sets %}
+    {% for inline_admin_formset in inline_admin_formsets %}
+        {% include inline_admin_formset.opts.template %}
+    {% endfor %}
+{% endblock %}
+
+{% block after_related_objects %}{% endblock %}
+{%  endcomment %}

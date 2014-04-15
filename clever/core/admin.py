@@ -107,7 +107,7 @@ class AdminFieldsetsMixin(object):
     def get_fieldsets(self, request, obj=None):
         primary_fieldsets = self.get_primary_fieldsets(request, obj)
         if primary_fieldsets:
-            form = self.get_form(request, obj, fields=None)
+            form = super(AdminFieldsetsMixin, self).get_form(request, obj, fields=None)
             fields = list(form.base_fields) + list(self.get_readonly_fields(request, obj))
 
             for fieldset_name, fieldset_params in primary_fieldsets:
@@ -118,3 +118,82 @@ class AdminFieldsetsMixin(object):
                 (None, {'fields': fields})
             ]
         return super(AdminFieldsetsMixin, self).get_fieldsets(self, request, obj)
+
+
+class TabPanel:
+    label = None
+    inlines = []
+    fieldsets = []
+
+    is_active = False
+
+    def __init__(self, label, fieldsets=[], inlines=[], **kwargs):
+        self.label = label
+        self.fieldsets = fieldsets
+        self.inlines = inlines
+
+
+class AdminTabbedMixin(object):
+    tabs = []
+    change_form_template = 'admin/tabbed/change_form.html'
+
+    def __init__(self, *args, **kwargs):
+        super(AdminTabbedMixin, self).__init__(*args, **kwargs)
+
+    @property
+    def media(self):
+        base_media = super(AdminTabbedMixin, self).media
+        base_media.add_css({
+            'all': [
+                'css/admin.css'
+            ]
+        })
+        return base_media
+
+    def find_inlines(self, inline_declr, inline_formsets):
+        inlines = []
+
+        def isinline(name):
+            def wrapper(formset):
+                formset_name = formset.opts.__class__.__name__
+                return name == formset_name
+            return wrapper
+
+        for name in inline_declr:
+            for x in filter(isinline(name), inline_formsets):
+                inlines.append(x)
+
+        return inlines
+
+    def find_fieldsets(self, fieldset_declr, adminform):
+        fieldsets = []
+
+        def isfieldset(name):
+            def wrapper(fieldset):
+                return fieldset.name == name
+            return wrapper
+
+        for name in fieldset_declr:
+            for x in filter(isfieldset(name), adminform):
+                fieldsets.append(x)
+        return fieldsets
+
+    def get_tabs(self, inline_admin_formsets, adminform):
+        tabs = []
+        for tab in self.tabs:
+            label = tab[0]
+            params = tab[1]
+
+            fieldsets = self.find_fieldsets(params.get('fieldsets',[]), adminform)
+            inlines = self.find_inlines(params.get('inlines', []), inline_admin_formsets)
+            panel = TabPanel(label, fieldsets, inlines)
+            if not tabs:
+                panel.is_active = True
+            tabs.append(panel)
+        return tabs
+
+    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
+        context.update({
+            'admintabs': self.get_tabs(context.get('inline_admin_formsets'), context.get('adminform'))
+        })
+        return super(AdminTabbedMixin, self).render_change_form(request, context, add, change, form_url, obj)

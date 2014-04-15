@@ -1,0 +1,40 @@
+.clever-tabs {
+
+}
+
+.clever-tabs-containers {
+
+}
+
+.clever-tabs-container {
+    display: none;
+    box-sizing: border-box;
+    padding: 0px;
+}
+
+.clever-tabs-container-active {
+    display: block;
+}
+
+.clever-tabs-item {
+    display: inline-block;
+    vertical-align: top;
+    cursor: pointer;
+}
+
+/*.grp-group:not(.grp-tabular) h2 {*/
+.clever-tabs .clever-tabs-item h2 {
+    margin: 0
+}
+
+.clever-tabs-item:hover h2,
+.clever-tabs-item-active h2 {
+    /*border: 1px solid #2987a6 !important;*/
+    background: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgi…pZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JhZCkiIC8+PC9zdmc+IA==');
+    background: -webkit-gradient(linear, 50% 0%, 50% 100%, color-stop(0%, #36b0d9), color-stop(100%, #309bbf));
+    background: -webkit-linear-gradient(#36b0d9,#309bbf);
+    background: -moz-linear-gradient(#36b0d9,#309bbf);
+    background: -o-linear-gradient(#36b0d9,#309bbf);
+    background: linear-gradient(#36b0d9,#309bbf);
+    color: #fff;
+}
