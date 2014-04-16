@@ -51,11 +51,13 @@ def render_label(field, **kwargs):
         return ''
     return Markup(field.label_tag(attrs=kwargs))
 
+
 @register.object
-def render_field(field, template=None, **kwargs):
+def render_field(field, template=None, attrs={}, **kwargs):
     if field == None:
         return ''
-
+    if attrs:
+        kwargs.update(attrs)
     is_render = False
     if field.field.widget:
         widget = field.field.widget
