@@ -75,6 +75,22 @@ class SectionQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQue
     def with_products(self):
         return self.filter(products__active=True).annotate(products_count=models.Count('products')).filter(products_count__gt=0)
 
+    def with_ancestors(self):
+        if isinstance(self, models.query.EmptyQuerySet):
+            return self
+        new_queryset = self.none()
+        for obj in self:
+            new_queryset = new_queryset | obj.get_ancestors()
+        return new_queryset
+
+    def with_descendants(self):
+        if isinstance(self, models.query.EmptyQuerySet):
+            return self
+        new_queryset = self.none()
+        for obj in self:
+            new_queryset = new_queryset | obj.get_descendants()
+        return new_queryset
+
 
 # ------------------------------------------------------------------------------
 class SectionBase(cache_machine.CachingMixin, mptt.MPTTModel, TimestableMixin, ActivableMixin, TitleMixin, PageMixin):
