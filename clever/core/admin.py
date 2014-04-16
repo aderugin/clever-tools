@@ -2,6 +2,7 @@
 
 from sorl.thumbnail import get_thumbnail
 from django.conf import settings
+from pytils.translit import slugify
 
 
 def thumbnail_column(size='106x80', **kwargs):
@@ -121,6 +122,7 @@ class AdminFieldsetsMixin(object):
 
 
 class TabPanel:
+    id = None
     label = None
     inlines = []
     fieldsets = []
@@ -129,6 +131,7 @@ class TabPanel:
 
     def __init__(self, label, fieldsets=[], inlines=[], **kwargs):
         self.label = label
+        self.id = slugify(label)
         self.fieldsets = fieldsets
         self.inlines = inlines
 

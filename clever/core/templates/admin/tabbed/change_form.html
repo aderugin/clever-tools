@@ -13,22 +13,39 @@
     <script type="text/javascript" charset="utf-8">
         (function($) {
             $(document).ready(function() {
+                var localUrl = window.location.href;
+
                 $('.clever-tabs').each(function() {
                     var tab = $(this);
                     var containers = tab.find('.clever-tabs-container');
                     var items = tab.find('.clever-tabs-item');
 
-                    items.click(function(e) {
-                        e.preventDefault();
-
-                        var index = $('.clever-tabs-item', tab).index(this);
-
+                    function activateItem(index) {
+                        var item = items.eq(index);
                         items.removeClass('clever-tabs-item-active');
                         items.eq(index).addClass('clever-tabs-item-active');
 
                         containers.removeClass('clever-tabs-container-active');
                         containers.eq(index).addClass('clever-tabs-container-active');
+
+                        if (localStorage) {
+                            localStorage.setItem(localUrl, item.attr('rel'));
+                        }
+                    }
+
+                    items.click(function(e) {
+                        e.preventDefault();
+                        activateItem(items.index(this));
+                        return false;
                     });
+
+                    if (localStorage) {
+                        var tabId = localStorage.getItem(localUrl);
+                        if (tabId) {
+                            var index = items.index(items.filter('[rel=' + tabId + ']'));
+                            activateItem(index);
+                        }
+                    }
                 });
             });
         })(grp.jQuery);
@@ -42,7 +59,7 @@
         {% spaceless %}
             <ul class="clever-tabs-items grp-module">
                 {% for tab in admintabs %}
-                    <li id="change-tab-{{ tab.id }}" class="clever-tabs-item {% if tab.is_active %} clever-tabs-item-active {% endif %}">
+                    <li id="change-tab-{{ tab.id }}" class="clever-tabs-item {% if tab.is_active %} clever-tabs-item-active {% endif %}" rel="change-tab-{{ tab.id }}">
                         <h2>{{ tab.label }}</h2>
                     </li>
                 {% endfor %}

@@ -12,6 +12,16 @@
     padding: 0px;
 }
 
+.clever-tabs-container:before,
+.clever-tabs-container:after {
+  content:"";
+  display:table;
+}
+
+.clever-tabs-container:after {
+  clear:both;
+}
+
 .clever-tabs-container-active {
     display: block;
 }
