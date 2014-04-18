@@ -288,7 +288,7 @@ def collect():
     with cd(env.root):
         with prefix(env.activate):
             run('npm install')
-            run('$(node bin)/bower install')
+            run('$(npm bin)/bower install')
             run('python manage.py collectstatic --noinput')
 
 
