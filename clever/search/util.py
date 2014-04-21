@@ -36,13 +36,7 @@ def make_queryset(
         # Включаем эти группы в поиск
         queryset = queryset_class()
         for qp in query_parts:
-            queryset_part = filter_phrase(queryset_class(), qp)
-
-            suggestion = SearchQuerySet().filter(text__startswith=qp) \
-                                         .spelling_suggestion()
-            if suggestion:
-                queryset_part &= filter_phrase(queryset_part, suggestion)
-            queryset &= queryset_part
+            queryset &= filter_phrase(queryset_class(), qp)
         return queryset
     else:
         queryset = empty_queryset_class()
