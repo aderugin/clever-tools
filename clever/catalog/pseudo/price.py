@@ -25,6 +25,7 @@ class PriceAttribute(PseudoAttribute):
 
     def get_values(self, sections):
         prices = Product.objects.filter(section__in=sections, active=True).aggregate(max_price=models.Max('price'), min_price=models.Min('price'))
+
         if isinstance(prices['min_price'], Decimal):
             prices['min_price'] = prices['min_price'].to_integral_exact(ROUND_FLOOR)
             prices['max_price'] = prices['max_price'].to_integral_exact(ROUND_CEILING)
