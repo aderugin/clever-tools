@@ -28,6 +28,7 @@ class PriceAttribute(PseudoAttribute):
 
         if isinstance(prices['min_price'], Decimal):
             prices['min_price'] = prices['min_price'].to_integral_exact(ROUND_FLOOR)
+        if isinstance(prices['max_price'], Decimal):
             prices['max_price'] = prices['max_price'].to_integral_exact(ROUND_CEILING)
         return (
             (prices['min_price'], prices['min_price']),
