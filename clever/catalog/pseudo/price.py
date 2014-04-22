@@ -22,8 +22,8 @@ class PriceAttribute(PseudoAttribute):
     type_object = PriceType('price', u'Цена')
     query_name = 'price'
 
-    def get_values(self, section):
-        prices = Product.objects.filter(section=section, active=True).aggregate(max_price=models.Max('price'), min_price=models.Min('price'))
+    def get_values(self, sections):
+        prices = Product.objects.filter(section__in=sections, active=True).aggregate(max_price=models.Max('price'), min_price=models.Min('price'))
         return (
             (prices['min_price'], prices['min_price']),
             (prices['max_price'], prices['max_price']),

@@ -79,7 +79,7 @@ class FilterForm(forms.Form):
 
         # Поиск значений для псевдо свойств
         for attrib in AttributeManager.get_attributes():
-            values = attrib.get_values(section)
+            values = attrib.get_values(self.sections)
             if len(values):
                 final_result.append(FilterAttribute(section, attrib, values,))
         return final_result

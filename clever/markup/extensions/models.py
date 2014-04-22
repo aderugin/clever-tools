@@ -112,7 +112,7 @@ class ModelMetadata(FixtureMetadata):
         # create model metadata
         class Meta(object):
             app_label = None
-        # Meta.proxy = is_proxy
+        Meta.proxy = is_proxy
         Meta.app_label = fix_name
 
         # create model class
