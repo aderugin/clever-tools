@@ -25,10 +25,13 @@ class PriceAttribute(PseudoAttribute):
 
     def get_values(self, sections):
         prices = Product.objects.filter(section__in=sections, active=True).aggregate(max_price=models.Max('price'), min_price=models.Min('price'))
+<<<<<<< HEAD
         if isinstance(prices['min_price'], Decimal):
             prices['min_price'] = prices['min_price'].to_integral_exact(ROUND_FLOOR)
         if isinstance(prices['max_price'], Decimal):
             prices['max_price'] = prices['max_price'].to_integral_exact(ROUND_CEILING)
+=======
+>>>>>>> bff7fc6... Merge fix for receive subsection product value in brand and price
         return (
             (prices['min_price'], prices['min_price']),
             (prices['max_price'], prices['max_price']),
