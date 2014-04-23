@@ -196,6 +196,7 @@ class ProductBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, T
     code = models.CharField(verbose_name=u'Внутренний код', help_text=u'Код для связи с внешними сервисами, например 1C', max_length=50, blank=True)
 
     # Это новая цена
+    from_str = models.CharField(verbose_name=u"Подпись перед ценой", max_length=255, null=True, blank=True)
     price = models.DecimalField(verbose_name=u"Цена", default=Decimal(0.00), decimal_places=2, max_digits=10)
 
     objects = CachingPassThroughManager(ProductQuerySet)
