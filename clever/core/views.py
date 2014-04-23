@@ -74,14 +74,14 @@ class AjaxFormMixin(object):
             'non_field_errors': form.non_field_errors(),
         }
 
-        # Ошибки из FormsetMixin
-        formsets = getattr(form, 'formsets', {})
-        for name, formset_option in formsets.items():
-            formset, fk_name, model = formset_option
-            formsets_errors = response.get('formsets_errors', {})
-            if formset.errors:
-                formsets_errors[name] = formset.errors
-            response['formsets_errors'] = formsets_errors
+        # # Ошибки из FormsetMixin
+        # formsets = getattr(form, 'formsets', {})
+        # for name, formset_option in formsets.items():
+        #     formset, fk_name, model = formset_option
+        #     formsets_errors = response.get('formsets_errors', {})
+        #     if formset.errors:
+        #         formsets_errors[name] = formset.errors
+        #     response['formsets_errors'] = formsets_errors
 
         return response
 
