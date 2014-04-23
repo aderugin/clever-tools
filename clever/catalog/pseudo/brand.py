@@ -16,10 +16,10 @@ class BrandAttribute(PseudoAttribute):
     control_object = CheckboxControl('brand-checkbox', u'Производитель', template_name=settings.CLEVER_FILTER_BRAND_TEMPLATE)
     query_name = 'brand'
 
-    def get_values(self, section):
+    def get_values(self, sections):
         brand_fields = settings.CLEVER_BRAND_FIELDS
-        brands = Brand.objects.filter(active=True, products__section=section, products__active=True).distinct().values_list('id', 'title', *brand_fields)
-        params = dict(SectionBrand.objects.filter(section=section).values_list('brand', 'order'))
+        brands = Brand.objects.filter(active=True, products__section__in=sections, products__active=True).distinct().values_list('id', 'title', *brand_fields)
+        params = dict(SectionBrand.objects.filter(section__in=sections).values_list('brand', 'order'))
         def brand_order(brand):
             brand_id = brand[0]
             brand_title = brand[1]

@@ -112,12 +112,12 @@ class ModelMetadata(FixtureMetadata):
         # create model metadata
         class Meta(object):
             app_label = None
-        # Meta.proxy = is_proxy
+        Meta.proxy = is_proxy
         Meta.app_label = fix_name
 
         # create model class
         if not model_class:
-            model_class = type(model_name, bases, {'__module__': fix_name, 'Meta': Meta,})
+            model_class = type(model_name, bases, {'__module__': fix_name, 'Meta': Meta, 'deferred_proxy': True})
         self.model_class = model_class
 
         # auto recreate existed members
