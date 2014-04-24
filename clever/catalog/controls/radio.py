@@ -8,16 +8,17 @@ from clever.catalog import settings
 
 
 # ------------------------------------------------------------------------------
-class RadioFilter(forms.CheckboxSelectMultiple):
+class RadioFilter(forms.RadioSelect):
     pass
 
 
 # ------------------------------------------------------------------------------
-class RadioFilterField(forms.MultipleChoiceField):
+class RadioFilterField(forms.ChoiceField):
     widget = RadioFilter
 
     def validate(self, *args, **kwargs):
         pass
+
 
 # ------------------------------------------------------------------------------
 @AttributeManager.register_control(tag='radio', verbose_name=u'Переключатели', allowed_only=True)
@@ -26,7 +27,7 @@ class RadioControl(AttributeControl):
     empty_label = u"----"
 
     def create_form_field(self, attribute, values):
-        return forms.RadioFilterField(
+        return RadioFilterField(
             choices=[(u'', self.empty_label)] + list(values),
             label=attribute.title,
             required=False,
