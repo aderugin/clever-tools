@@ -74,15 +74,6 @@ class AjaxFormMixin(object):
             'non_field_errors': form.non_field_errors(),
         }
 
-        # # Ошибки из FormsetMixin
-        # formsets = getattr(form, 'formsets', {})
-        # for name, formset_option in formsets.items():
-        #     formset, fk_name, model = formset_option
-        #     formsets_errors = response.get('formsets_errors', {})
-        #     if formset.errors:
-        #         formsets_errors[name] = formset.errors
-        #     response['formsets_errors'] = formsets_errors
-
         return response
 
     def get_ajax_valid(self, form):
@@ -166,3 +157,14 @@ class DetailListView(ListView):
         context['object'] = self.detail
         context[self.detail.__class__.__name__] = self.detail
         return context
+
+
+#-------------------------------------------------------------------------------
+class BreadcrumbsMixin(object):
+    def prepare_breadcrumbs(self, breadcrumbs, context):
+        ''' Подготовка хлебных крошек '''
+        pass
+
+    def render_to_response(self, context, **response_kwargs):
+        self.prepare_breadcrumbs(self.request.breadcrumbs, context)
+        return super(BreadcrumbsMixin, self).render_to_response(context, **response_kwargs)
