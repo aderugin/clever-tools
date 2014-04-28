@@ -104,6 +104,8 @@ class XMLImporter(BaseXMLImporter):
                 else:
                     self.created_count += 1
             return instance
+        except KeyboardInterrupt:
+            raise
         except Exception as e:
             self.errors_count += 1
             self.save_error(data, sys.exc_info())
