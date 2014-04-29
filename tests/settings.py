@@ -17,7 +17,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
 
     # Tests
-    'django_any',
+    # 'django_any',
     'django_nose',
 
     # Our application

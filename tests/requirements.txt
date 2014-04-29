@@ -1,4 +1,4 @@
 django-jenkins>=0.11.1
 pep8>=0.6.1
-Pillow==1.7.4
+Pillow
 git+git://github.com/django-mptt/django-mptt.git

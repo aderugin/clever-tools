@@ -20,7 +20,7 @@ class CartMiddleware(object):
     def process_response(self, request, response):
         # fixme: Почему у не которых запросов не вызывается process_request?
         cart = getattr(request, 'cart', None)
-        if cart is not None and cart.is_save:
+        if cart is not None and cart.is_modified:
             request.session[settings.CLEVER_CART_SESSION_NAME] = request.cart
             request.session.modified = True
         return response

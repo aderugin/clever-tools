@@ -48,11 +48,12 @@ class CartBase(object):
         is_save - Сохранить изменения корзины
     """
     item_class = ItemBase
-    is_save = False
+    is_modified = False
 
-    def __init__(self, item_class):
+    def __init__(self, item_class=None):
         self.items = list()
-        self.item_class = item_class
+        if item_class:
+            self.item_class = item_class
 
     @property
     def is_empty(self):
@@ -63,12 +64,16 @@ class CartBase(object):
 
     @property
     def price(self):
-        """ Общая стоимость товаров корзине """
-        return reduce(lambda price, item: price + item.price, self.items, Decimal(0.0))
+        """
+        Общая стоимость товаров корзине
+        """
+        return reduce(lambda price, item: price + item.total_price, self.items, Decimal(0.0))
 
     @property
     def count(self):
-        """ Получение количества всех единиц товара в корзине"""
+        """
+        Получение количества всех единиц товара в корзине
+        """
         if len(self.items):
             return reduce(lambda count, item: count + item.count, self.items, 0)
         else:
@@ -120,6 +125,7 @@ class CartBase(object):
             product - Экземпляр модели Продукт
             count - Количество единиц продукта, для добавления в корзину
         """
+
         # Пытаемся найти товар в корзине
         item = self.get(product, options)
 
@@ -130,17 +136,25 @@ class CartBase(object):
             item = self.item_class(self.make_item_id(product, options), product, count=count, options=options)
             signals.add_item.send(self, cart=self, item=item)
             self.items.append(item)
-            self.is_save = True
+            self.is_modified = True
 
     def delete(self, id):
         self.items = filter(lambda item: item.id != id, self.items)
-        self.is_save = True
+        self.is_modified = True
+
+    def delete_product(self, product, options=[]):
+        """
+        Полное удаление элемнта из корзины
+        """
+        item = self.get(product, options)
+        self.items = filter(lambda item: item.product.id != product.id, self.items)
 
     def cleanup(self):
         """
         Очистка в корзины от несуществующих товаров
         """
-        products = (,)
+        count = len(self.items)
+        products = list()
 
         # сбор существующих элементов в корзине
         for content_type, items in itertools.groupby(self.items, lambda item: get_model_fullname(item.product)):
@@ -153,37 +167,34 @@ class CartBase(object):
                 indexes = map(lambda item: item.product.id, indexes)
                 indexes = model_class.objects.filter(id__in=indexes).values_list('id', flat=True)
 
-                # фильтрация существующих элементов в
+                # фильтрация существующих элементов в БД
+                items = filter(lambda item: item.product.id in indexes, items)
 
-                # products.append(filter(indexes))
+                # добавление продукции в список существующих элементов
+                products += list(map(lambda item: item.id, items))
 
+        # чистим список элементов корзины от не существующих элементов
+        self.items = filter(lambda item: item.id in products, self.items)
 
-        # content_types = filter()
-        # products = Product.objects.filter(id__in=[item.product.id for item in self.items]).values_list('id')
-        # products = sum(products, ())
+        # отметка о изменении корзины
+        if len(self.items) != count:
+            self.is_modified = True
 
-        self.items = filter(lambda x: x.id in products, self.items)
+    def update_item_count(self, product, count, options=[]):
+        """
+        Изменяет количество товара в корзине
 
-    # def update_item_count(self, product, count):
-    #     """
-    #     Изменяет количество товара в корзине
-    #
-    #     Аргументы:
-    #         product - Ид элемента в корзине
-    #         count - Значение
-    #     """
-    #     count = int(count)
-    #
-    #     ext_item = filter(lambda x: x.product.id == product.id, self.items)
-    #     ext_item[0].count = count
+        Аргументы:
+            product - Ид элемента в корзине
+            count - Значение
+        """
+        item = self.get(product, options)
+        if item:
+            item.count = int(count)
 
-    # def clear(self):
-    #     """ Очистка корзины """
-    #     self.items = list()
-
-    # def remove_product(self, product):
-    #     """ Полное удаление из корзины """
-    #     self.items = filter(lambda x: x.product.id != product.id, self.items)
+    def clear(self):
+        """ Очистка корзины """
+        self.items = list()
 
     def __iter__(self):
         """ Получение итератора по элементам корзины """
