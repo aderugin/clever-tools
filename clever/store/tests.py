@@ -29,7 +29,7 @@ class Item(ItemBase):
 
 # ------------------------------------------------------------------------------
 class Cart(CartBase):
-    item_model = Item
+    item_class = Item
 
 
 # ------------------------------------------------------------------------------
@@ -166,7 +166,7 @@ class OrderTestCase(unittest.TestCase):
         self.add_products_to_cart(cart)
         cart.add_product(self.product, 10)
 
-        item = cart.find_product(self.product)
+        item = cart.get(self.product)
         self.assertIsInstance(item, Item)
         self.assertEqual(10, item.quantity)
 
@@ -176,7 +176,7 @@ class OrderTestCase(unittest.TestCase):
 
         self.add_products_to_cart(cart)
 
-        item = cart.find_product(self.product)
+        item = cart.get(self.product)
         self.assertIsNone(item)
 
     def test_items_count(self):

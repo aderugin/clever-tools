@@ -1,21 +1,18 @@
 # -*- coding: utf-8 -*-
 
-from django.views.generic import View
-from django.views.generic import ListView
+from django.views import generic
 from django.core.serializers.json import DjangoJSONEncoder
 from django.core.exceptions import ImproperlyConfigured
 from django.http import HttpResponse
 import json
 
 
-#-------------------------------------------------------------------------------
 class AjaxDataMixin(object):
     def get_ajax_data(self, **kwargs):
         return {}
 
 
-#-------------------------------------------------------------------------------
-class AjaxMixin(View, AjaxDataMixin):
+class AjaxMixin(generic.View, AjaxDataMixin):
     '''
     Миксин, формирующий JSON ответ для GET запроса. Достаточно переопределить
     get_ajax_data и вернуть в нем словарь
@@ -30,8 +27,7 @@ class AjaxMixin(View, AjaxDataMixin):
             return response
 
 
-#-------------------------------------------------------------------------------
-class AjaxListMixin(ListView, AjaxDataMixin):
+class AjaxListMixin(generic.ListView, AjaxDataMixin):
     '''
     Миксин, формирующий JSON ответ для GET запроса. Достаточно переопределить
     get_ajax_data и вернуть в нем словарь
@@ -46,8 +42,7 @@ class AjaxListMixin(ListView, AjaxDataMixin):
             return response
 
 
-#-------------------------------------------------------------------------------
-class AjaxProcessMixin(View, AjaxDataMixin):
+class AjaxProcessMixin(generic.View, AjaxDataMixin):
     '''
     Миксин, формирующий JSON ответ для GET запроса. Достаточно переопределить
     get_ajax_data и вернуть в нем словарь
@@ -58,7 +53,6 @@ class AjaxProcessMixin(View, AjaxDataMixin):
         return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), mimetype='application/json')
 
 
-#-------------------------------------------------------------------------------
 class AjaxFormMixin(object):
     def get_success_url(self):
         return ''
@@ -105,8 +99,7 @@ class AjaxFormMixin(object):
         return result
 
 
-#-------------------------------------------------------------------------------
-class AjaxListMixin(ListView, AjaxDataMixin):
+class AjaxListMixin(generic.ListView, AjaxDataMixin):
     '''
     Миксин, формирующий JSON ответ для GET запроса. Достаточно переопределить
     get_ajax_data и вернуть в нем словарь
@@ -121,7 +114,24 @@ class AjaxListMixin(ListView, AjaxDataMixin):
             return response
 
 
-#-------------------------------------------------------------------------------
+class AjaxNextView(generic.RedirectView, AjaxDataMixin):
+    permanent = False
+    status = False
+
+    def proccess(self, *args, **kwargs):
+        raise NotImplementedError()
+
+    def get(self, request, *args, **kwargs):
+        self.proccess(*args, **kwargs)
+        if request.is_ajax():
+            data = self.get_ajax_data(*kwargs)
+            return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), mimetype='application/json')
+        return super(AjaxNextView, self).get(request, *args, **kwargs)
+
+    def get_redirect_url(self, *args, **kwargs):
+        return self.request.GET.get('next', '/')
+
+
 class BreadcrumbsMixin(object):
     def prepare_breadcrumbs(self, breadcrumbs, context):
         ''' Подготовка хлебных крошек '''
@@ -132,7 +142,7 @@ class BreadcrumbsMixin(object):
         return super(BreadcrumbsMixin, self).render_to_response(context, **response_kwargs)
 
 
-class DetailListView(ListView):
+class DetailListView(generic.ListView):
     allow_empty = False
     detail_model = None
     filter_attr = None
@@ -163,8 +173,6 @@ class DetailListView(ListView):
         context['object'] = self.detail
         context[self.detail.__class__.__name__] = self.detail
         return context
-
-    #-------------------------------------------------------------------------------
 
 
 class SortableMixin(object):
@@ -219,9 +227,7 @@ class SortableMixin(object):
             'sort_list': sort_list,
         })
         return context
-
-    #-------------------------------------------------------------------------------
-
+    
 
 class SortableListMixin(SortableMixin):
     def get_queryset(self):

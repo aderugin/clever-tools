@@ -10,6 +10,8 @@
 
 from django.db import models
 import importlib
+from django.db.models.loading import get_model
+
 
 def get_model_fields(model):
     """Получение полей из модели Django ORM"""
@@ -19,6 +21,20 @@ def get_model_fields(model):
 def get_related_objects(model):
     """Получение зависимых объектов из модели Django ORM"""
     return model._meta.get_all_related_objects()
+
+
+def get_model_fullname(instance):
+    """ Получение полного имени модели Django """
+    meta = instance._meta
+    return "%s.%s" % (meta.app_label, meta.model_name)
+
+
+def get_model_by_name(content_type):
+    try:
+        app_label, model_name = content_type.split(".")
+    except (ValueError, AttributeError):
+        return None
+    return get_model(app_label, model_name)
 
 
 def is_concrete_model(bases, dct):
