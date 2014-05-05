@@ -110,8 +110,11 @@ class CartBase(object):
             Экземпляр унаследованный от класса ItemBase, либо None если товар
             не найден в корзине
         """
-        uid = self.make_item_id(product, options)
-        ext_item = filter(lambda item: item.id == uid, self.items)
+        id = self.make_item_id(product, options)
+        return self.get_by_id(id)
+
+    def get_by_id(self, id):
+        ext_item = filter(lambda item: item.id == id, self.items)
         if ext_item:
             return ext_item[0]
         else:
@@ -139,8 +142,21 @@ class CartBase(object):
             self.is_modified = True
 
     def delete(self, id):
+        """ Удаление элемента из корзины """
         self.items = filter(lambda item: item.id != id, self.items)
         self.is_modified = True
+
+    def update(self, id, count):
+        """
+        Изменяет количество товара в корзине
+
+        Аргументы:
+            product - Ид элемента в корзине
+            count - Значение
+        """
+        item = self.get_by_id(id)
+        if item:
+            item.count = int(count)
 
     def delete_product(self, product, options=[]):
         """
@@ -179,18 +195,6 @@ class CartBase(object):
         # отметка о изменении корзины
         if len(self.items) != count:
             self.is_modified = True
-
-    def update_item_count(self, product, count, options=[]):
-        """
-        Изменяет количество товара в корзине
-
-        Аргументы:
-            product - Ид элемента в корзине
-            count - Значение
-        """
-        item = self.get(product, options)
-        if item:
-            item.count = int(count)
 
     def clear(self):
         """ Очистка корзины """

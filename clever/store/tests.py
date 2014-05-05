@@ -86,7 +86,7 @@ class CartTestCase(unittest.TestCase):
         cart = Cart()
 
         cart.add(self.product, 1)
-        cart.update_item_count(self.product, 3)
+        cart.update(self.product, 3)
 
         self.assertEqual(3, cart.items[0].count)
 

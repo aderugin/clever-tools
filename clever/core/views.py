@@ -118,13 +118,13 @@ class AjaxNextView(generic.RedirectView, AjaxDataMixin):
     permanent = False
     status = False
 
-    def proccess(self, *args, **kwargs):
+    def process(self, *args, **kwargs):
         raise NotImplementedError()
 
     def get(self, request, *args, **kwargs):
-        self.proccess(*args, **kwargs)
+        self.process(*args, **kwargs)
         if request.is_ajax():
-            data = self.get_ajax_data(*kwargs)
+            data = self.get_ajax_data(**kwargs)
             return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), mimetype='application/json')
         return super(AjaxNextView, self).get(request, *args, **kwargs)
 
