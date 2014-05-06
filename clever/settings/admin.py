@@ -2,6 +2,7 @@
 
 from django.conf.urls import patterns
 from django.contrib import admin
+from django.contrib.auth.decorators import permission_required
 from django.template import RequestContext
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect
@@ -9,10 +10,12 @@ from .base import get_models
 from .forms import create_form
 from django.contrib.sites.models import Site
 from django.core.exceptions import ObjectDoesNotExist
-from django.core.urlresolvers import reverse
+from django.core.urlresolvers import reverse, reverse_lazy
 from django.conf.urls import url
 from django.db import models
 
+
+@permission_required('sites.can_edit_settings', raise_exception=True)
 def show_site_settings(request):
     """
     Show site settings and edit
