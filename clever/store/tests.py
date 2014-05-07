@@ -81,12 +81,12 @@ class CartTestCase(unittest.TestCase):
 
         self.assertEqual(0, len(cart.items))
 
-    def test_update_quanity_of_product_in_cart(self):
+    def test_update_count_of_product_in_cart(self):
         """Обновление кол-ва товара в корзине"""
         cart = Cart()
 
         cart.add(self.product, 1)
-        cart.update_item_count(self.product, 3)
+        cart.update(self.product, 3)
 
         self.assertEqual(3, cart.items[0].count)
 

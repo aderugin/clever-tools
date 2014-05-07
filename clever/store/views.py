@@ -23,7 +23,7 @@ class AddView(AjaxNextView):
             raise Http404()
         return model_class.objects.get(id=self.kwargs['id'])
 
-    def proccess(self, *args, **kwargs):
+    def process(self, *args, **kwargs):
         # TODO: Add options
         try:
             count = max(0, int(self.request.GET.get('count', 1)))
@@ -33,13 +33,33 @@ class AddView(AjaxNextView):
 
 
 class DeleteView(AjaxNextView):
-    def proccess(self, *args, **kwargs):
+    def process(self, *args, **kwargs):
         self.request.cart.delete(self.kwargs.get('id'))
 
 
 class UpdateView(AjaxNextView):
-    def proccess(self, *args, **kwargs):
-        pass
+    def process(self, *args, **kwargs):
+        try:
+            count = max(0, int(self.request.GET.get('count', 0)))
+        except TypeError:
+            count = 0
+        self.request.cart.update(self.kwargs.get('id'), count=count)
+
+    def get_ajax_data(self, **kwargs):
+        cart = self.request.cart
+
+        def item_to_json(item):
+            return {
+                'id': item.id,
+                'price': item.price,
+                'total_price': item.total_price
+            }
+
+        return {
+            'success': True,
+            'price': cart.price,
+            'items': [item_to_json(item) for item in cart]
+        }
 
 
 class CartView(generic.TemplateView):
