@@ -19,6 +19,9 @@ Brand = DeferredPoint('Brand')
 Product = DeferredPoint('Product')
 
 # ------------------------------------------------------------------------------
+AttributeGroup = DeferredPoint('AttributeGroup')
+
+# ------------------------------------------------------------------------------
 Attribute = DeferredPoint('Attribute')
 
 # ------------------------------------------------------------------------------
@@ -263,6 +266,31 @@ class ProductBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, T
     # url = property(get_absolute_url)
 
 
+
+
+class AttributeGroupBase(models.Model):
+    """
+        Базовая модель для свойства
+
+        .. versionadded:: 0.1
+    """
+    class Meta:
+        abstract = True
+
+    __metaclass__ = DeferredModelMetaclass.for_point(
+        AttributeGroup,
+        extend_meta(
+            verbose_name=u'Группа свойств',
+            verbose_name_plural=u'Группы свойств'
+        )
+    )
+
+    title = models.CharField(u'Имя', max_length=255)
+
+    def __unicode__(self):
+        return self.title
+
+
 # ------------------------------------------------------------------------------
 class AttributeBase(cache_machine.CachingMixin, models.Model, AbstractAttribute):
     """
@@ -281,6 +309,8 @@ class AttributeBase(cache_machine.CachingMixin, models.Model, AbstractAttribute)
         )
     )
 
+    group = DeferredForeignKey(AttributeGroup, verbose_name=u'Группа свойств', related_name='attributes', blank=True,
+                               null=True)
     code = models.CharField(verbose_name=u'Внутренний код', help_text=u'Код для связи с внешними сервисами, например 1C', max_length=50, blank=True)
     main_title = models.CharField(verbose_name=u'Заголовок', max_length=255)
     additional_title = models.CharField(verbose_name=u"Дополнительный заголовок", max_length=50, blank=True, null=True,
