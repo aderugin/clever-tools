@@ -76,7 +76,11 @@ class DeferredConsumer(object):
 class DeferredMetaclass(type):
     ''' Строчка для подготовки магии отложенных ключей '''
     def __init__(meta, name, bases, attribs):
-        super(DeferredMetaclass, meta).__init__(name, bases, attribs)
+        result = super(DeferredMetaclass, meta).__init__(name, bases, attribs)
+
+        deferred_proxy = getattr(meta, 'deferred_proxy', False)
+        if deferred_proxy:
+            return result
 
         consumers = []
 
@@ -96,6 +100,8 @@ class DeferredMetaclass(type):
         # Попытка создать реальные данные
         for consumer in consumers:
             consumer.point.resolve_deferred_consumer(consumer)
+
+        return result
 
     @classmethod
     def for_consumer(self, *bases):

@@ -9,6 +9,10 @@ from django.core.files.images import ImageFile
 from clever.magic import load_class
 
 
+class ConverterError(Exception):
+    pass 
+
+
 class FieldConverter(object):
     def create_field(self, factory, name, param):
         raise NotImplementedError()
@@ -113,4 +117,4 @@ class ForeignConverter(FieldConverter):
                 if issubclass(rel_model, model):
                     return ForeignConverter(model_name)
 
-        raise RuntimeError('Not found metadata for model in foreign key %s' % rel_model.__class__)
+        raise ConverterError('Not found metadata for model in foreign key %s' % rel_model.__class__)
