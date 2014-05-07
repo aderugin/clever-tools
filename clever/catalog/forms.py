@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 from django import forms
-from django.db import models
+
 from clever.catalog.models import AttributeManager
 from clever.catalog.models import Attribute
 from clever.catalog.models import SectionAttribute
 from clever.catalog.models import Product
 from clever.catalog.models import ProductAttribute
-import operator
+
 import sys
 
 
 class FilterForm(forms.Form):
     ''' Базовая форма для фильтра '''
     def __init__(self, instance=None, sections=None, *args, **kwargs):
+
         super(FilterForm, self).__init__(*args, **kwargs)
 
         self.attributes = {}
@@ -79,7 +80,7 @@ class FilterForm(forms.Form):
 
         # Поиск значений для псевдо свойств
         for attrib in AttributeManager.get_attributes():
-            values = attrib.get_values(section)
+            values = attrib.get_values(self.sections)
             if len(values):
                 final_result.append(FilterAttribute(section, attrib, values,))
         return final_result

@@ -132,6 +132,7 @@ class AjaxNextView(generic.RedirectView, AjaxDataMixin):
         return self.request.GET.get('next', '/')
 
 
+#-------------------------------------------------------------------------------
 class BreadcrumbsMixin(object):
     def prepare_breadcrumbs(self, breadcrumbs, context):
         ''' Подготовка хлебных крошек '''

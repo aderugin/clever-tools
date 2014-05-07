@@ -157,7 +157,10 @@ class RandomQuerySet(models.query.QuerySet):
         ''' Получение случайных продуктов '''
         count = self.count()
         if count > 0:
-            indexes = random.sample(self.values_list('id', flat=True), length)
+            if count < length:
+                return self
+            else:
+                indexes = random.sample(self.values_list('id', flat=True), length)
             return self.filter(id__in=indexes)
         else:
             return self.extra(where=["1=0"])
