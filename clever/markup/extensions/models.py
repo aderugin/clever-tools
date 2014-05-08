@@ -110,7 +110,7 @@ class ModelMetadata(FixtureMetadata):
             converter = INVERT_FIELDS.get(type_name, None)
             if converter:
                 try:
-                self.update_field(field.name, converter=converter.recreate(self.factory, self, field, defaults=DEFAULT_PARENTS))
+                    self.update_field(field.name, converter=converter.recreate(self.factory, self, field, defaults=DEFAULT_PARENTS))
                 except fields.ConverterError:
                     pass
 

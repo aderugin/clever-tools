@@ -10,15 +10,19 @@ class CartExtension(PageExtension):
         self.cart = CartBase(item_class=ItemBase)
 
         cart_data = data.get('cart', {})
-        for i, item_data in enumerate(self.factory.convert(cart_data.get('products', []))):
-            item = ItemBase(i, item_data['product'], item_data.get('count', 1), item_data.get('options', []))
+        for id, item_data in enumerate(self.factory.convert(cart_data.get('products', []))):
+            item = ItemBase(id, item_data['product'], item_data.get('count', 1), item_data.get('options', []))
 
+            # populate other
             for key, value in item_data.items():
                 if key not in ['id', 'product', 'count', 'options']:
                     try:
                         setattr(item, key, value)
                     except AttributeError:
                         pass
+
+            # add cart
+            self.cart.items.append(item)
 
     def process_page(self, page, request, context):
         if page.params.get('is_cart', True):
