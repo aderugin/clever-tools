@@ -287,6 +287,8 @@ def collect():
     # Собираем статические файлы
     with cd(env.root):
         with prefix(env.activate):
+            run('npm install')
+            run('$(npm bin)/bower install')
             run('python manage.py collectstatic --noinput')
 
 

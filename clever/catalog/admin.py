@@ -148,9 +148,18 @@ class AttributeAdmin(AdminMixin, admin.ModelAdmin):
     form = AttributeForm
 
     def __init__(self, model, admin_site, *args, **kwargs):
-        super(AttributeAdmin, self).__init__(model, admin_site, *args, **kwargs)
+        list_display_items = ['code', 'group', 'type', 'control']
+        list_filter_items = ['group', 'type', 'control']
 
-        self.insert_list_display(['code', 'type', 'control'])
+        if not models.AttributeGroup.deferred_instance:
+            list_display_items.remove('group')
+            list_filter_items.remove('group')
+
+        self.insert_list_display(list_display_items)
+        self.insert_list_filter(list_filter_items)
+        self.insert_search_fields(['title'])
+
+        super(AttributeAdmin, self).__init__(model, admin_site, *args, **kwargs)
 
 
 # ------------------------------------------------------------------------------

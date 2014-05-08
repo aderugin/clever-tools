@@ -27,7 +27,6 @@ from django.db.models.sql import datastructures
 from django.core.urlresolvers import reverse
 
 
-
 # ------------------------------------------------------------------------------
 class IndexView(BreadcrumbsMixin, ListView):
     """Главная страница каталога"""
