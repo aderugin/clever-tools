@@ -70,11 +70,13 @@ def render_field(field, template=None, attrs={}, **kwargs):
         field = set_field_attribute(field, name, value)
 
     if is_render and template:
+        widget = field.field.widget
+        attributes = widget.build_attrs([(key, value) for key, value in kwargs.items()], name=field.html_name, id=field.auto_id)
         result = render_to_string(template, {
             'bound_field': field,
             'field': field.field,
-            'widget': field.field.widget,
-            'attributes': kwargs
+            'widget': widget,
+            'attributes': attributes
         })
     else:
         result = field.as_widget()

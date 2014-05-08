@@ -94,25 +94,9 @@ class ModelMetadata(FixtureMetadata):
         name = '%s.%s' % (app_name, model_name)
         bases = (models.Model,)
 
-        is_proxy = False
-        # parent_model = get_model(app_name, model_name)
-        # if parent_model:
-        #     is_proxy = True
-        #     bases = (parent_model, )
-        # if name in DEFAULT_PARENTS:
-        #     is_proxy = True
-        #     parent_model = load_class(DEFAULT_PARENTS[name])
-        #     bases = (parent_model,)
-
-#         if parent_model and not getattr(parent_model, '_base_manager', None):
-#             manager = models.Manager()
-#             manager.model = parent_model
-#             setattr(parent_model, '_base_manager', manager)
-
         # create model metadata
         class Meta(object):
             app_label = None
-        Meta.proxy = is_proxy
         Meta.app_label = fix_name
 
         # create model class
@@ -126,7 +110,7 @@ class ModelMetadata(FixtureMetadata):
             converter = INVERT_FIELDS.get(type_name, None)
             if converter:
                 try:
-                    self.update_field(field.name, converter=converter.recreate(self.factory, self, field, defaults=DEFAULT_PARENTS))
+                self.update_field(field.name, converter=converter.recreate(self.factory, self, field, defaults=DEFAULT_PARENTS))
                 except fields.ConverterError:
                     pass
 
