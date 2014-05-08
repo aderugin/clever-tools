@@ -32,6 +32,17 @@ class AddView(AjaxNextView):
         self.request.cart.add(self.object, count=count, options=[])
 
 
+class AddBatchView(AjaxNextView):
+    formset = None
+
+    def process(self, *args, **kwargs):
+        formset = self.formset(self.request.POST, self.request.FILES)
+        if formset.is_valid():
+            for item_data in formset.cleaned_data:
+                if item_data['count'] > 0:
+                    self.request.cart.add(item_data['product'], item_data['count'], options=item_data['options'])
+
+
 class DeleteView(AjaxNextView):
     def process(self, *args, **kwargs):
         self.request.cart.delete(self.kwargs.get('id'))

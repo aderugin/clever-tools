@@ -14,7 +14,7 @@ class ItemBase(object):
     count = 0
     options = None
 
-    def __init__(self, id, product, count=1, options=[]):
+    def __init__(self, id, product, count=1, options={}):
         self.id = id
         self.product = product
         self.count = count
@@ -79,7 +79,7 @@ class CartBase(object):
         else:
             return 0
 
-    def make_item_id(self, product, options=[]):
+    def make_item_id(self, product, options={}):
         """
         Создание уникального идентификатора для элемента корзины
         """
@@ -93,13 +93,18 @@ class CartBase(object):
             uid = u"%d" % id
 
         # Если есть опции добавить их в UID
-        options_uid = "-".join(options)
+        options_uids = []
+        for key, option in options.items():
+            options_uids.append(unicode(key))
+            options_uids.append(unicode(option.id))
+
+        options_uid = u"-".join(options_uids)
         if options_uid:
-            return uid + '-' + options_uid
+            return uid + u'-' + options_uid
         else:
             return uid
 
-    def get(self, product, options=[]):
+    def get(self, product, options={}):
         """
         Поиск товара в корзине
 
@@ -120,7 +125,7 @@ class CartBase(object):
         else:
             None
 
-    def add(self, product, count=1, options=[]):
+    def add(self, product, count=1, options={}):
         """
         Добавление товара в корзину
 
@@ -158,7 +163,7 @@ class CartBase(object):
         if item:
             item.count = int(count)
 
-    def delete_product(self, product, options=[]):
+    def delete_product(self, product, options={}):
         """
         Полное удаление элемнта из корзины
         """
