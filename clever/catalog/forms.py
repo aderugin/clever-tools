@@ -93,13 +93,17 @@ class FilterForm(forms.Form):
         if len(self.sections):
             attributes = attributes.filter(values__product__section__in=self.sections)
         attributes = list(attributes)
-
+        
         # Поиск значений аттрибутов для раздела
-        attributes_values = ProductAttribute.objects.filter(attribute__in=attributes).select_related('attribute').distinct()
+        
+        attributes_values = ProductAttribute.objects.filter(attribute__in=attributes).values_list('attribute__id', 'raw_value').distinct()
+        #attributes_values = ProductAttribute.objects.filter(attribute__in=attributes).select_related('attribute').distinct()
         if len(self.sections):
             attributes_values = attributes_values.filter(product__section__in=self.sections)
         attributes_values = list(attributes_values)
-
+        
+        
+        
         # Поиск параметров аттрибутов для раздела
         attributes_params = SectionAttribute.objects.filter(attribute__in=attributes).select_related('attribute').distinct()
         if section:
@@ -115,8 +119,11 @@ class FilterForm(forms.Form):
 
             # Поиск значений для свойства
             for product_attrib in attributes_values:
-                if attrib.id == product_attrib.attribute_id:
-                    value = product_attrib.value
+
+                #if attrib.id == product_attrib.attribute_id:
+                #    value = product_attrib.value
+                if attrib.id == product_attrib[0]:
+                    value = product_attrib[1]
                     if not value in values_set:
                         values_set.add(value)
                         values.append((value, value))
