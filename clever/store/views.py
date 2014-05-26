@@ -13,6 +13,7 @@ from django.db.models.loading import get_model
 from django.http.response import Http404
 from clever.core.views import AjaxNextView
 from django.views import generic
+from . import signals
 
 
 class AddView(AjaxNextView):
@@ -73,7 +74,28 @@ class UpdateView(AjaxNextView):
         }
 
 
-class CartView(generic.TemplateView):
-    def get_context_data(self, **kwargs):
-        context = super(CartView, self).get_context_data(**kwargs)
-        return context
+class CartView(generic.CreateView):
+    order_field = 'order'
+
+    def form_valid(self, form):
+        order = form.instance
+        cart = self.request.cart
+
+        # send pre signal
+        signals.pre_order_create.send(order, order=order, cart=cart)
+
+        # fill items and order
+        items = self.populate_order(order, cart)
+        response = super(CartView, self).form_valid(form)
+
+        # save items
+        for item in items:
+            setattr(item, 'order', order)
+            item.save()
+
+        # send post signal
+        signals.post_order_create.send(order, order=order, cart=cart)
+        return response
+
+    def populate_order(self, order, cart):
+        raise NotImplementedError("Populate order from cart is not implemented")
