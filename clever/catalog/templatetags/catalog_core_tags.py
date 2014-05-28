@@ -28,6 +28,9 @@ def show_recently_viewed(context, template_name='catalog/blocks/recent-viewed.ht
 
 @register.filter()
 def format_price(value):
+    if not value:
+        return value
+
     from decimal import getcontext
     backup_prec = getcontext().prec
     getcontext().prec = 2

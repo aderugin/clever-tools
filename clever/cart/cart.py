@@ -3,6 +3,7 @@
 import decimal
 import json
 import urllib2
+from raven.contrib.django.models import get_client
 
 
 class Cart(object):
@@ -11,6 +12,7 @@ class Cart(object):
     product_model = None
 
     def __init__(self, request):
+        self.raven = get_client()
         self.request = request
         if not self.session_key in self.request.session:
             self.request.session[self.session_key] = {}
@@ -78,6 +80,11 @@ class Cart(object):
         if len(product_pks) > 0:
             self.product_list = self.product_model.objects.filter(pk__in=product_pks)
             self.product_prices = {str(x['id']): x[self.price_key] for x in self.product_list.values('id', self.price_key)}
+
+            self.raven.captureMessage("Cart prepare data", extra={
+                'product_list': [x for x in self.product_list.values_list('id', flat=True)],
+                'product_prices': self.product_prices
+            })
 
     def remove_missing(self):
         product_pks = [str(x.id) for x in self.product_list]
