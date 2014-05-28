@@ -39,7 +39,8 @@ class ItemBase(object):
         return {
             'id': self.id,
             'price': self.price,
-            'total_price': self.total_price
+            'total_price': self.total_price,
+            'count': self.count
         }
 
 

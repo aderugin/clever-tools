@@ -32,6 +32,12 @@ class AddView(AjaxNextView):
             count = 0
         self.request.cart.add(self.object, count=count, options=self.request.GET.get('options', {}))
 
+    def get_ajax_data(self, **kwargs):
+        context = self.request.cart.to_json()
+        context.update({
+            'status': True
+        })
+        return context
 
 class AddBatchView(AjaxNextView):
     formset = None

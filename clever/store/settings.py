@@ -15,7 +15,7 @@ CLEVER_CART_CLASS = getattr(settings, 'CLEVER_CART_CLASS', 'clever.store.cart.Ca
 CLEVER_CART_ITEM_CLASS = getattr(settings, 'CLEVER_ITEM_CLASS', 'clever.store.cart.ItemBase')
 
 # Настройка имени переменной в сессии для хранения корзины
-CLEVER_CART_SESSION_NAME = getattr(settings, 'CART_SESSION_NAME', 'clever-cart')
+CLEVER_CART_SESSION_NAME = getattr(settings, 'CLEVER_CART_SESSION_NAME', 'clever-cart')
 
 # Пространство имен для URL'ов корзины
 CLEVER_CART_NAMESPACE = getattr(settings, 'CLEVER_CART_NAMESPACE', 'cart')
