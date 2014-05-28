@@ -35,6 +35,13 @@ class ItemBase(object):
         """ Получение цены для всех единиц товара """
         return self.price * self.count
 
+    def to_json(self):
+        return {
+            'id': self.id,
+            'price': self.price,
+            'total_price': self.total_price
+        }
+
 
 class CartBase(object):
     """
@@ -204,6 +211,15 @@ class CartBase(object):
     def clear(self):
         """ Очистка корзины """
         self.items = list()
+        self.is_modified = True
+
+    def to_json(self):
+        return {
+            'length': len(self),
+            'count': self.count,
+            'price': self.price,
+            'items': [item.to_json() for item in self]
+        }
 
     def __iter__(self):
         """ Получение итератора по элементам корзины """

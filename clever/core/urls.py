@@ -58,7 +58,8 @@ def shared_urlpatterns(regex, *rules):
         if len(rule) > 2:
             namespace = rule[2]
         else:
-            namespace = rule[0].__module__.split('.')[-2]
+            namespace = None
+        #     namespace = rule[0].__module__.split('.')[-2]
         url_item = url(regex, SharedView.as_view(regex=regex), name=rule[1])
         urls_mod = import_module(settings.ROOT_URLCONF)
         urlpatterns = getattr(urls_mod, 'urlpatterns')

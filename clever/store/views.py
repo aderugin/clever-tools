@@ -43,10 +43,24 @@ class AddBatchView(AjaxNextView):
                 if item_data['count'] > 0:
                     self.request.cart.add(item_data['product'], item_data['count'], options=item_data['options'])
 
+    def get_ajax_data(self, **kwargs):
+        context = self.request.cart.to_json()
+        context.update({
+            'status': True
+        })
+        return context
+
 
 class DeleteView(AjaxNextView):
     def process(self, *args, **kwargs):
         self.request.cart.delete(self.kwargs.get('id'))
+
+    def get_ajax_data(self, **kwargs):
+        context = self.request.cart.to_json()
+        context.update({
+            'status': True
+        })
+        return context
 
 
 class UpdateView(AjaxNextView):
@@ -58,20 +72,11 @@ class UpdateView(AjaxNextView):
         self.request.cart.update(self.kwargs.get('id'), count=count)
 
     def get_ajax_data(self, **kwargs):
-        cart = self.request.cart
-
-        def item_to_json(item):
-            return {
-                'id': item.id,
-                'price': item.price,
-                'total_price': item.total_price
-            }
-
-        return {
-            'success': True,
-            'price': cart.price,
-            'items': [item_to_json(item) for item in cart]
-        }
+        context = self.request.cart.to_json()
+        context.update({
+            'status': True
+        })
+        return context
 
 
 class CartView(generic.CreateView):
@@ -95,6 +100,9 @@ class CartView(generic.CreateView):
 
         # send post signal
         signals.post_order_create.send(order, order=order, cart=cart)
+
+        # Clear cart
+        cart.clear()
         return response
 
     def populate_order(self, order, cart):

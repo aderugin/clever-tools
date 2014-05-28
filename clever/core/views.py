@@ -22,7 +22,7 @@ class AjaxMixin(generic.View, AjaxDataMixin):
         response = super(AjaxMixin, self).get(request, request, *args, **kwargs)
         if request.is_ajax():
             data = self.get_ajax_data(**kwargs)
-            return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), mimetype='application/json')
+            return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), content_type='application/json')
         else:
             return response
 
@@ -37,7 +37,7 @@ class AjaxListMixin(generic.ListView, AjaxDataMixin):
         response = super(AjaxListMixin, self).get(request, request, *args, **kwargs)
         if request.is_ajax():
             data = self.get_ajax_data(object_list=self.object_list, **kwargs)
-            return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), mimetype='application/json')
+            return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), content_type='application/json')
         else:
             return response
 
@@ -50,7 +50,7 @@ class AjaxProcessMixin(generic.View, AjaxDataMixin):
 
     def post(self, request, *args, **kwargs):
         data = self.get_ajax_data(**kwargs)
-        return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), mimetype='application/json')
+        return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), content_type='application/json')
 
 
 class AjaxFormMixin(object):
@@ -58,7 +58,7 @@ class AjaxFormMixin(object):
         return ''
 
     def json_response(self, response):
-        return HttpResponse(json.dumps(response, cls=DjangoJSONEncoder), mimetype='application/json')
+        return HttpResponse(json.dumps(response, cls=DjangoJSONEncoder), content_type='application/json')
 
     def get_ajax_invalid(self, form):
         response = {
@@ -109,7 +109,7 @@ class AjaxListMixin(generic.ListView, AjaxDataMixin):
         response = super(AjaxListMixin, self).get(request, request, *args, **kwargs)
         if request.is_ajax():
             data = self.get_ajax_data(object_list=self.object_list, **kwargs)
-            return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), mimetype='application/json')
+            return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), content_type='application/json')
         else:
             return response
 
@@ -125,7 +125,7 @@ class AjaxNextView(generic.RedirectView, AjaxDataMixin):
         self.process(*args, **kwargs)
         if request.is_ajax():
             data = self.get_ajax_data(**kwargs)
-            return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), mimetype='application/json')
+            return HttpResponse(json.dumps(data, cls=DjangoJSONEncoder), content_type='application/json')
         return super(AjaxNextView, self).get(request, *args, **kwargs)
 
     def get_redirect_url(self, *args, **kwargs):
