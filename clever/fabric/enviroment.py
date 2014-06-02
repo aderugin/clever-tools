@@ -27,3 +27,6 @@ class Enviroment(UserDict):
 
         # Текущий репозиторий
         self.CLEVER_REVISION = 'master'
+
+        # нужна ли установка bower
+        self.IS_BOWER_INSTALL = True

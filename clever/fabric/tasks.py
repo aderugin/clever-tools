@@ -97,6 +97,7 @@ def active_env(name, environ_name):
     # Путь до virtualenv директории на серверах
     env.supervisor = env_params.get('supervisor', None)
 
+    env.is_bower_install  = env_params.get('is-bower-install', True)
 
     env.is_supervisor_with_sudo = env_params.get('supervisor-with-sudo', False)
 
@@ -287,8 +288,9 @@ def collect():
     # Собираем статические файлы
     with cd(env.root):
         with prefix(env.activate):
-            run('npm install')
-            run('$(npm bin)/bower install')
+            if env.is_bower_install:
+                run('npm install')
+                run('$(npm bin)/bower install')
             run('python manage.py collectstatic --noinput')
 
 
