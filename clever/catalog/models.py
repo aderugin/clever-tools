@@ -135,6 +135,11 @@ class SectionBase(cache_machine.CachingMixin, mptt.MPTTModel, TimestableMixin, A
         '''
         return self.__class__.objects.filter(section=self, active=True)
 
+    @property
+    def brands(self):
+        section_ids = self.get_descendants(include_self=True).values_list('id', flat=True).distinct()
+        return Product.objects.filter(section_id__in=section_ids)
+
     @models.permalink
     def get_absolute_url(self):
         '''

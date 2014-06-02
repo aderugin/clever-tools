@@ -11,5 +11,6 @@ register = Library()
 def dir(value):
     res = []
     for key, value in inspect.getmembers(value):
-        res.append('%r: %s\n' % (key, pformat(value, indent=4, depth=2)))
-    return Markup('<pre>' + '\n'.join(res) + '</pre>')
+        str = pformat(value, indent=4, depth=2)
+        res.append(u'%s: %s\n' % (key, str.decode("utf-8")))
+    return Markup(u'<pre>' + u'\n'.join(res) + u'</pre>')
