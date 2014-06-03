@@ -6,13 +6,13 @@ class RequireFilter(CompilerFilter):
     def __init__(self, content, *args, **kwargs):
         super(RequireFilter, self).__init__(content, '$(npm bin)/r.js -o {infile}', **kwargs)
 
+        self.dirname = os.path.dirname(self.filename)
+        self.filename = os.path.basename(self.filename)
+
     def input(self, **kwargs):
-        dir = os.path.dirname(self.filename)
         current_dir = os.getcwd()
         try:
-            os.chdir(dir)
-            result = super(RequireFilter, self).input(**kwargs)
-            # import ipdb; ipdb.set_trace()
-            return result
+            os.chdir(self.dirname)
+            return super(RequireFilter, self).input(**kwargs)
         finally:
             os.chdir(current_dir)
