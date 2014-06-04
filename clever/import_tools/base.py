@@ -7,6 +7,7 @@ from django_importer.importers.xml_importer import XMLImporter as BaseXMLImporte
 from lxml import etree
 import gc
 import datetime
+from raven.contrib.django.models import get_client
 
 
 IMPORT_DIRECTORY = 'exchange_1c/import'
@@ -56,10 +57,12 @@ def create_file_parser(tag_name, import_dir=IMPORT_DIRECTORY, file_dir='', requi
 
 class XMLImporter(BaseXMLImporter):
     ignore_clear = []
+    raven = None
 
     def __init__(self, source=None):
         super(XMLImporter, self).__init__(source)
 
+        self.raven = get_client()
         self.errors = []
         self.errors_count = 0
         self.created_count = 0
@@ -106,9 +109,18 @@ class XMLImporter(BaseXMLImporter):
             return instance
         except KeyboardInterrupt:
             raise
-        except Exception as e:
-            self.errors_count += 1
-            self.save_error(data, sys.exc_info())
+        except Exception:
+            try:
+                err = sys.exc_info()
+                verbose_name = self.model._meta.verbose_name_plural.title()
+                if not data:
+                    data = {}
+                self.raven.captureException(err, import_model=self.model, import_name=verbose_name, import_parser=self, import_item=item, **data)
+                self.save_error(data, err)
+                self.errors_count += 1
+            finally:
+                del err
+
             return None
 
 

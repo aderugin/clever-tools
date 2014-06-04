@@ -138,6 +138,11 @@ class SectionBase(cache_machine.CachingMixin, mptt.MPTTModel, TimestableMixin, A
     @property
     def brands(self):
         section_ids = self.get_descendants(include_self=True).values_list('id', flat=True).distinct()
+        return Brand.objects.filter(products__section_id__in=section_ids)
+
+    @property
+    def descendant_products(self):
+        section_ids = self.get_descendants(include_self=True).values_list('id', flat=True).distinct()
         return Product.objects.filter(section_id__in=section_ids)
 
     @models.permalink
@@ -282,8 +287,6 @@ class ProductBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, T
     # url = property(get_absolute_url)
 
 
-
-
 class AttributeGroupBase(models.Model):
     """
         Базовая модель для свойства
@@ -302,6 +305,7 @@ class AttributeGroupBase(models.Model):
     )
 
     title = models.CharField(u'Имя', max_length=255)
+    code = models.CharField(verbose_name=u'Внутренний код', help_text=u'Код для связи с внешними сервисами, например 1C', max_length=50, blank=True)
 
     def __unicode__(self):
         return self.title
