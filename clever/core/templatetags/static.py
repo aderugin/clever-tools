@@ -17,7 +17,6 @@ def static_image(path):
     """
     storage_class = get_storage_class(settings.STATICFILES_STORAGE)
     storage = storage_class()
-    path = os.path.join(settings.STATIC_ROOT, path)
     image = ImageFile(storage.open(path))
     image.storage = storage
     return image
