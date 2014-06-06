@@ -144,7 +144,7 @@ def update(branch=None, force=False):
     # Обновления в clever-tools
     if local_env.CLEVER_REVISION:
         virtualenv = os.environ.get('VIRTUAL_ENV', None)
-        if local_env.CLEVER_REVISION:
+        if local_env.CLEVER_REVISION != 'master':
             tools_branch = 'version/' + local_env.CLEVER_REVISION
         else:
             tools_branch = 'master'
@@ -187,10 +187,11 @@ def install(branch=None):
         # Обновляем зависимости для проекта
         with prefix(env.activate):
             if local_env.CLEVER_REVISION:
-                tools_branch = 'version/' + local_env.CLEVER_REVISION
-            else:
-                tools_branch = 'master'
-            run('pip install --upgrade -e git+git@bitbucket.org:cleversite/clever-tools.git@' + tools_branch + '#egg=clever-tools')
+                if local_env.CLEVER_REVISION != 'master':
+                    tools_branch = 'version/' + local_env.CLEVER_REVISION
+                else:
+                    tools_branch = 'master'
+                run('pip install --upgrade -e git+git@bitbucket.org:cleversite/clever-tools.git@' + tools_branch + '#egg=clever-tools')
             run('pip install -r ' + local_env.REQUIREMENTS_NAME)
 
 
