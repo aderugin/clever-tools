@@ -2,6 +2,7 @@
 from django import template
 from django.utils.encoding import force_unicode
 import re
+import json
 
 register = template.Library()
 
@@ -28,3 +29,8 @@ def to_str(value):
 @register.filter()
 def widget_name(field):
     return field.field.widget.__class__.__name__
+
+
+@register.filter()
+def to_json(value):
+    return json.dumps(value, ensure_ascii=False)
