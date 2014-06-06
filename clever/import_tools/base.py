@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import itertools
+from clever.path import ensure_dir
+from clever.process import ConsoleProcessLogger
 from django.conf import settings
 import sys
 import os
@@ -9,7 +12,6 @@ import gc
 import datetime
 from raven.contrib.django.models import get_client
 
-
 IMPORT_DIRECTORY = 'exchange_1c/import'
 
 BACKUP_DIRECTORY = 'backup/import'
@@ -19,7 +21,9 @@ def create_object_parser(model, tag_name, code_name='code', required=False):
     ''' Создание типа для объекта '''
     def parse_object(self, item, field_name, source_name):
         id = item.get(tag_name, '').strip()
-        params = {code_name: id}
+        params = {
+            code_name: id
+        }
         try:
             return model.objects.get(**params)
         except model.DoesNotExist, e:
@@ -58,6 +62,7 @@ def create_file_parser(tag_name, import_dir=IMPORT_DIRECTORY, file_dir='', requi
 class XMLImporter(BaseXMLImporter):
     ignore_clear = []
     raven = None
+    title = None
 
     def __init__(self, source=None):
         super(XMLImporter, self).__init__(source)
@@ -102,14 +107,20 @@ class XMLImporter(BaseXMLImporter):
             else:
                 is_updated = not instance.pk is None
                 self.save_item(item, data, instance)
-                if is_updated:
-                    self.updated_count += 1
-                else:
-                    self.created_count += 1
+
+            # Update statistics
+            if is_updated:
+                self.updated_count += 1
+            elif is_deleted:
+                self.deleted_count += 1
+            else:
+                self.created_count += 1
+
+            #
             return instance
-        except KeyboardInterrupt:
+        except (KeyboardInterrupt, SystemExit):
             raise
-        except Exception:
+        except Exception as e:
             try:
                 err = sys.exc_info()
                 verbose_name = self.model._meta.verbose_name_plural.title()
@@ -124,65 +135,66 @@ class XMLImporter(BaseXMLImporter):
             return None
 
 
-class ImportSpecification:
+class AbstractManager(object):
+    def __init__(self, parsers):
+        self.parsers = []
+        for ps in parsers:
+            self.parsers.append(ElementManager.create(ps))
+
+    def __iter__(self):
+        """ Перебор всех элементов """
+        return iter(self.parsers)
+
+    def each(self):
+        return self.parsers + sum(map(lambda parser: parser.each(), self.parsers), [])
+
+    def get_parsers_count(self):
+        return len(self.parsers) + sum(map(lambda parser: parser.get_parsers_count(), self.parsers))
+
+
+class ElementManager(AbstractManager):
     parser = None
+    _title = None
 
-    def __init__(self, parser, subparsers):
+    def __init__(self, parser, parsers):
+        super(ElementManager, self).__init__(parsers)
         self.parser = parser()
-        self.subparsers = []
-        for ps in subparsers:
-            self.subparsers.append(ImportSpecification.create(ps))
 
-    def parse(self, root, instance=None):
-        self._parse_iter(root.iter(self.parser.item_tag_name), instance)
+    @classmethod
+    def create(cls, specification):
+        """ Создание внутренней спецификации """
+        if not isinstance(specification, (list, tuple)):
+            specification = [specification, []]
+        return cls(specification[0], specification[1])
 
-    def _parse_iter(self, iter, instance):
-        self.parser.parent = instance
-        for item in iter:
-            self_instance = self.parser.process_item(item, instance)
-
-            for parser in self.subparsers:
-                parser.parse(item, self_instance)
-        self.parser.parent = None
-
-    def progress_parse(self, root, instance=None):
-        """
-        Parses all data from the source, saving model instances.
-        """
-        def progressbar(items, prefix="", size=60):
-            import itertools
-            items, items_count = itertools.tee(items)
-            count = len([x for x in items_count])
-
-            if count:
-                def _show(_i):
-                    x = int(size*_i/count)
-                    sys.stdout.write("%s[%s%s] %i/%i Ошибок: %i\r" % (prefix, "#" * x, "." * (size - x), _i, count, self.parser.errors_count))
-                    sys.stdout.flush()
-
-                _show(0)
-                i = 0
-                for item in items:
-                    # item = items.pop(0)
-                    yield item
-
-                    # Unload item
-                    item.clear()
-
-                    # cleanup
-                    if i % 1000:
-                        gc.collect()
-
-                    # Show progress
-                    _show(i + 1)
-                    i += 1
-                sys.stdout.write("\n")
-                sys.stdout.flush()
-        self._parse_iter(progressbar(root.iter(self.parser.item_tag_name), "Прогресс: "), instance)
+    def get_elements_count(self, root):
+        """ Получение количества элементов в XML файле """
+        count = 0
+        for item in root.iter(self.parser.item_tag_name):
+            count += 1 + sum(map(lambda parser: parser.get_elements_count(item), self.parsers))
+        return count
 
     @property
-    def model(self):
-        return self.parser.model
+    def title(self):
+        if not self._title:
+            if self.parser.title:
+                self._title = self.parser.title
+            else:
+                self._title = unicode(self.parser.model._meta.verbose_name_plural)
+        return self._title
+
+    def parse(self, root, logger, parent=None):
+        self.parser.parent = parent
+        for item in root.iter(self.parser.item_tag_name):
+            instance = self.parser.process_item(item, parent)
+
+            # notify progress
+            logger += 1
+
+            # parse subparsers
+            for parser in self.parsers:
+                parser.parse(item, logger, instance)
+        self.parser.parent = None
 
     @property
     def errors(self):
@@ -208,93 +220,97 @@ class ImportSpecification:
     def updated_count(self):
         return self.parser.updated_count
 
-    @classmethod
-    def create(cls, specification):
-        if not isinstance(specification, (list, tuple)):
-            specification = [specification, []]
-        return cls(specification[0], specification[1])
+    def summary(self, logger, width=0):
+        if self.processed_count:
+            # logger.notice(u"%s- Импортировано %d", u' ' * width, self.processed_count)
+            if self.created_count:
+                logger.notice(u"%s- Создано: %d", u' ' * width, self.created_count)
+            if self.updated_count:
+                logger.notice(u"%s- Обновлено: %d", u' ' * width, self.updated_count)
+            if self.deleted_count:
+                logger.notice(u"%s- Удалено: %d", u' ' * width, self.deleted_count)
+            if self.errors_count:
+                logger.notice(u"%s- Ошибок: %d", u' ' * width, self.errors_count)
+        # else:
+        #     logger.notice(u'%s- Нечего не импортировано',  u' ' * width)
 
-    def each(self):
-        result = [self]
-        for parser in self.subparsers:
-            result += parser.each()
-        return result
 
+class ImportManager(AbstractManager):
+    """ Базовый класс для выполнения импорта """
+    def __init__(self, parsers, progress=None):
+        super(ImportManager, self).__init__(parsers)
 
-class ImportFactory(object):
-    ''' Базовый класс для выполнения импорта '''
-    def __init__(self, parsers):
+        self.progress = progress or ConsoleProcessLogger()
         self.errors = []
-        self.parsers = []
-        for ps in parsers:
-            self.parsers.append(ImportSpecification.create(ps))
 
-    def print_errors(self, errors=None):
-        former_errors = set()
-        if errors is None:
-            errors = self.errors
+    def get_elements_count(self, source):
+        """ Подсчет кол-ва элементов """
+        tree = etree.parse(source)
+        return sum(map(lambda p: p.get_elements_count(tree), self))
 
-        if len(errors):
-            for error in errors:
-                exception_message = '%s' % error['exception']
-                if not exception_message in former_errors:
-                    sys.stdout.write(''.join(["    - Информация об ошибке: \n\033[31m", exception_message, "\033[39m\n"]))
-                    former_errors.add(exception_message)
-
-    def parse(self, source, store=False):
-        def text_color(*args, **kwargs):
-            color = kwargs.get('color', 'green')
-            string = u''.join(args)
-            if color == 'red':
-                return '\033[31m' + string + '\033[39m'
-            return '\033[32m' + string + '\033[39m'
-
-        filename = os.path.join(settings.PROJECT_DIR, '../cache', IMPORT_DIRECTORY, source)
-        print u'Импорт файла:', filename
-        try:
-            with open(filename):
-                pass
-        except IOError:
-            u'Файл `%s` не найден' % unicode(filename)
-            return False
-
+    def parse(self, source):
+        """ Актуальный парсер """
         # Импорт экземпляров моделей в базу
-        count = len(self.parsers)
+        count = self.get_parsers_count()
         index = 1
-        parsers = []
-        tree = etree.parse(filename)
+        tree = etree.parse(source)
+
+        number_width = len(str(count))
+        full_width = number_width * 2 + 2
+        format = u'[%' + unicode(number_width) + u'd/%d] '
 
         for parser in self.parsers:
-            parsers.append(parser)
-            model_verbose_name = parser.model._meta.verbose_name_plural.title()
-
             # Импортируем экземпляры модели
-            print text_color(u'[', unicode(index), u'/', unicode(count), u"] Импорт элементов: ", unicode(model_verbose_name), color='green')
-            parser.progress_parse(tree)
+            self.progress.info(format + u'Импорт элементов: %s', index, count, parser.title)
+            parser.parse(tree, self.progress)
+            index += 1
+            parser.summary(self.progress, full_width)
+
+            for subparser in parser.each():
+                self.progress.info(format + u'Импорт элементов: %s', index, count, subparser.title)
+                subparser.summary(self.progress, full_width)
+                index += 1
 
             # Обновляем сатистику
             self.errors += parser.errors
 
-            for current in parser.each():
-                model_verbose_name = current.model._meta.verbose_name_plural.title()
-                print text_color(u'Импортировано ', unicode(model_verbose_name), ' ', unicode(current.processed_count), color='green')
-                sys.stdout.write(''.join([
-                    u"    - Создано: ", unicode(current.created_count),   "\n",
-                    u"    - Обновлено: ", unicode(current.updated_count), "\n",
-                    u"    - Удалено: ", unicode(current.deleted_count),   "\n",
-                    u"    - Ошибок: ", unicode(current.errors_count),     "\n",
-                ]))
-                self.print_errors(current.errors)
-            index += 1
+            # Показать ошибки
+            self.progress.show_errors(parser.errors)
+            for subparser in parser.each():
+                self.progress.show_errors(subparser.errors)
+
+            # Очистка Garbage Collector'а
             gc.collect()
 
-        # Удаляем файл файл в архив
-        if not store:
-            dt = str(datetime.datetime.now())
-            newname = 'import_' + dt.replace(' ', '_') + '.xml'
-            os.rename(filename, os.path.join(settings.PROJECT_DIR, '../cache', BACKUP_DIRECTORY, newname))
+    def import_xml(self, name, store=False):
+        filename = os.path.realpath(os.path.join(settings.PROJECT_DIR, '../cache', IMPORT_DIRECTORY, name))
+        self.progress.info(u'Импорт файла: %s', filename)
+        self.progress.line()
 
-        # Вывод полной информации о импорте
-        print u'---------------------------------------------------------------'
-        print text_color(u"Импорт завершен")
-        return True
+        # Проверка существования файла
+        try:
+            with open(filename) as source:
+                # Поиск кол-ва элементов, если это требуется
+                self.progress.initialize(self.get_elements_count(source))
+                source.seek(0)
+
+                # Импорт элементов из xml
+                self.parse(source)
+        except IOError:
+            self.progress.error(u'Файл `%s` не найден', unicode(filename))
+            return False
+        else:
+            # Удаляем файл файл в архив
+            if not store:
+                dt = str(datetime.datetime.now())
+                new_name = 'import_' + dt.replace(' ', '_') + '.xml'
+                directory = os.path.realpath(os.path.join(settings.PROJECT_DIR, '../cache', BACKUP_DIRECTORY))
+                ensure_dir(directory)
+                fullname = os.path.join(directory, new_name)
+                os.rename(filename, fullname)
+                self.progress.info(u"Перемещение файла: %s", fullname)
+
+            # Вывод полной информации о импорте
+            self.progress.line()
+            self.progress.complete(u"Импорт завершен")
+            return False
