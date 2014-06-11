@@ -27,7 +27,7 @@ class YoutubeUrl(unicode):
     def video_id(self):
         parsed_url = urlparse.urlparse(self)
         if parsed_url.query == '':
-            return parsed_url.path
+            return parsed_url.path.strip('/')
         return urlparse.parse_qs(parsed_url.query)['v'][0]
 
     @property
@@ -42,6 +42,8 @@ class YoutubeUrl(unicode):
     def default_image(self):
         return "http://img.youtube.com/vi/%s/0.jpg" % self.video_id
 
+    def __call__(self, *args, **kwargs):
+        return unicode(self)
 
 class YoutubeUrlField(models.URLField):
     __metaclass__ = models.SubfieldBase
@@ -51,9 +53,7 @@ class YoutubeUrlField(models.URLField):
         self.validators.append(validate_youtube_url)
 
     def to_python(self, value):
-
         url = super(YoutubeUrlField, self).to_python(value)
-
         return YoutubeUrl(url)
 
     def get_prep_value(self, value):
