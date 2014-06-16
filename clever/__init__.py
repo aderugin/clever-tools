@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+__import__('pkg_resources').declare_namespace(__name__)
 VERSION = (0, 2, 0, '')
 
 if VERSION[-1] != "final":  # pragma: no cover
