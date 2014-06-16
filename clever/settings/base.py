@@ -53,7 +53,8 @@ class SettingsModel(cache_machine.CachingMixin, Model):
 
 def get_option(name, default=None):
     cache = get_cache('catalog')
-    value = cache.get(name)
+    cache_id = 'clever.settings:%s' % name
+    value = cache.get(cache_id)
     if value:
         model = _options.get(name, None)
         if model is not None:
@@ -61,7 +62,7 @@ def get_option(name, default=None):
                 site = Site.objects.get_current()
                 object = model.objects.filter(_site=site)[0]
                 value = getattr(object, name, default)
-                cache.set(name, value, timeout=CLEVER_SETTINGS_TIMEOUT)
+                cache.set(cache_id, value, timeout=CLEVER_SETTINGS_TIMEOUT)
                 return value
             except IndexError:
                 pass

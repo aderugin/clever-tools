@@ -22,26 +22,31 @@ def md5(object):
     m.update(string)
     return m.hexdigest()
 
-def filter_section_cached(func):
-    # cache = get_cache('catalog')
-    cache = get_cache('catalog')
-    log = logging.getLogger('clever.catalog')
+def filter_section_cached(func=None, prefix=None):
+    def wrapper(func):
+        # cache = get_cache('catalog')
+        cache = get_cache('catalog')
+        log = logging.getLogger('clever.catalog')
 
-    @wraps(func)
-    def with_cache(self, section):
-        cache_id = 'filter.section.%s.%d' % (func.__name__, section.id)
-        cache_tag = 'section.%d' % section.id
-        cached_result = cache.get(cache_id)
-        if not cached_result:
-            log.info('Cache miss for filter: %s', cache_id)
-            result = func(self, section)
-            cached_result = pickle.dumps(result)
-            cache.set(cache_id, cached_result, timeout=CLEVER_FILTER_TIMEOUT, tags=[cache_tag])
-        else:
-            log.info('Cache found for filter: %s', cache_id)
-            result = pickle.loads(cached_result)
-        return result
-    return with_cache
+        @wraps(func)
+        def with_cache(self, section):
+            cache_id = 'filter.section.%s.%d.%s' % (func.__name__, section.id, prefix)
+            cache_tag = 'section.%d' % section.id
+            cached_result = cache.get(cache_id)
+            if not cached_result:
+                log.info('Cache miss for filter: %s', cache_id)
+                result = func(self, section)
+                cached_result = pickle.dumps(result)
+                cache.set(cache_id, cached_result, timeout=CLEVER_FILTER_TIMEOUT, tags=[cache_tag])
+            else:
+                log.info('Cache found for filter: %s', cache_id)
+                result = pickle.loads(cached_result)
+            return result
+        return with_cache
+
+    if callable(func):
+        return wrapper(func)
+    return wrapper
 
 
 def filter_queryset_cached(func):
