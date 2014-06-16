@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from clever.settings.settings import CLEVER_SETTINGS_TIMEOUT
+from django.core.cache import get_cache
 from django.db import models
 from django.db.models.base import ModelBase
 from django.db.models.base import Model
@@ -50,14 +52,20 @@ class SettingsModel(cache_machine.CachingMixin, Model):
 
 
 def get_option(name, default=None):
-    model = _options.get(name, None)
-    if model is not None:
-        try:
-            site = Site.objects.get_current()
-            object = model.objects.filter(_site=site)[0]
-            return getattr(object, name, default)
-        except IndexError:
-            pass
-        except ObjectDoesNotExist:
-            pass
-    return default
+    cache = get_cache('catalog')
+    value = cache.get(name)
+    if value:
+        model = _options.get(name, None)
+        if model is not None:
+            try:
+                site = Site.objects.get_current()
+                object = model.objects.filter(_site=site)[0]
+                value = getattr(object, name, default)
+                cache.set(name, value, timeout=CLEVER_SETTINGS_TIMEOUT)
+                return value
+            except IndexError:
+                pass
+            except ObjectDoesNotExist:
+                pass
+        return default
+    return value

@@ -56,3 +56,8 @@ CLEVER_FILTER_BRAND_TEMPLATE = getattr(settings, 'CLEVER_FILTER_BRAND_TEMPLATE',
 CLEVER_BREADCRUMBS_CATALOG_TITLE = getattr(settings, 'CLEVER_BREADCRUMBS_CATALOG_TITLE', u'Каталог')
 
 CLEVER_BREADCRUMBS_BRANDS_TITLE = getattr(settings, 'CLEVER_BREADCRUMBS_BRANDS_TITLE', u'Производители')
+
+
+
+# Настройка по умолчанию для таймаута кэша в фильтре
+CLEVER_FILTER_TIMEOUT = getattr(settings, 'CLEVER_FILTER_TIMEOUT', 60*10)

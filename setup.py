@@ -47,6 +47,8 @@ setup(
         "PyYAML == 3.10",
         "Jinja2 == 2.7.1",
         "factory_boy == 2.3.1",
+        'cache-tagging == 0.7.7.1',
+        'requests == 2.2.1',
     ],
     scripts=[
         'bin/clever-install-python',
