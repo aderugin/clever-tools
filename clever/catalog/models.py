@@ -181,7 +181,8 @@ class BrandBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, Tit
         Brand,
         extend_meta(
             verbose_name=u'Производитель',
-            verbose_name_plural=u'Производители'
+            verbose_name_plural=u'Производители',
+            ordering=['title']
         )
     )
 
