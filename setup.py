@@ -26,7 +26,7 @@ setup(
     test_suite='clever.tests.runtests.runtests',
     install_requires=[
         # Latest version
-        'Pillow == 1.7.8',
+        'Pillow==2.4.0',
         'South >= 0.7.6',
         'Unidecode >= 0.04.12',
         'django-autoslug >= 1.6.1',
