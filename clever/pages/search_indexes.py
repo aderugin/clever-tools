@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from haystack.indexes import *
+from celery_haystack.indexes import CelerySearchIndex
 from models import Page
 
 
-class PageIndex(SearchIndex, Indexable):
+class PageIndex(CelerySearchIndex, Indexable):
     """Поисковой индекс по страницам"""
     active = BooleanField(model_attr='active')
     text = CharField(document=True, use_template=True)
