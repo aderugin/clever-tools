@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from clever.catalog.cache import create_cache_identifiers
 from django.contrib.sites.models import Site
 from cache_tagging.django_cache_tagging import get_cache
 from djcelery_transactions import task
@@ -10,37 +9,17 @@ from .models import Section
 from .models import Attribute
 from .models import ProductAttribute
 from .models import PseudoSection
+from .forms import FilterForm
 import requests
 import urlparse
 
 
-def do_invalidate_section(child):
+def do_invalidate_section(section):
     """ Do invalidate section """
-    log = invalidate_section.get_logger()
-    current_site = Site.objects.get_current()
-    cache = get_cache('catalog')
-
-    cache_id, cache_tag = create_cache_identifiers(None)
-    cache.invalidate_tags(cache_tag)
-
-    for section in child.get_ancestors(include_self=True):
-        # Invalidate section
-        log.info('Invalidate cache for section "%s" [%d]', section.title, section.id)
-        cache_id, cache_tag = create_cache_identifiers(section)
-        cache.invalidate_tags(cache_tag)
-
-        # Create cache for section
-        log.info('Recreate cache for section "%s" [%d]', section.title, section.id)
-        url = urlparse.urljoin('http://%s' % current_site.domain, section.get_absolute_url())
-        requests.get(url)
-
-        # Create cache for pseudo sections
-        if PseudoSection.deferred_instance:
-            pseudo_sections = PseudoSection.objects.filter(section_id=section.id)
-            for pseudo_section in pseudo_sections:
-                log.info('Recreate cache for pseudo section "%s - %s" [%d]', section.title, pseudo_section.title, section.id)
-                url = urlparse.urljoin('http://%s' % current_site.domain, pseudo_section.get_absolute_url())
-                requests.get(url)
+    logger = invalidate_section.get_logger()
+    FilterForm.get_product_indexes.invalidate_cache(section, logger)
+    FilterForm.get_pseudo_attributes.invalidate_cache(section, logger)
+    FilterForm.get_attributes.invalidate_cache(section, logger)
 
 
 def do_invalidate_catalog():

@@ -6,10 +6,6 @@
 .. moduleauthor:: Василий Шередеко <piphon@gmail.com>
 """
 
-# Форсируем загрузку всех моделей
-from django.db import models
-models.get_models(include_auto_created=True)
-
 from .models import SectionBase as Section
 from .models import BrandBase as Brand
 from .models import ProductBase as Product

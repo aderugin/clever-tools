@@ -1,20 +1,22 @@
 # -*- coding: utf-8 -*-
-from clever.catalog.cache import create_cache_identifiers
 from django import forms
 from django.db import models
 from cache_tagging.django_cache_tagging import get_cache
+from django.contrib.sites.models import Site
 from clever.catalog.models import AttributeManager
 from clever.catalog.models import Attribute
 from clever.catalog.models import SectionAttribute
 from clever.catalog.models import Product
 from clever.catalog.models import ProductAttribute
+from clever.catalog.models import PseudoSection
 from clever.catalog.settings import CLEVER_FILTER_TIMEOUT
 from functools import wraps
 import hashlib
 import logging
-import operator
 import sys
 import pickle
+import requests
+import urlparse
 
 
 def md5(object):
@@ -22,6 +24,60 @@ def md5(object):
     m = hashlib.md5()
     m.update(string)
     return m.hexdigest()
+
+
+def create_cache_identifiers(func, section):
+    if section:
+        cache_id = 'filter.section.%s.%d' % (func.__name__, section.id)
+        cache_tag = 'section.%d' % section.id
+    else:
+        cache_id = 'filter.section.%s.%s' % (func.__name__, 'all')
+        cache_tag = 'section.%s' % 'all'
+    return cache_id, cache_tag
+
+
+def create_invalidate_cache(func):
+    def invalidate_cache(section, logger=None):
+        """ Do invalidate section """
+        if not logger:
+            logger = logging.getLogger("clever.catalog")
+        current_site = Site.objects.get_current()
+        cache = get_cache('catalog')
+
+        if section:
+            # Invalidate section
+            logger.info('Invalidate cache for section "%s" [%d]', section.title, section.id)
+            cache_id, cache_tag = create_cache_identifiers(func, section)
+            cache.invalidate_tags(cache_tag)
+
+            # Create cache for section
+            url = urlparse.urljoin('http://%s' % current_site.domain, section.get_absolute_url())
+            logger.info('Recreate cache for section "%s" [%d]: %s', section.title, section.id, url)
+            requests.get(url)
+
+            # Create cache for pseudo sections
+            if PseudoSection.deferred_instance:
+                pseudo_sections = PseudoSection.objects.filter(section_id=section.id)
+                for pseudo_section in pseudo_sections:
+                    logger.info('Recreate cache for pseudo section "%s - %s" [%d]', section.title, pseudo_section.title, section.id)
+                    url = urlparse.urljoin('http://%s' % current_site.domain, pseudo_section.get_absolute_url())
+                    requests.get(url)
+
+        # invalidate cache of parent element
+        if section.section:
+            invalidate_cache(section.section, logger)
+        else:
+            # Invalidate catalog
+            logger.info('Invalidate cache for catalog')
+            cache_id, cache_tag = create_cache_identifiers(func, None)
+            cache.invalidate_tags(cache_tag)
+
+            # Create cache for catalog
+            for path in ['']:
+                url = urlparse.urljoin('http://%s' % current_site.domain, path)
+                logger.info('Recreate cache for catalog: %s', url)
+                requests.get(url)
+    return invalidate_cache
 
 
 def filter_section_cached(func=None, prefix=None):
@@ -43,6 +99,7 @@ def filter_section_cached(func=None, prefix=None):
                 log.info('Cache found for filter: %s', cache_id)
                 result = pickle.loads(cached_result)
             return result
+        with_cache.invalidate_cache = create_invalidate_cache(func)
         return with_cache
 
     if callable(func):
@@ -81,6 +138,7 @@ def filter_queryset_cached(func):
             log.info('Filter is not valid: %s', cache_id)
         log.info('Products is not filtered')
         return queryset
+    with_cache.invalidate_cache = create_invalidate_cache(func)
     return with_cache
 
 
@@ -151,7 +209,6 @@ class FilterForm(forms.Form):
                 return products_queryset.none()
         else:
             return products_queryset
-
 
     @filter_section_cached
     def get_pseudo_attributes(self, section):

@@ -602,6 +602,5 @@ class PseudoSectionBrandBase(models.Model):
     brand = DeferredForeignKey(Brand, verbose_name=u'Производитель', related_name='pseudo_section_brands')
 
 
-
 # ------------------------------------------------------------------------------
 from . import receivers
