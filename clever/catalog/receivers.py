@@ -6,6 +6,10 @@
 .. moduleauthor:: Василий Шередеко <piphon@gmail.com>
 """
 
+# Форсируем загрузку всех моделей
+from django.db import models
+models.get_models(include_auto_created=True)
+
 from .models import SectionBase as Section
 from .models import BrandBase as Brand
 from .models import ProductBase as Product
@@ -17,7 +21,6 @@ from .models import AttributeBase as Attribute
 from django.db.models.signals import post_save
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
-
 
 @receiver(post_save, weak=False)
 @receiver(pre_delete, weak=False)
