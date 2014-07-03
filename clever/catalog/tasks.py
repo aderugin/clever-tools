@@ -16,6 +16,11 @@ import urlparse
 
 def do_invalidate_section(section):
     """ Do invalidate section """
+    # Load all deffered models
+    from django.db import models
+    models.get_models(include_auto_created=True)
+
+    # start section invalidation
     logger = invalidate_section.get_logger()
     FilterForm.get_product_indexes.invalidate_cache(section, logger)
     FilterForm.get_pseudo_attributes.invalidate_cache(section, logger)
