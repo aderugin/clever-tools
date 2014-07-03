@@ -26,7 +26,7 @@ setup(
     test_suite='clever.tests.runtests.runtests',
     install_requires=[
         # Latest version
-        'Pillow == 1.7.8',
+        'Pillow==2.4.0',
         'South >= 0.7.6',
         'Unidecode >= 0.04.12',
         'django-autoslug >= 1.6.1',
@@ -47,6 +47,8 @@ setup(
         "PyYAML == 3.10",
         "Jinja2 == 2.7.1",
         "factory_boy == 2.3.1",
+        'cache-tagging == 0.7.7.1',
+        'requests == 2.2.1',
     ],
     scripts=[
         'bin/clever-install-python',

@@ -7,11 +7,14 @@ from ckeditor.widgets import CKEditorWidget
 from clever.core.admin import thumbnail_column
 from clever.core.admin import AdminMixin
 from clever.catalog import models
+from clever.catalog import tasks
 from clever.catalog.forms import FilterForm
 from clever.catalog.attributes import AttributeManager
 from clever.magic.classmaker import classmaker
 from clever.seo.admin import inject_seo_inline
-
+from django.conf.urls import patterns, url
+from django.core.urlresolvers import reverse
+from django.shortcuts import redirect
 
 # ------------------------------------------------------------------------------
 from mptt.forms import TreeNodeChoiceField
@@ -133,6 +136,19 @@ class SectionAdmin(AdminMixin, editor.TreeEditor):
     def admin_thumbnail(self, inst):
         """ Выводит картинку а админке """
         return [inst.image]
+
+    def clear_cache(self, request):
+        tasks.invalidate_catalog.delay()
+        return redirect(reverse('admin:catalog_section_changelist'))
+
+    def get_urls(self):
+        urls = super(SectionAdmin, self).get_urls()
+
+        my_urls = patterns(
+            '',
+            url(r'^clear_cache/$', self.clear_cache, name='catalog_clear_cache'),
+        )
+        return my_urls + urls
 
 
 # ------------------------------------------------------------------------------
