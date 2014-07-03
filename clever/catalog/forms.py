@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from clever.catalog.cache import create_cache_identifiers
 from django import forms
 from django.db import models
 from cache_tagging.django_cache_tagging import get_cache
@@ -22,6 +23,7 @@ def md5(object):
     m.update(string)
     return m.hexdigest()
 
+
 def filter_section_cached(func=None, prefix=None):
     def wrapper(func):
         # cache = get_cache('catalog')
@@ -30,8 +32,7 @@ def filter_section_cached(func=None, prefix=None):
 
         @wraps(func)
         def with_cache(self, section):
-            cache_id = 'filter.section.%s.%d.%s' % (func.__name__, section.id, prefix)
-            cache_tag = 'section.%d' % section.id
+            cache_id, cache_tag = create_cache_identifiers(func, section)
             cached_result = cache.get(cache_id)
             if not cached_result:
                 log.info('Cache miss for filter: %s', cache_id)
@@ -56,8 +57,7 @@ def filter_queryset_cached(func):
 
     @wraps(func)
     def with_cache(self, section, queryset):
-        cache_id = 'filter.section.%s.%d' % (func.__name__, section.id)
-        cache_tag = 'section.%d' % section.id
+        cache_id, cache_tag = create_cache_identifiers(func, section)
         if self.is_valid():
             cache_id = cache_id + '-' + md5(self.cleaned_data)
             log.info('Filter is valid: %s', cache_id)
