@@ -14,10 +14,6 @@ from .models import SectionAttributeBase as SectionAttribute
 from .models import PseudoSectionBase as PseudoSection
 from .models import AttributeBase as Attribute
 
-from .tasks import invalidate_section
-from .tasks import invalidate_brand
-from .tasks import invalidate_attribute
-
 from django.db.models.signals import post_save
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
@@ -26,6 +22,10 @@ from django.dispatch import receiver
 @receiver(post_save, weak=False)
 @receiver(pre_delete, weak=False)
 def handle_section_invalidate(sender, instance, **kwargs):
+    from .tasks import invalidate_section
+    from .tasks import invalidate_brand
+    from .tasks import invalidate_attribute
+
     if issubclass(sender, Section):
         invalidate_section.delay(instance.id)
 
