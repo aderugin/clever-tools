@@ -5,6 +5,7 @@
 
 .. moduleauthor:: Василий Шередеко <piphon@gmail.com>
 """
+from clever.dynamic.base import DynamicSettings
 
 from .models import SectionBase as Section
 from .models import BrandBase as Brand
@@ -26,25 +27,25 @@ from django.dispatch import receiver
 @receiver(post_save, weak=False)
 @receiver(pre_delete, weak=False)
 def handle_section_invalidate(sender, instance, **kwargs):
-    if issubclass(sender, Section):
-        invalidate_section.delay(instance.id)
+    settings = DynamicSettings.get()
+    if not settings.BATCH_PROCESSING:
+        if issubclass(sender, Section):
+            invalidate_section.delay(instance.id)
 
-    elif issubclass(sender, Product):
-        invalidate_section.delay(instance.section.id)
+        elif issubclass(sender, Product):
+            invalidate_section.delay(instance.section.id)
 
-    elif issubclass(sender, ProductAttribute):
-        invalidate_section.delay(instance.product.section.id)
+        elif issubclass(sender, ProductAttribute):
+            invalidate_section.delay(instance.product.section.id)
 
-    elif issubclass(sender, SectionAttribute):
-        invalidate_section.delay(instance.section.id)
+        elif issubclass(sender, SectionAttribute):
+            invalidate_section.delay(instance.section.id)
 
-    elif issubclass(sender, Brand):
-        invalidate_brand.delay(instance.id)
+        elif issubclass(sender, Brand):
+            invalidate_brand.delay(instance.id)
 
-    elif issubclass(sender, PseudoSection):
-        invalidate_section.delay(instance.section_id)
+        elif issubclass(sender, PseudoSection):
+            invalidate_section.delay(instance.section_id)
 
-    elif issubclass(sender, Attribute):
-        invalidate_attribute.delay(instance.id)
-
-
+        elif issubclass(sender, Attribute):
+            invalidate_attribute.delay(instance.id)

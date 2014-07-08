@@ -2,7 +2,7 @@
 from django import forms
 from django.db import models
 from cache_tagging.django_cache_tagging import get_cache
-from clever.catalog.models import AttributeManager
+from clever.catalog.models import AttributeManager, AttributeGroup
 from clever.catalog.models import Attribute
 from clever.catalog.models import SectionAttribute
 from clever.catalog.models import Product
@@ -152,7 +152,6 @@ class FilterForm(forms.Form):
         else:
             return products_queryset
 
-
     @filter_section_cached
     def get_pseudo_attributes(self, section):
         """Получение всех псевдо аттрибутов из данного раздела"""
@@ -177,14 +176,11 @@ class FilterForm(forms.Form):
         attributes = list(attributes)
         
         # Поиск значений аттрибутов для раздела
-        
         attributes_values = ProductAttribute.objects.filter(attribute__in=attributes).values_list('attribute__id', 'raw_value').distinct()
         #attributes_values = ProductAttribute.objects.filter(attribute__in=attributes).select_related('attribute').distinct()
         if len(self.sections):
             attributes_values = attributes_values.filter(product__section__in=self.sections)
         attributes_values = list(attributes_values)
-        
-        
         
         # Поиск параметров аттрибутов для раздела
         attributes_params = SectionAttribute.objects.filter(attribute__in=attributes).select_related('attribute').distinct()
@@ -227,6 +223,43 @@ class FilterForm(forms.Form):
     def attributes_list(self):
         return ((filter_attribute, self[filter_attribute.uid]) for filter_attribute in self.attributes_params)
 
+    def compare_groups(self, group1, group2):
+        return group1.title < group2.title
+
+    @property
+    def groups(self):
+        # Merge attributes in groups
+        group_dict = {}
+        group_list = []
+
+        for filter_attr, field in self.attributes_list:
+            group_id = getattr(filter_attr.attribute, 'group_id', None)
+            group = group_dict.get(group_id, None)
+            if not group:
+                group = FilterGroup()
+                if group_id:
+                    group_dict[group_id] = group
+                    group.is_collapsable = True
+                    group.collapse = True
+                else:
+                    group_list.append(group)
+            group.fields.append((filter_attr, field, ))
+
+        # Collect groups information
+        indexes = [x for x in group_dict.keys() if x is not None]
+        groups = AttributeGroup.objects.filter(id__in=indexes)
+        for group in groups:
+            group_dict[group.id].group = group
+
+        # Sort groups
+        groups = [x for x in sorted(group_dict.values(), self.compare_groups)] + group_list
+        for group in groups:
+            self.prepare_group(group)
+        return groups
+
+    def prepare_group(self, group):
+        pass
+
 
 class FilterAttribute(object):
     def __init__(self, section, attrib, values, params=None):
@@ -247,3 +280,35 @@ class FilterAttribute(object):
 
     def __repl__(self):
         return unicode(self.attribute).encode('utf-8')
+
+
+class FilterGroup:
+    is_collapsable = None
+    collapse = None
+    fields = None
+    group = None
+
+    def __init__(self):
+        self.fields = []
+
+    @property
+    def is_single(self):
+        return len(self.fields) == 1
+
+    @property
+    def first_attribute(self):
+        return self.fields[0][0].attribute
+
+    @property
+    def title(self):
+        if self.group:
+            return self.group.title
+        elif self.is_single:
+            return self.first_attribute.title
+        return ''
+
+    @property
+    def unit(self):
+        if not self.group and self.is_single:
+            return self.first_attribute.unit
+        return ''

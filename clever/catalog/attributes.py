@@ -141,6 +141,10 @@ class PseudoAttribute(AbstractAttribute):
         self.uid = uid
         self.title = title
 
+    @property
+    def control(self):
+        return self.uid
+
 
 # ------------------------------------------------------------------------------
 class AttributeManager(object):
