@@ -7,10 +7,11 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from optparse import make_option
 import os
+import datetime
 
 
-COMPRESS_SCRIPT_BIN = '$(npm bin)/r.js -o {infile} out={outfile}'
-COMPRESS_STYLE_BIN = '$(npm bin)/lessc {infile} {outfile} --clean-css -rp {static_url}'
+COMPRESS_SCRIPT_BIN = '$(npm bin)/r.js -o "{infile}" out="{outfile}"'
+COMPRESS_STYLE_BIN = '$(npm bin)/lessc "{infile}" "{outfile}" --clean-css -rp="{static_url}less/"'
 
 
 class SubprocessError(Exception):
@@ -23,6 +24,7 @@ class Command(BaseCommand):
     )
 
     def run_process(self, command_line, directory):
+        # print command_line
         process = subprocess.Popen(command_line, stdout=PIPE, stderr=PIPE, shell=True, cwd=directory)
         result = process.wait()
         if result > 0:
@@ -57,13 +59,15 @@ class Command(BaseCommand):
 
     def handle(self, source_file=None, *args, **kwargs):
         # get compress version and increment it
-        cache = get_cache('default')
-        version = cache.get('CLEVER_COMPRESS_VERSION', 0)
-        version += 1
+        version = str(datetime.datetime.now())
+        version = version.replace(' ', '-')
+        version = version.replace(':', '-')
+        version = version.replace('.', '-')
 
         # compress styles and script
-        self.compile_styles('less/styles.less', 'compress/style.%d.css' % version)
-        self.compile_script('js/build.js', 'compress/script.%d.js' % version)
+        self.compile_styles('less/styles.less', 'compress/style.%s.css' % version)
+        self.compile_script('js/build.js', 'compress/script.%s.js' % version)
 
         # store new version
+        cache = get_cache('default')
         cache.set('CLEVER_COMPRESS_VERSION', version)

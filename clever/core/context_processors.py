@@ -5,7 +5,7 @@ from django.conf import settings
 def django_settings(context):
     # get compress version and increment it
     cache = get_cache('default')
-    version = cache.get('CLEVER_COMPRESS_VERSION', 1)
+    version = cache.get('CLEVER_COMPRESS_VERSION', None)
     return {
         'DEBUG': settings.DEBUG,
         'TEMPLATE_DEBUG': settings.TEMPLATE_DEBUG,
