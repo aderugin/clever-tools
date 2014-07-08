@@ -69,4 +69,4 @@ class Command(BaseCommand):
 
         # store new version
         cache = get_cache('default')
-        cache.set('CLEVER_COMPRESS_VERSION', version)
+        cache.set('CLEVER_COMPRESS_VERSION', version, timeout=None)

@@ -3,7 +3,7 @@ from django import forms
 from django.db import models
 from cache_tagging.django_cache_tagging import get_cache
 from django.contrib.sites.models import Site
-from clever.catalog.models import AttributeManager
+from clever.catalog.models import AttributeManager, AttributeGroup
 from clever.catalog.models import Attribute
 from clever.catalog.models import SectionAttribute
 from clever.catalog.models import Product
@@ -339,3 +339,35 @@ class FilterAttribute(object):
 
     def __repl__(self):
         return unicode(self.attribute).encode('utf-8')
+
+
+class FilterGroup:
+    is_collapsable = None
+    collapse = None
+    fields = None
+    group = None
+
+    def __init__(self):
+        self.fields = []
+
+    @property
+    def is_single(self):
+        return len(self.fields) == 1
+
+    @property
+    def first_attribute(self):
+        return self.fields[0][0].attribute
+
+    @property
+    def title(self):
+        if self.group:
+            return self.group.title
+        elif self.is_single:
+            return self.first_attribute.title
+        return ''
+
+    @property
+    def unit(self):
+        if not self.group and self.is_single:
+            return self.first_attribute.unit
+        return ''
