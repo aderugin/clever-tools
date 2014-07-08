@@ -34,7 +34,7 @@ def get_django_setting(name):
                 return run(console_line % (local_env.DJANGO_SETTINGS, name))
 
 
-def get_mysql_params():
+def get_default_database_params():
     console_line = "DJANGO_SETTINGS_MODULE=%s python -c \"from django.conf import settings; print settings.DATABASES['default']['%s']\""
     with cd(env.root):
         with prefix(env.activate):
@@ -52,7 +52,7 @@ def backup_mysql(path):
     dump_file = str(datetime.now()).replace(':', '_').replace(' ', '_') + '.sql'
     fullname = os.path.join(path, dump_file)
 
-    params = get_mysql_params()
+    params = get_default_database_params()
     with cd(env.root):
         run('mkdir -p %s' % path)
 
@@ -66,8 +66,26 @@ def backup_mysql(path):
     return fullname
 
 
+def backup_postgre(path):
+    from datetime import datetime
+    dump_file = str(datetime.now()).replace(':', '_').replace(' ', '_') + '.sql'
+    fullname = os.path.join(path, dump_file)
+
+    params = get_default_database_params()
+    with cd(env.root):
+        run('mkdir -p %s' % path)
+
+        with hide('running'):
+            run('PGPASSWORD=%s pg_dump -U %s %s > %s' % (
+                params['db_pass'],
+                params['db_name'],
+                params['db_user'],
+                fullname
+            ))
+    return fullname
+
 def revert_mysql(fullname):
-    params = get_mysql_params()
+    params = get_default_database_params()
     with cd(env.root):
         run('mysql -u%s -p%s %s < %s' % (
             params['db_user'],
