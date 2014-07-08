@@ -35,8 +35,8 @@ class Command(BaseCommand):
     def compile_script(self, input_file, output_file):
         print "Compile script:", output_file
 
-        input_file = os.path.join(settings.STATIC_PATH, input_file)
-        output_file = os.path.join(settings.STATIC_PATH, output_file)
+        input_file = os.path.join(settings.STATIC_ROOT, input_file)
+        output_file = os.path.join(settings.STATIC_ROOT, output_file)
 
         directory = os.path.dirname(output_file)
         ensure_dir(directory)
@@ -46,8 +46,8 @@ class Command(BaseCommand):
     def compile_styles(self, input_file, output_file):
         print "Compile style:", output_file
 
-        input_file = os.path.join(settings.STATIC_PATH, input_file)
-        output_file = os.path.join(settings.STATIC_PATH, output_file)
+        input_file = os.path.join(settings.STATIC_ROOT, input_file)
+        output_file = os.path.join(settings.STATIC_ROOT, output_file)
 
         directory = os.path.dirname(output_file)
         ensure_dir(directory)
