@@ -1,41 +1,31 @@
 # -*- coding: utf-8 -*-
-from django.contrib.sites.models import Site
-from cache_tagging.django_cache_tagging import get_cache
+import functools
 from djcelery_transactions import task
 from celery.decorators import periodic_task
 from celery.schedules import crontab
-from .models import Brand
-from .models import Section
-from .models import Attribute
-from .models import ProductAttribute
-from .models import PseudoSection
-import requests
-import urlparse
+from clever.catalog.models import Brand
+from clever.catalog.models import Section
+from clever.catalog.models import Attribute
+from clever.catalog.models import ProductAttribute
+from .forms import FilterForm
+
+
+def load_all_models(func):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        # Load all deffered models
+        from django.db import models
+        models.get_models(include_auto_created=True)
+        func(*args, **kwargs)
+    return wrapper
 
 
 def do_invalidate_section(section):
     """ Do invalidate section """
-    log = invalidate_section.get_logger()
-    current_site = Site.objects.get_current()
-
-    # Invalidate section
-    log.info('Invalidate cache for section "%s" [%d]', section.title, section.id)
-    cache_tag = 'section.%d' % section.id
-    cache = get_cache('catalog')
-    cache.invalidate_tags(cache_tag)
-
-    # Create cache for section
-    log.info('Recreate cache for section "%s" [%d]', section.title, section.id)
-    url = urlparse.urljoin('http://%s' % current_site.domain, section.get_absolute_url())
-    requests.get(url)
-
-    # Create cache for pseudo sections
-    if PseudoSection.deferred_instance:
-        pseudo_sections = PseudoSection.objects.filter(section_id=section.id)
-        for pseudo_section in pseudo_sections:
-            log.info('Recreate cache for pseudo section "%s - %s" [%d]', section.title, pseudo_section.title, section.id)
-            url = urlparse.urljoin('http://%s' % current_site.domain, pseudo_section.get_absolute_url())
-            requests.get(url)
+    logger = invalidate_section.get_logger()
+    FilterForm.get_product_indexes.invalidate_cache(section, logger)
+    FilterForm.get_pseudo_attributes.invalidate_cache(section, logger)
+    FilterForm.get_attributes.invalidate_cache(section, logger)
 
 
 def do_invalidate_catalog():
@@ -48,6 +38,7 @@ def do_invalidate_catalog():
 
 
 @task(ignore_result=True)
+@load_all_models
 def invalidate_section(section_id):
     try:
         section = Section.objects.get(id=section_id)
@@ -57,6 +48,7 @@ def invalidate_section(section_id):
 
 
 @task(ignore_result=True)
+@load_all_models
 def invalidate_brand(brand_id):
     try:
         brand = Brand.objects.get(id=brand_id)
@@ -67,6 +59,7 @@ def invalidate_brand(brand_id):
 
 
 @task(ignore_result=True)
+@load_all_models
 def invalidate_attribute(attribute_id):
     try:
         attribute = Attribute.objects.get(id=attribute_id)
@@ -79,5 +72,6 @@ def invalidate_attribute(attribute_id):
 
 
 @periodic_task(run_every=crontab(hour=3, minute=0))
+@load_all_models
 def invalidate_catalog():
     do_invalidate_catalog()

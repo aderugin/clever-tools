@@ -9,41 +9,29 @@
 """
 from clever.deferred import DeferredPoint
 
-# ------------------------------------------------------------------------------
 Section = DeferredPoint('Section')
 
-# ------------------------------------------------------------------------------
 Brand = DeferredPoint('Brand')
 
-# ------------------------------------------------------------------------------
 Product = DeferredPoint('Product')
 
-# ------------------------------------------------------------------------------
 AttributeGroup = DeferredPoint('AttributeGroup')
 
-# ------------------------------------------------------------------------------
 Attribute = DeferredPoint('Attribute')
 
-# ------------------------------------------------------------------------------
 ProductAttribute = DeferredPoint('ProductAttribute')
 
-# ------------------------------------------------------------------------------
 SectionAttribute = DeferredPoint('SectionAttribute')
 
-# ------------------------------------------------------------------------------
 SectionBrand = DeferredPoint('SectionBrand')
 
-# ------------------------------------------------------------------------------
 PseudoSection = DeferredPoint('PseudoSection')
 
-# ------------------------------------------------------------------------------
 PseudoSectionValue = DeferredPoint('PseudoSectionValue')
 
-# ------------------------------------------------------------------------------
 PseudoSectionBrand = DeferredPoint('PseudoSectionBrand')
 
 
-# ------------------------------------------------------------------------------
 from django.db import models
 from caching import base as cache_machine
 from clever.deferred.fields import DeferredForeignKey
@@ -66,7 +54,6 @@ from clever.catalog.attributes import ImportPseudoAttributeValuesMetaclass
 from decimal import Decimal
 
 
-# ------------------------------------------------------------------------------
 # Разделы каталога
 class SectionQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQuerySet):
     """
@@ -91,7 +78,6 @@ class SectionQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQue
         return new_queryset | self
 
 
-# ------------------------------------------------------------------------------
 class SectionBase(cache_machine.CachingMixin, mptt.MPTTModel, TimestableMixin, ActivableMixin, TitleMixin, PageMixin):
     """
         Базовая модель для раздела в каталоге
@@ -155,7 +141,6 @@ class SectionBase(cache_machine.CachingMixin, mptt.MPTTModel, TimestableMixin, A
         return ('catalog:section', (), {'slug': self.slug})
 
 
-# ------------------------------------------------------------------------------
 # Производители(бренды) каталога
 class BrandQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQuerySet):
     """Базовый запрос для получения продуктов из каталога"""
@@ -163,7 +148,6 @@ class BrandQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQuery
         return self.annotate(products_count=models.Count('products')).filter(products_count__gt=0)
 
 
-# ------------------------------------------------------------------------------
 class BrandBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, TitleMixin, PageMixin):
     """
         Базовая модель для производителя в каталоге
@@ -208,7 +192,6 @@ class BrandBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, Tit
         return ('catalog:brand', (), {'slug': self.slug})
 
 
-# ------------------------------------------------------------------------------
 class SectionBrandBase(cache_machine.CachingMixin, models.Model):
     """Базовая модель для настройки бренда в отдельном разделе"""
     class Meta:
@@ -230,20 +213,17 @@ class SectionBrandBase(cache_machine.CachingMixin, models.Model):
     objects = CachingManager()
 
 
-# ------------------------------------------------------------------------------
 # Товары каталога
 class ProductQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQuerySet):
     """Базовый запрос для получения продуктов из каталога"""
 
 
-# ------------------------------------------------------------------------------
 class ProductFrontendManager(CachingPassThroughManager):
     """Менеджер для получения только активных продуктов из каталога"""
     def get_query_set(self):
         return super(ProductFrontendManager, self).get_query_set().active()
 
 
-# ------------------------------------------------------------------------------
 class ProductBase(cache_machine.CachingMixin, TimestableMixin, ActivableMixin, TitleMixin, PageMixin):
     """
         Базовая модель для продукта в каталоге
@@ -312,7 +292,6 @@ class AttributeGroupBase(models.Model):
         return self.title
 
 
-# ------------------------------------------------------------------------------
 class AttributeBase(cache_machine.CachingMixin, models.Model, AbstractAttribute):
     """
         Базовая модель для свойства
@@ -412,7 +391,6 @@ class AttributeBase(cache_machine.CachingMixin, models.Model, AbstractAttribute)
         return self.title
 
 
-# ------------------------------------------------------------------------------
 class ProductAttributeBase(cache_machine.CachingMixin, models.Model):
     """Базовая модель для хранения значения свойства у продукта"""
     __metaclass__ = DeferredModelMetaclass.for_point(
@@ -465,7 +443,6 @@ class ProductAttributeBase(cache_machine.CachingMixin, models.Model):
         return u"%s: %s" % (self.attribute.title, unicode(self.value))
 
 
-# ------------------------------------------------------------------------------
 class SectionAttributeBase(cache_machine.CachingMixin, models.Model):
     """Базовая модель для настройки свойства в отдельном разделе"""
     __metaclass__ = DeferredModelMetaclass.for_point(
@@ -486,20 +463,17 @@ class SectionAttributeBase(cache_machine.CachingMixin, models.Model):
     objects = CachingManager()
 
 
-# ------------------------------------------------------------------------------
 # Псевдо разделы каталога
 class PseudoSectionQuerySet(cache_machine.CachingQuerySet, ActivableQuerySet, TitleQuerySet):
     """Базовый запрос для получения псевдо категорий из каталога"""
 
 
-# ------------------------------------------------------------------------------
 class PseudoSectionFrontendManager(CachingPassThroughManager):
     """Менеджер для получения только активных псевдо категорий из каталога"""
     def get_query_set(self):
         return super(PseudoSectionFrontendManager, self).get_query_set().active()
 
 
-# ------------------------------------------------------------------------------
 class PseudoSectionBase(cache_machine.CachingMixin, TitleMixin, TimestableMixin, ActivableMixin, PageMixin):
     """
         Базовая модель для псевдо раздела в каталоге
@@ -542,7 +516,6 @@ class PseudoSectionBase(cache_machine.CachingMixin, TitleMixin, TimestableMixin,
         return ('catalog:pseudo_section', (), {'slug': self.section.slug, 'pseudo_slug': self.slug})
 
 
-# ------------------------------------------------------------------------------
 class PseudoSectionValueBase(models.Model):
     """
         Значение для фильтра псевдо-категории
@@ -608,7 +581,6 @@ class PseudoSectionValueBase(models.Model):
         return getattr(self, field_name, type.filter_value(self.raw_value_to))
 
 
-# ------------------------------------------------------------------------------
 class PseudoSectionBrandBase(models.Model):
     """
         Брэнды для фильтра псевдо-категории
@@ -628,7 +600,6 @@ class PseudoSectionBrandBase(models.Model):
 
     pseudo_section = DeferredForeignKey(PseudoSection, verbose_name=u'Псевдо раздел')
     brand = DeferredForeignKey(Brand, verbose_name=u'Производитель', related_name='pseudo_section_brands')
-
 
 
 # ------------------------------------------------------------------------------

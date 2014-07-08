@@ -661,7 +661,7 @@ def init():
             run('git checkout -b master origin/master')
 
             if local_env.MARKUP_DIRECTORY:
-                run('git clone %s %s' %(markup_repository, local_env.MARKUP_DIRECTORY))
+                run('git clone %s %s' % (markup_repository, local_env.MARKUP_DIRECTORY))
 
     ##--------------------------------------------------------------------------
     @builder.step(prompt='Создание локальных настроек для проекта')
