@@ -30,7 +30,6 @@ class Command(BaseCommand):
         if result > 0:
             error_string = process.stderr.read()
             output_string = process.stdout.read()
-            import ipdb; ipdb.set_trace()
             raise SubprocessError(error_string if error_string else output_string)
 
     def compile_script(self, input_file, output_file):
