@@ -299,6 +299,7 @@ def collect():
                 run('npm install')
                 run('$(npm bin)/bower install')
             run('python manage.py collectstatic --noinput')
+            run('python manage.py generate_compress')
 
 
 @task
