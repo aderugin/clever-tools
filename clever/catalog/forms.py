@@ -144,9 +144,8 @@ def filter_queryset_cached(func):
 
 
 class FilterForm(forms.Form):
-    ''' Базовая форма для фильтра '''
+    """ Базовая форма для фильтра """
     def __init__(self, instance=None, sections=None, *args, **kwargs):
-
         super(FilterForm, self).__init__(*args, **kwargs)
 
         self.attributes = {}
@@ -236,7 +235,6 @@ class FilterForm(forms.Form):
         
         # Поиск значений аттрибутов для раздела
         attributes_values = ProductAttribute.objects.filter(attribute__in=attributes).values_list('attribute__id', 'raw_value').distinct()
-        #attributes_values = ProductAttribute.objects.filter(attribute__in=attributes).select_related('attribute').distinct()
         if len(self.sections):
             attributes_values = attributes_values.filter(product__section__in=self.sections)
         attributes_values = list(attributes_values)
@@ -252,13 +250,10 @@ class FilterForm(forms.Form):
         for attrib in attributes:
             values = []
             values_set = set()
-            params = None
+            params = SectionAttribute(attribute=attrib, section=section)
 
             # Поиск значений для свойства
             for product_attrib in attributes_values:
-
-                #if attrib.id == product_attrib.attribute_id:
-                #    value = product_attrib.value
                 if attrib.id == product_attrib[0]:
                     value = product_attrib[1]
                     if not value in values_set:
@@ -276,14 +271,33 @@ class FilterForm(forms.Form):
                 values = [(type_object.filter_value(v), t) for v, t in values]
                 values = sorted(values)
                 final_result.append(FilterAttribute(section, attrib, values, params))
-        return final_result
+
+        # Сортировка результата
+        return sorted(final_result, key=lambda x: x.params.order)
 
     @property
     def attributes_list(self):
         return ((filter_attribute, self[filter_attribute.uid]) for filter_attribute in self.attributes_params)
 
     def compare_groups(self, group1, group2):
-        return group1.title < group2.title
+        params1 = group1.attribute_params
+        params2 = group2.attribute_params
+
+        # compare
+        priority1 = sys.maxint if not params1 or not params1.priority else params1.priority
+        priority2 = sys.maxint if not params2 or not params2.priority else params2.priority
+        if priority1 == priority2:
+            title1 = group1.title
+            title2 = group2.title
+
+            if title1 == title2:
+                return 0
+            elif title1 < title2:
+                return -1
+            return 0
+        elif priority1 < priority2:
+            return -1
+        return 1
 
     @property
     def groups(self):
@@ -313,6 +327,7 @@ class FilterForm(forms.Form):
         # Sort groups
         groups = [x for x in sorted(group_dict.values(), self.compare_groups)] + group_list
         for group in groups:
+            # group.fields = sorted(group.fields, key=lambda x: x[0].params.order if x[0].params is not None else sys.maxint)
             self.prepare_group(group)
         return groups
 
@@ -321,6 +336,12 @@ class FilterForm(forms.Form):
 
 
 class FilterAttribute(object):
+    section = None
+    attribute = None
+    attributes_values = None
+    params = None
+    field = None
+
     def __init__(self, section, attrib, values, params=None):
         self.section = section
         self.attribute = attrib
@@ -342,8 +363,8 @@ class FilterAttribute(object):
 
 
 class FilterGroup:
-    is_collapsable = None
-    collapse = None
+    is_collapsable = True
+    is_collapsed = True
     fields = None
     group = None
 
@@ -371,3 +392,15 @@ class FilterGroup:
         if not self.group and self.is_single:
             return self.first_attribute.unit
         return ''
+
+    @property
+    def name(self):
+        if not self.group and self.is_single:
+            return self.first_attribute.uid
+        return ''
+
+    @property
+    def attribute_params(self):
+        if not self.group and self.is_single:
+            return self.first_attribute.params
+        return None

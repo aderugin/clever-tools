@@ -46,14 +46,14 @@ def set_field_attribute(field, name, value):
     return process_field_attributes(field, name + ':' + value, process)
 
 @register.object
-def render_label(field, **kwargs):
+def render_label(field, label_suffix='', **kwargs):
     if field == None:
         return ''
-    return Markup(field.label_tag(attrs=kwargs))
+    return Markup(field.label_tag(label_suffix=label_suffix, attrs=kwargs))
 
 
 @register.object
-def render_field(field, template=None, attrs={}, **kwargs):
+def render_field(field, template=None, attrs={}, context={}, **kwargs):
     if field == None:
         return ''
     if attrs:
@@ -72,12 +72,15 @@ def render_field(field, template=None, attrs={}, **kwargs):
     if is_render and template:
         widget = field.field.widget
         attributes = widget.build_attrs([(key, value) for key, value in kwargs.items()], name=field.html_name, id=field.auto_id)
-        result = render_to_string(template, {
+
+        template_context = {
             'bound_field': field,
             'field': field.field,
             'widget': widget,
             'attributes': attributes
-        })
+        }
+        template_context.update(context)
+        result = render_to_string(template, template_context)
     else:
         result = field.as_widget()
     return Markup(result)

@@ -24,7 +24,7 @@ class CheckboxField(forms.MultipleChoiceField):
 @AttributeManager.register_control(tag='checkbox', verbose_name=u'Флажки', allowed_only=True)
 class CheckboxControl(AttributeControl):
     template_name = settings.CLEVER_FILTER_CHECKBOX_TEMPLATE
-    empty_label = u"----"
+    empty_label = settings.CLEVER_EMPTY_LABEL
 
     def create_form_field(self, attribute, values):
         return CheckboxField(

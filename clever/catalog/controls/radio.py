@@ -7,12 +7,10 @@ from clever.catalog.attributes import AttributeManager
 from clever.catalog import settings
 
 
-# ------------------------------------------------------------------------------
 class RadioFilter(forms.RadioSelect):
     pass
 
 
-# ------------------------------------------------------------------------------
 class RadioFilterField(forms.ChoiceField):
     widget = RadioFilter
 
@@ -20,11 +18,10 @@ class RadioFilterField(forms.ChoiceField):
         pass
 
 
-# ------------------------------------------------------------------------------
 @AttributeManager.register_control(tag='radio', verbose_name=u'Переключатели', allowed_only=True)
 class RadioControl(AttributeControl):
     template_name = settings.CLEVER_FILTER_RADIO_TEMPLATE
-    empty_label = u"----"
+    empty_label = settings.CLEVER_EMPTY_LABEL
 
     def create_form_field(self, attribute, values):
         return RadioFilterField(
