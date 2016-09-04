@@ -58,33 +58,3 @@ cd $VENV/packages
 curl http://python-distribute.org/distribute_setup.py | python
 easy_install --upgrade pip
 easy_install --upgrade distribute
-
-    python -c "
-CHECK = '\033[32m✔\033[39m'
-ERROR = '\033[31m✘\033[39m'
-
-# Check python
-import sys
-python_version = CHECK if (sys.version_info == (2, 7)) else ERROR
-
-# Check zlib
-try:
-    import pkg_resources
-except ImportError:
-    zlib_installed = False
-else:
-    zlib_installed = True
-
-# Check ssl
-import socket
-ssl_installed = socket.ssl
-
-print 'Python version 2.7:     %s' % (CHECK if python_version else ERROR)
-print 'ZLib installed:         %s' % (CHECK if zlib_installed else ERROR)
-print 'OpenSSL installed:      %s' % (CHECK if ssl_installed else ERROR)
-
-if python_version or zlib_installed or ssl_installed:
-    print 'Install completed succefull ' + CHECK
-else:
-    print 'Install completed with error ' + ERROR
-"

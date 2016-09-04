@@ -48,9 +48,9 @@ setup(
         "Jinja2 == 2.7.1",
         "factory_boy == 2.3.1",
     ],
-    scripts=[
-        'bin/clever-install-python',
-        'bin/clever-install-redis',
-        'bin/clever-install-xapian',
-    ]
+    # scripts=[
+    #     'bin/clever-install-python',
+    #     'bin/clever-install-redis',
+    #     'bin/clever-install-xapian',
+    # ]
 )
