@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from django.db.models.signals import post_save
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from templated_emails.utils import send_templated_email
 from django.db.models import Q
 from django.core.urlresolvers import reverse
 from django.contrib.sites.models import Site
+
+User = get_user_model()
 
 
 def get_site_url(url):
